@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>NAGOH — Notify App Gains On Hand | Real‑time sales alerts</title>
+  <title>NAGOH — Notify App Gains On Hand | Real-time sales alerts</title>
   <meta name="description" content="Instant push notifications the moment someone buys your app. Privacy-first, no servers, no sign-ups" />
   <!-- Tailwind CSS v3 + custom config -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,11 +12,11 @@
       theme: {
         extend: {
           colors: {
-            'nagoh-orange': '#FF6B35',
-            'nagoh-coral': '#FF8C5E',
-            'nagoh-teal': '#20C997',
-            'nagoh-cyan': '#0DCAF0',
-            'nagoh-dark': '#0A1928',
+            'nagoh-sky': '#87CEFA',
+            'nagoh-lightblue': '#A5D8FF',
+            'nagoh-cyan': '#40C4FF',
+            'nagoh-teal': '#26A69A',
+            'nagoh-softorange': '#FFAB91',
           },
           fontFamily: {
             display: ['Playfair Display', 'serif'],
@@ -24,38 +24,53 @@
           },
           animation: {
             'float': 'float 7s ease-in-out infinite',
-            'glow-pulse': 'glowPulse 3s ease-out infinite',
-            'fade-up': 'fadeUp 0.8s ease-out forwards',
+            'glow-pulse': 'glowPulse 4s ease-out infinite',
+            'subtle-shift': 'subtleShift 28s ease infinite',
+            'blob-slow': 'blobSlow 45s ease-in-out infinite',
+            'blob-medium': 'blobMedium 60s ease-in-out infinite',
+            'blob-fast': 'blobFast 38s ease-in-out infinite',
           },
           keyframes: {
             float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
-            glowPulse: { '0%': { boxShadow: '0 0 0 0 rgba(255,255,255,0.3)' }, '70%': { boxShadow: '0 0 0 16px rgba(255,255,255,0)' }, '100%': { boxShadow: '0 0 0 0 rgba(255,255,255,0)' } },
-            fadeUp: { '0%': { opacity: '0', transform: 'translateY(16px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
-          },
-          backdropBlur: { xs: '2px' }
+            glowPulse: { '0%': { boxShadow: '0 0 0 0 rgba(135,206,250,0.3)' }, '70%': { boxShadow: '0 0 0 16px rgba(135,206,250,0)' }, '100%': { boxShadow: '0 0 0 0 rgba(135,206,250,0)' } },
+            subtleShift: { '0%': { backgroundPosition: '0% 50%' }, '50%': { backgroundPosition: '100% 50%' }, '100%': { backgroundPosition: '0% 50%' } },
+            blobSlow: { '0%, 100%': { transform: 'translate(0,0) scale(1) rotate(0deg)' }, '50%': { transform: 'translate(12vw, 8vh) scale(1.08) rotate(8deg)' } },
+            blobMedium: { '0%, 100%': { transform: 'translate(0,0) scale(1) rotate(0deg)' }, '50%': { transform: 'translate(-10vw, -12vh) scale(1.1) rotate(-6deg)' } },
+            blobFast: { '0%, 100%': { transform: 'translate(0,0) scale(1)' }, '33%': { transform: 'translate(6vw, -4vh) scale(1.04)' }, '66%': { transform: 'translate(-4vw, 10vh) scale(1.06)' } }
+          }
         }
       }
     }
   </script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      background: radial-gradient(circle at 20% 30%, #FF6B35, #E8552E, #20C997);
-      background-size: cover;
+      background: linear-gradient(135deg, #A5D8FF, #87CEFA, #40C4FF, #26A69A, #A5D8FF);
+      background-size: 300% 300%;
+      animation: subtle-shift 28s ease infinite;
       min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+      color: white;
+      font-family: 'Inter', system-ui, sans-serif;
     }
+    h1, h2, h3 { font-family: 'Playfair Display', serif; }
     .glass-card {
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px); /* iOS support */
-      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(165, 216, 255, 0.09);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(135, 206, 250, 0.25);
       transition: all 0.3s ease;
     }
-    .glass-card:hover { background: rgba(255,255,255,0.15); transform: translateY(-4px); }
+    .glass-card:hover {
+      background: rgba(165, 216, 255, 0.14);
+      transform: translateY(-4px);
+      border-color: rgba(135, 206, 250, 0.4);
+    }
     .feature-icon {
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(6px);
+      background: rgba(135, 206, 250, 0.18);
+      backdrop-filter: blur(8px);
       width: 70px; height: 70px;
       display: flex; align-items: center; justify-content: center;
       border-radius: 1.5rem; margin: 0 auto 1.25rem;
@@ -66,143 +81,146 @@
     @media (max-width: 640px) {
       .hero-title { font-size: 3.5rem; line-height: 1.1; }
       .hero-sub { font-size: 1.6rem; }
-      .screenshot-frame { transform: none !important; width: 85% !important; max-width: 320px; margin: 0 auto; }
+      .screenshot-frame { transform: none !important; width: 85% !important; max-width: 320px; margin: 0 auto 2rem; }
     }
   </style>
 </head>
-<body class="font-sans text-white antialiased overflow-x-hidden">
+<body class="antialiased overflow-x-hidden">
 
-  <!-- Subtle animated blobs – reduced for mobile perf -->
+  <!-- Translucent moving sky-like blobs -->
   <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-    <div class="absolute top-10 -left-16 w-80 h-80 bg-nagoh-teal rounded-full opacity-20 blur-3xl animate-pulse" style="animation-duration: 14s;"></div>
-    <div class="absolute bottom-8 right-8 w-96 h-96 bg-nagoh-orange rounded-full opacity-15 blur-3xl animate-pulse" style="animation-duration: 18s; animation-delay: 3s;"></div>
+    <div class="absolute w-[60vw] h-[60vw] bg-nagoh-lightblue rounded-full opacity-18 blur-3xl animate-blob-slow top-[-15%] left-[-20%]"></div>
+    <div class="absolute w-[70vw] h-[70vw] bg-nagoh-cyan rounded-full opacity-14 blur-3xl animate-blob-medium bottom-[-20%] right-[-25%] animation-delay-10000"></div>
+    <div class="absolute w-[55vw] h-[55vw] bg-nagoh-sky rounded-full opacity-16 blur-[120px] animate-blob-fast top-[25%] left-[35%] animation-delay-18000"></div>
+    <div class="absolute w-[50vw] h-[50vw] bg-nagoh-teal rounded-full opacity-10 blur-3xl animate-blob-slow bottom-[15%] left-[10%] animation-delay-25000"></div>
   </div>
 
   <main class="relative z-10">
     <!-- Hero -->
     <header class="relative pt-16 pb-24 sm:pt-24 sm:pb-32 px-5 sm:px-8 md:px-12 text-center">
       <div class="max-w-5xl mx-auto">
-        <div class="inline-block mb-6 p-3 sm:p-4 rounded-full bg-white/15 backdrop-blur-lg border border-white/25 animate-float">
-          <svg class="w-20 h-20 sm:w-24 sm:h-24 text-white" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+        <div class="inline-block mb-6 p-4 rounded-full bg-white/12 backdrop-blur-lg border border-nagoh-sky/30 animate-float shadow-xl">
+          <svg class="w-20 h-20 sm:w-24 sm:h-24 text-nagoh-sky drop-shadow-lg" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
           </svg>
         </div>
-        <h1 class="hero-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight drop-shadow-xl font-display">
+        <h1 class="hero-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight drop-shadow-xl">
           NAGOH
         </h1>
         <p class="hero-sub mt-3 text-2xl sm:text-3xl md:text-4xl font-light mb-6 opacity-95">
           Notify App Gains On Hand
         </p>
-        <p class="text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed text-white/90">
+        <p class="text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
           Instant push notifications the moment someone buys your app.
-          <span class="block mt-3 sm:mt-4 font-semibold bg-white/15 backdrop-blur px-5 py-2 rounded-full text-base sm:text-lg inline-block">🔐 Privacy-first • No servers • No Accounts • Zero tracking</span>
+          <span class="block mt-4 font-semibold bg-white/12 backdrop-blur px-5 py-2 rounded-full text-base sm:text-lg inline-block border border-nagoh-sky/20">
+            🔐 Privacy-first • No servers • No accounts • Zero tracking
+          </span>
         </p>
         <div class="flex flex-col sm:flex-row justify-center gap-5 mt-10 sm:mt-14">
-          <a href="#features" class="px-8 py-4 sm:px-10 sm:py-5 bg-white text-nagoh-orange font-bold rounded-full text-lg sm:text-xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all btn-glow">
+          <a href="#features" class="px-8 py-4 sm:px-10 sm:py-5 bg-white text-nagoh-sky font-bold rounded-full text-lg sm:text-xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
             Discover How
           </a>
-          <div class="px-8 py-4 sm:px-10 sm:py-5 bg-transparent border-2 border-white/60 font-semibold rounded-full text-lg sm:text-xl hover:bg-white/15 transition">
+          <div class="px-8 py-4 sm:px-10 sm:py-5 bg-transparent border-2 border-nagoh-lightblue/70 font-semibold rounded-full text-lg sm:text-xl hover:bg-white/10 transition duration-300">
             Coming Soon to the App Store
           </div>
         </div>
       </div>
     </header>
 
-    <!-- Screenshots – stack on mobile -->
+    <!-- Screenshots -->
     <section class="py-12 sm:py-16 md:py-24 px-5 sm:px-8">
       <div class="max-w-6xl mx-auto text-center">
-        <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-display">Real-Time. Beautiful. Yours.</h2>
-        <p class="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto mb-10 sm:mb-14">See your sales pop in real-time — elegant, minimal, and completely private.</p>
+        <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6">Real-Time. Beautiful. Private.</h2>
+        <p class="text-lg sm:text-xl text-white/85 max-w-2xl mx-auto mb-10 sm:mb-14">Sales alerts appear instantly — clean, elegant, and fully on-device.</p>
         <div class="flex flex-col items-center gap-10 sm:gap-12 md:flex-row md:justify-center md:gap-14">
-          <div class="screenshot-frame w-80 sm:w-72 md:w-80 rounded-3xl overflow-hidden bg-white/5 p-2 border border-white/25 shadow-2xl">
-            <img src="https://placehold.co/600x1200/FF6B35/FFFFFF?text=✨+NAGOH+Alert" alt="Notification preview" class="w-full rounded-2xl aspect-[9/19] object-cover">
+          <div class="screenshot-frame w-80 sm:w-72 md:w-80 rounded-3xl overflow-hidden bg-white/5 p-2 border border-nagoh-sky/30 shadow-2xl">
+            <img src="https://placehold.co/600x1200/87CEFA/FFFFFF?text=NAGOH+Alert" alt="Notification preview" class="w-full rounded-2xl aspect-[9/19] object-cover">
           </div>
-          <div class="screenshot-frame relative w-80 sm:w-80 md:w-[360px] rounded-[2.5rem] bg-gradient-to-br from-white/10 to-white/5 p-1.5 border border-white/35 shadow-2xl">
+          <div class="screenshot-frame relative w-80 sm:w-80 md:w-[360px] rounded-[2.5rem] bg-gradient-to-br from-white/10 to-white/5 p-1.5 border border-nagoh-lightblue/40 shadow-2xl">
             <div class="rounded-[2.2rem] overflow-hidden">
-              <img src="https://placehold.co/800x1600/20C997/FFFFFF?text=📱+Sale:+App+Purchase+%242.99" alt="NAGOH dashboard mock" class="w-full aspect-[9/19] object-cover">
+              <img src="https://placehold.co/800x1600/40C4FF/FFFFFF?text=Sale+Detected+$2.99" alt="NAGOH dashboard" class="w-full aspect-[9/19] object-cover">
             </div>
             <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-28 h-1 bg-white/40 rounded-full"></div>
           </div>
-          <div class="screenshot-frame w-80 sm:w-72 md:w-80 rounded-3xl overflow-hidden bg-white/5 p-2 border border-white/25 shadow-2xl">
-            <img src="https://placehold.co/600x1200/FF8C5E/FFFFFF?text=📈+Revenue+Tracker" alt="Analytics view" class="w-full rounded-2xl aspect-[9/19] object-cover">
+          <div class="screenshot-frame w-80 sm:w-72 md:w-80 rounded-3xl overflow-hidden bg-white/5 p-2 border border-nagoh-sky/30 shadow-2xl">
+            <img src="https://placehold.co/600x1200/A5D8FF/FFFFFF?text=Revenue+Overview" alt="Analytics view" class="w-full rounded-2xl aspect-[9/19] object-cover">
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Features – smaller icons/padding on mobile -->
+    <!-- Features -->
     <section id="features" class="py-16 sm:py-20 md:py-28 px-5 sm:px-8">
       <div class="max-w-6xl mx-auto">
         <div class="text-center mb-12 sm:mb-16">
-          <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold">Everything you need,<br>nothing you don't.</h2>
+          <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold">Everything you need,<br>nothing you don't.</h2>
         </div>
         <div class="grid gap-8 sm:gap-10 md:grid-cols-3 md:gap-10 lg:gap-12">
           <div class="glass-card rounded-3xl p-6 sm:p-8 text-center">
             <div class="feature-icon">⚡</div>
             <h3 class="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">Instant Alerts</h3>
-            <p class="text-white/85 text-base sm:text-lg leading-relaxed">Sub-second push notifications — react to every sale in real time.</p>
+            <p class="text-white/85 text-base sm:text-lg leading-relaxed">Sub-second push notifications — feel every sale the moment it happens.</p>
           </div>
           <div class="glass-card rounded-3xl p-6 sm:p-8 text-center">
             <div class="feature-icon">🔒</div>
             <h3 class="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">Privacy First</h3>
-            <p class="text-white/85 text-base sm:text-lg leading-relaxed">Fully local, encrypted storage. No cloud, no tracking, no telemetry.</p>
+            <p class="text-white/85 text-base sm:text-lg leading-relaxed">Fully encrypted, local-only storage. No cloud. No tracking. No telemetry.</p>
           </div>
           <div class="glass-card rounded-3xl p-6 sm:p-8 text-center">
             <div class="feature-icon">🔗</div>
             <h3 class="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">Super Simple Setup</h3>
-            <p class="text-white/85 text-base sm:text-lg leading-relaxed">Paste one webhook URL into App Store Connect — done in under 2 minutes.</p>
+            <p class="text-white/85 text-base sm:text-lg leading-relaxed">One webhook URL pasted into App Store Connect — ready in under 2 minutes.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- How It Works – adjusted spacing -->
+    <!-- How It Works -->
     <section class="py-16 sm:py-20 md:py-28 px-5 sm:px-8">
       <div class="max-w-5xl mx-auto text-center">
-        <h2 class="text-4xl sm:text-5xl md:text-6xl font-display font-bold mb-10 sm:mb-14">From Apple to your phone<br><span class="text-white/80">in 3 simple steps</span></h2>
+        <h2 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-10 sm:mb-14">From Apple to your phone<br><span class="text-white/80">in 3 simple steps</span></h2>
         <div class="grid gap-10 sm:gap-12 md:grid-cols-3 relative">
-          <div class="hidden md:block absolute top-1/3 left-1/3 right-1/3 h-0.5 bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+          <div class="hidden md:block absolute top-1/3 left-1/3 right-1/3 h-0.5 bg-gradient-to-r from-transparent via-nagoh-sky/40 to-transparent"></div>
           <div class="relative">
-            <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-white/15 backdrop-blur-md border border-white/30 flex items-center justify-center text-3xl sm:text-4xl font-black shadow-lg mb-4 sm:mb-6">1</div>
+            <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-white/15 backdrop-blur-md border border-nagoh-sky/30 flex items-center justify-center text-3xl sm:text-4xl font-black shadow-lg mb-4 sm:mb-6">1</div>
             <h3 class="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">Add your app</h3>
             <p class="text-white/80 text-base sm:text-lg">Generate your secure webhook URL instantly.</p>
           </div>
           <div class="relative">
-            <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-white/15 backdrop-blur-md border border-white/30 flex items-center justify-center text-3xl sm:text-4xl font-black shadow-lg mb-4 sm:mb-6">2</div>
+            <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-white/15 backdrop-blur-md border border-nagoh-sky/30 flex items-center justify-center text-3xl sm:text-4xl font-black shadow-lg mb-4 sm:mb-6">2</div>
             <h3 class="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">Paste in App Store Connect</h3>
             <p class="text-white/80 text-base sm:text-lg">Server Notifications section — one click.</p>
           </div>
           <div class="relative">
-            <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-white/15 backdrop-blur-md border border-white/30 flex items-center justify-center text-3xl sm:text-4xl font-black shadow-lg mb-4 sm:mb-6">3</div>
-            <h3 class="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">Get instant alerts</h3>
-            <p class="text-white/80 text-base sm:text-lg">Push + local history, fully private.</p>
+            <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-white/15 backdrop-blur-md border border-nagoh-sky/30 flex items-center justify-center text-3xl sm:text-4xl font-black shadow-lg mb-4 sm:mb-6">3</div>
+            <h3 class="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">Receive alerts</h3>
+            <p class="text-white/80 text-base sm:text-lg">Instant push + local history, 100% private.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Waitlist form – full width on mobile -->
+    <!-- Waitlist -->
     <section class="py-16 sm:py-20 md:py-28 px-5 sm:px-8 text-center">
       <div class="max-w-lg mx-auto">
-        <h2 class="text-4xl sm:text-5xl md:text-6xl font-display font-bold mb-6">Be the First to Know</h2>
-        <p class="text-lg sm:text-xl text-white/90 mb-8">Early access & launch updates — join the waitlist.</p>
+        <h2 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">Be the First to Know</h2>
+        <p class="text-lg sm:text-xl text-white/90 mb-8">Early access, launch updates & exclusive offers.</p>
         <form class="flex flex-col sm:flex-row gap-4" onsubmit="event.preventDefault(); alert('Thanks! You’re on the list.'); this.reset();">
-          <input type="email" required placeholder="your@email.com" class="flex-1 px-6 py-4 rounded-full bg-white/12 backdrop-blur border border-white/30 focus:outline-none focus:border-white text-white placeholder-white/60 text-base sm:text-lg" />
-          <button type="submit" class="px-8 py-4 bg-white text-nagoh-teal font-bold rounded-full shadow-xl hover:shadow-2xl transition text-base sm:text-lg">Notify Me</button>
+          <input type="email" required placeholder="your@email.com" class="flex-1 px-6 py-4 rounded-full bg-white/10 backdrop-blur border border-nagoh-lightblue/40 focus:outline-none focus:border-nagoh-sky text-white placeholder-white/60 text-base sm:text-lg transition-all" />
+          <button type="submit" class="px-8 py-4 bg-white text-nagoh-sky font-bold rounded-full shadow-xl hover:shadow-2xl transition text-base sm:text-lg">Notify Me</button>
         </form>
-        <p class="mt-6 text-sm text-white/60">One email only. No spam.</p>
+        <p class="mt-6 text-sm text-white/60">One email only. No spam. Ever.</p>
       </div>
     </section>
 
     <!-- Footer -->
-    <footer class="py-12 px-5 sm:px-8 border-t border-white/20 text-center text-sm text-white/70">
-      <p>© 2026 NAGOH • Built for indie devs who value privacy & real-time insights.</p>
+    <footer class="py-12 px-5 sm:px-8 border-t border-nagoh-sky/20 text-center text-sm text-white/70">
+      <p>© 2026 NAGOH • Built for indie developers who value real-time insights & privacy.</p>
       <p class="mt-2">Made with ❤️ • support@nagoh.xyz</p>
     </footer>
   </main>
 
   <script>
-    // Smooth scroll for anchors
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', e => {
         e.preventDefault();
