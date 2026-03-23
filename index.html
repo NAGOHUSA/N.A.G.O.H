@@ -824,6 +824,77 @@
       .comp-header, .comp-row { grid-template-columns: 2fr 1fr 1fr; }
     }
 
+    /* ── SCREENSHOTS ── */
+    .screenshots {
+      padding: 6rem 8%;
+      text-align: center;
+    }
+
+    .screenshots-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .screenshots-grid {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 2rem;
+      margin-top: 3.5rem;
+    }
+
+    .screenshot-item {
+      flex: 1;
+      max-width: 280px;
+      position: relative;
+    }
+
+    .screenshot-item img {
+      width: 100%;
+      border-radius: 36px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.05);
+      display: block;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .screenshot-item:hover img {
+      transform: translateY(-8px);
+      box-shadow: 0 36px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.08);
+    }
+
+    .screenshot-item.center {
+      transform: scale(1.06);
+      z-index: 2;
+    }
+
+    .screenshot-item.center:hover img {
+      transform: translateY(-8px);
+    }
+
+    .screenshot-caption {
+      margin-top: 1.1rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    @media (max-width: 720px) {
+      .screenshots-grid {
+        gap: 1rem;
+      }
+      .screenshot-item { max-width: 180px; }
+      .screenshot-item img { border-radius: 24px; }
+    }
+
+    @media (max-width: 480px) {
+      .screenshots-grid { gap: 0.6rem; }
+      .screenshot-item { max-width: 130px; }
+      .screenshot-item img { border-radius: 18px; }
+      .screenshot-caption { font-size: 0.7rem; }
+    }
+
     /* ── ANIMATIONS ── */
     .fade-up {
       opacity: 0;
@@ -859,7 +930,7 @@
     <li><a href="#features">Features</a></li>
     <li><a href="#privacy">Privacy</a></li>
     <li><a href="#how-it-works">How It Works</a></li>
-    <li><a href="mailto:support@nagohcreative.com" class="nav-cta">Support</a></li>
+    <li><a href="/cdn-cgi/l/email-protection#42313732322d3036022c23252d2a21302723362b34276c212d2f" class="nav-cta">Support</a></li>
   </ul>
 </nav>
 
@@ -948,6 +1019,32 @@
     Built for indie developers
   </div>
 </div>
+
+<!-- SCREENSHOTS -->
+<section id="screenshots">
+  <div class="screenshots">
+    <div class="screenshots-inner">
+      <div class="section-eyebrow">See It In Action</div>
+      <h2 class="section-title">Designed for clarity.<br>Built for speed.</h2>
+      <p class="section-subtitle" style="margin:0 auto 0;max-width:480px;">From the splash screen to the dashboard, every screen is crafted to get you the information you need — instantly.</p>
+
+      <div class="screenshots-grid">
+        <div class="screenshot-item fade-up">
+          <img src="https://nagoh.xyz/images/02.png" alt="NAGOH splash screen with daily marketing tip" loading="lazy" />
+          <p class="screenshot-caption">Splash · Daily Tip</p>
+        </div>
+        <div class="screenshot-item center fade-up">
+          <img src="https://nagoh.xyz/images/04.png" alt="NAGOH live sales dashboard" loading="lazy" />
+          <p class="screenshot-caption">Live Dashboard</p>
+        </div>
+        <div class="screenshot-item fade-up">
+          <img src="https://nagoh.xyz/images/06.png" alt="NAGOH developer business card" loading="lazy" />
+          <p class="screenshot-caption">Business Card</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- FEATURES -->
 <section id="features">
@@ -1091,8 +1188,6 @@
         <h3>Instant Alerts</h3>
         <p>The moment a sale happens, your iPhone notifies you. Track trends, celebrate milestones, and stay in sync with your business in real time.</p>
       </div>
-    </div>
-  </div>
 </section>
 
 <!-- COMPARISON -->
@@ -1162,7 +1257,7 @@
 <section>
   <div class="cta-section">
     <h2>Start knowing<br>when you earn.</h2>
-    <p>Download NAGOH free. No account creation, no subscription, no strings. Just instant, private App Store sales intelligence for iOS developers.</p>
+    <p>Download NAGOH free to try. No account creation, no commitment, no strings. Just instant, private App Store sales intelligence for iOS developers.</p>
     <a href="#" class="app-store-btn">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
       Download on the App Store
@@ -1184,27 +1279,14 @@
 
   <ul class="footer-links">
     <li><a href="#privacy">Privacy Policy</a></li>
-    <li><a href="mailto:support@nagohcreative.com">Support</a></li>
+    <li><a href="/cdn-cgi/l/email-protection#83f0f6f3f3ecf1f7c3ede2e4ecebe0f1e6e2f7eaf5e6ade0ecee">Support</a></li>
     <li><a href="https://nagohcreative.com" target="_blank" rel="noopener">nagohcreative.com</a></li>
   </ul>
 
   <p class="footer-copy">
     © 2026 NAGOH · <a href="https://nagoh.xyz">nagoh.xyz</a> · Designed by <a href="https://nagohcreative.com" target="_blank" rel="noopener">Nagoh Creative</a>
-    <br>Questions? <a href="mailto:support@nagohcreative.com">support@nagohcreative.com</a>
+    <br>Questions? <a href="/cdn-cgi/l/email-protection#473432373728353307292620282f24352226332e31226924282a"><span class="__cf_email__" data-cfemail="8ffcfaffffe0fdfbcfe1eee8e0e7ecfdeaeefbe6f9eaa1ece0e2">[email&#160;protected]</span></a>
   </p>
 </footer>
 
-<script>
-  // Fade-up on scroll
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-      }
-    });
-  }, { threshold: 0.12 });
-
-  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-</script>
-</body>
-</html>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.
