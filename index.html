@@ -1,11 +1,13 @@
+Here is a polished HTML document that transforms the original landing page into a more modern, visually refined design with enhanced layout and subtle interactions.
+```html
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NAGOH — Notify App Gains On Hand</title>
-  <meta name="description" content="Instant sales notifications for your apps — privacy-first, no servers, no subscriptions."/>
-  <!-- Tailwind CSS CDN -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>NAGOH — Notify App Gains On Hand | Real‑time sales alerts</title>
+  <meta name="description" content="Instant push notifications the moment someone buys your app. Privacy-first, no servers, no subscriptions." />
+  <!-- Tailwind CSS v3 + custom config -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -16,130 +18,330 @@
             'nagoh-coral': '#FF8C5E',
             'nagoh-teal': '#20C997',
             'nagoh-cyan': '#0DCAF0',
+            'nagoh-dark': '#0A1928',
+          },
+          fontFamily: {
+            display: ['Playfair Display', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'glow-pulse': 'glowPulse 2s ease-out infinite',
+            'fade-up': 'fadeUp 0.8s ease-out forwards',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-12px)' },
+            },
+            glowPulse: {
+              '0%': { boxShadow: '0 0 0 0 rgba(255,255,255,0.4)' },
+              '70%': { boxShadow: '0 0 0 20px rgba(255,255,255,0)' },
+              '100%': { boxShadow: '0 0 0 0 rgba(255,255,255,0)' },
+            },
+            fadeUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          },
+          backdropBlur: {
+            xs: '2px',
           }
         }
       }
     }
   </script>
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', system-ui, sans-serif; }
-    h1, h2, h3 { font-family: 'Playfair Display', serif; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: radial-gradient(circle at 10% 30%, #FF6B35, #E8552E, #20C997);
+      background-attachment: fixed;
+    }
+    /* Modern glass morphism enhancements */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    }
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.45);
+      transform: translateY(-6px);
+    }
+    .hero-blur-bg {
+      background: radial-gradient(ellipse at 70% 40%, rgba(255,107,53,0.3), rgba(32,201,151,0.2));
+      filter: blur(90px);
+    }
+    .step-number {
+      background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 100%);
+      backdrop-filter: blur(4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .screenshot-frame {
+      transition: all 0.5s ease;
+      box-shadow: 0 25px 40px -12px rgba(0,0,0,0.35);
+    }
+    .screenshot-frame:hover {
+      transform: rotate(0deg) scale(1.02);
+      box-shadow: 0 35px 50px -18px rgba(0,0,0,0.45);
+    }
+    input::placeholder {
+      color: rgba(255,255,255,0.65);
+    }
+    .btn-glow {
+      transition: all 0.25s ease;
+    }
+    .btn-glow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 30px -12px rgba(0,0,0,0.3);
+    }
+    .feature-icon {
+      background: rgba(255,255,240,0.2);
+      backdrop-filter: blur(4px);
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 2rem;
+      margin: 0 auto 1.5rem auto;
+      font-size: 3rem;
+      transition: all 0.3s;
+    }
+    .glass-card:hover .feature-icon {
+      transform: scale(1.05);
+      background: rgba(255,255,255,0.3);
+    }
+    @media (max-width: 640px) {
+      .hero-title {
+        font-size: 3.2rem;
+        line-height: 1.2;
+      }
+      .hero-sub {
+        font-size: 1.5rem;
+      }
+    }
   </style>
 </head>
-<body class="bg-gradient-to-br from-nagoh-orange via-nagoh-coral to-nagoh-teal min-h-screen text-white overflow-x-hidden">
+<body class="font-sans text-white antialiased overflow-x-hidden">
 
-  <!-- Hero Section -->
-  <header class="relative pt-16 pb-28 px-6 md:px-12 lg:px-24 text-center">
-    <div class="absolute inset-0 bg-black opacity-10"></div>
-    <div class="relative z-10 max-w-5xl mx-auto">
-      <div class="inline-block mb-8 p-5 rounded-full bg-white/20 backdrop-blur-lg shadow-xl">
-        <svg class="w-24 h-24 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-        </svg>
-      </div>
-      <h1 class="text-6xl md:text-8xl font-bold mb-4 tracking-tight drop-shadow-2xl">
-        NAGOH
-      </h1>
-      <p class="text-2xl md:text-4xl font-light mb-8 opacity-95">
-        Notify App Gains On Hand
-      </p>
-      <p class="text-xl md:text-2xl max-w-4xl mx-auto mb-12 leading-relaxed">
-        Instant push notifications the moment someone buys your app.<br class="hidden sm:inline"/>
-        <span class="font-semibold">Privacy-first • No cloud servers • No subscriptions • No tracking</span>
-      </p>
-      <div class="flex flex-col sm:flex-row justify-center gap-6">
-        <a href="#features" class="px-12 py-6 bg-white text-nagoh-orange font-bold rounded-full text-xl shadow-2xl hover:bg-orange-50 transition transform hover:-translate-y-1 hover:shadow-3xl">
-          Discover How
-        </a>
-        <p class="px-12 py-6 bg-transparent border-2 border-white/80 font-semibold rounded-full text-xl hover:bg-white/20 transition">
-          Coming Soon to the App Store
+  <!-- Animated floating blobs background (polished atmosphere) -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="absolute top-20 -left-20 w-96 h-96 bg-nagoh-teal rounded-full mix-blend-multiply opacity-30 blur-3xl animate-pulse" style="animation-duration: 12s;"></div>
+    <div class="absolute bottom-10 right-10 w-[28rem] h-[28rem] bg-nagoh-orange rounded-full mix-blend-overlay opacity-30 blur-3xl animate-pulse" style="animation-duration: 15s; animation-delay: 2s;"></div>
+    <div class="absolute top-1/3 left-1/4 w-80 h-80 bg-nagoh-cyan rounded-full mix-blend-soft-light opacity-20 blur-3xl animate-pulse" style="animation-duration: 18s;"></div>
+  </div>
+
+  <main class="relative z-10">
+    <!-- Hero Section — modern, spacious, centered with polished typography -->
+    <header class="relative pt-20 pb-32 md:pt-28 md:pb-40 px-6 md:px-12 overflow-hidden">
+      <div class="max-w-6xl mx-auto text-center relative">
+        <!-- floating icon with glow animation -->
+        <div class="inline-block mb-8 p-4 rounded-full bg-white/20 backdrop-blur-xl shadow-2xl border border-white/30 animate-float">
+          <div class="relative">
+            <svg class="w-24 h-24 md:w-28 md:h-28 text-white drop-shadow-lg" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+            <span class="absolute -top-2 -right-2 w-5 h-5 bg-nagoh-teal rounded-full animate-ping opacity-70"></span>
+          </div>
+        </div>
+        
+        <h1 class="hero-title text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight drop-shadow-2xl font-display">
+          NAGOH
+        </h1>
+        <div class="mt-4 mb-6 flex justify-center">
+          <div class="h-1 w-24 bg-white/60 rounded-full"></div>
+        </div>
+        <p class="hero-sub text-3xl md:text-5xl font-light mb-5 tracking-wide opacity-95">
+          Notify App Gains On Hand
         </p>
-      </div>
-    </div>
-  </header>
-
-  <!-- Visual Teaser / Screenshots -->
-  <section class="py-20 px-6 bg-white/10 backdrop-blur-xl">
-    <div class="max-w-6xl mx-auto text-center">
-      <h2 class="text-5xl md:text-6xl font-bold mb-16">Real-Time. Beautiful. Yours.</h2>
-      <div class="flex flex-col md:flex-row justify-center gap-16 items-center">
-        <!-- Replace these srcs with your actual screenshot URLs -->
-        <div class="w-80 md:w-96 rounded-3xl shadow-2xl overflow-hidden border-8 border-white/40 transform -rotate-3 hover:rotate-0 transition duration-500">
-          <img src="https://www.shutterstock.com/shutterstock/photos/1901535601/display_1500/stock-photo-abstract-gradient-yellow-orange-soft-color-background-modern-horizontal-design-for-mobile-app-1901535601.jpg" alt="NAGOH Gradient Splash Screen" class="w-full"/>
+        <p class="text-xl md:text-2xl max-w-4xl mx-auto leading-relaxed text-white/90 font-medium">
+          Instant push notifications the moment someone buys your app.
+          <span class="inline-block mt-2 font-bold bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full text-base md:text-lg">🔐 Privacy-first • No servers • No subscriptions • Zero tracking</span>
+        </p>
+        
+        <div class="flex flex-col sm:flex-row justify-center gap-6 mt-14">
+          <a href="#features" class="group px-10 py-5 bg-white text-nagoh-orange font-bold rounded-full text-xl shadow-2xl transition-all duration-300 hover:shadow-white/30 hover:-translate-y-1 flex items-center justify-center gap-2 btn-glow">
+            <span>Discover How</span>
+            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+          </a>
+          <div class="px-10 py-5 bg-transparent border-2 border-white/70 font-semibold rounded-full text-xl backdrop-blur-sm hover:bg-white/20 transition-all duration-300 cursor-default">
+            Coming Soon to the App Store
+          </div>
         </div>
-        <div class="w-80 md:w-96 rounded-3xl shadow-2xl overflow-hidden border-8 border-white/40 transform rotate-3 hover:rotate-0 transition duration-500">
-          <img src="https://thumbs.dreamstime.com/b/vibrant-glossy-red-orange-web-buttons-versatile-set-various-shapes-modern-ui-design-vibrant-glossy-red-orange-445782534.jpg" alt="NAGOH Dashboard Example" class="w-full"/>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Features -->
-  <section id="features" class="py-28 px-6">
-    <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-12 text-center">
-      <div class="bg-white/15 backdrop-blur-lg p-10 rounded-3xl shadow-2xl">
-        <div class="text-6xl mb-8">⚡</div>
-        <h3 class="text-3xl font-semibold mb-6">Instant Alerts</h3>
-        <p class="text-lg opacity-90">Push notifications arrive within seconds of every sale — react to momentum in real time.</p>
-      </div>
-      <div class="bg-white/15 backdrop-blur-lg p-10 rounded-3xl shadow-2xl">
-        <div class="text-6xl mb-8">🔒</div>
-        <h3 class="text-3xl font-semibold mb-6">Privacy First</h3>
-        <p class="text-lg opacity-90">Everything encrypted locally on your device. No cloud, no data mining, no telemetry.</p>
-      </div>
-      <div class="bg-white/15 backdrop-blur-lg p-10 rounded-3xl shadow-2xl">
-        <div class="text-6xl mb-8">🔗</div>
-        <h3 class="text-3xl font-semibold mb-6">Super Simple Setup</h3>
-        <p class="text-lg opacity-90">Just paste one webhook URL into App Store Connect — that's it.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- How It Works -->
-  <section class="py-24 px-6 bg-black/15">
-    <div class="max-w-4xl mx-auto text-center">
-      <h2 class="text-5xl md:text-6xl font-bold mb-16">How It Works</h2>
-      <div class="space-y-16 text-xl">
-        <div>
-          <div class="text-7xl font-extrabold text-white/70 mb-6">1</div>
-          <p>Add your app profile in NAGOH to generate a secure, encrypted webhook URL.</p>
-        </div>
-        <div>
-          <div class="text-7xl font-extrabold text-white/70 mb-6">2</div>
-          <p>Paste that URL into App Store Connect under Server Notifications.</p>
-        </div>
-        <div>
-          <div class="text-7xl font-extrabold text-white/70 mb-6">3</div>
-          <p>Apple sends sale events → NAGOH relays instantly to your iPhone via push + stores locally.</p>
+        
+        <!-- subtle scroll hint -->
+        <div class="absolute bottom-[-2rem] left-1/2 transform -translate-x-1/2 hidden md:block animate-bounce">
+          <svg class="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7-7-7m14-6l-7 7-7-7"></path></svg>
         </div>
       </div>
-    </div>
-  </section>
+    </header>
 
-  <!-- Coming Soon CTA -->
-  <section class="py-28 px-6 text-center">
-    <div class="max-w-4xl mx-auto">
-      <h2 class="text-5xl md:text-6xl font-bold mb-10">Be the First to Know</h2>
-      <p class="text-2xl mb-12 opacity-90 max-w-3xl mx-auto">
-        NAGOH is launching soon. Sign up for launch updates and early access info.
-      </p>
-      <form class="max-w-lg mx-auto flex flex-col sm:flex-row gap-4">
-        <input type="email" placeholder="your@email.com" class="flex-1 px-8 py-5 rounded-full bg-white/20 border border-white/40 focus:outline-none focus:border-white text-white placeholder-white/60 text-lg"/>
-        <button type="submit" class="px-12 py-5 bg-white text-nagoh-teal font-bold rounded-full shadow-2xl hover:bg-teal-50 transition text-lg">
-          Notify Me
-        </button>
-      </form>
-      <p class="mt-8 text-base opacity-70">One email only. No spam, ever.</p>
-    </div>
-  </section>
+    <!-- Visual Showcase / Polished screenshots with better mockup style -->
+    <section class="py-16 md:py-28 px-6 relative">
+      <div class="max-w-6xl mx-auto text-center">
+        <div class="inline-block px-5 py-1 rounded-full bg-white/20 backdrop-blur-sm text-sm font-medium mb-6 tracking-wide">✨ LIVE PREVIEW</div>
+        <h2 class="text-4xl md:text-6xl font-bold mb-6 font-display">Real-Time. Beautiful. Yours.</h2>
+        <p class="text-xl text-white/80 max-w-2xl mx-auto mb-16">See your sales pop in real-time — elegant, minimal, and completely private.</p>
+        
+        <div class="flex flex-col md:flex-row justify-center gap-12 items-center">
+          <!-- first mockup -->
+          <div class="w-72 md:w-80 rounded-3xl overflow-hidden screenshot-frame transition-all duration-500 bg-white/5 p-2 backdrop-blur-sm border border-white/30 shadow-2xl transform -rotate-2 hover:rotate-0">
+            <div class="rounded-2xl overflow-hidden bg-white/10">
+              <img src="https://placehold.co/600x1200/FF6B35/FFFFFF?text=✨+NAGOH+Alert" alt="Notification preview" class="w-full object-cover aspect-[9/16] object-center">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+            </div>
+          </div>
+          <!-- central elegant device frame with dynamic gradient image (realistic placeholder with modern UI) -->
+          <div class="relative w-80 md:w-[360px] rounded-[2.5rem] screenshot-frame transition-all duration-500 shadow-2xl border border-white/40 bg-gradient-to-br from-white/10 to-white/5 p-1 backdrop-blur-sm">
+            <div class="rounded-[2rem] overflow-hidden bg-black/20">
+              <img src="https://placehold.co/800x1600/20C997/FFFFFF?text=📱+Sale:+App+Purchase+%242.99" alt="NAGOH dashboard mock" class="w-full object-cover aspect-[9/19]">
+            </div>
+            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 w-32 h-1.5 bg-white/40 rounded-full"></div>
+          </div>
+          <!-- third mockup -->
+          <div class="w-72 md:w-80 rounded-3xl overflow-hidden screenshot-frame transition-all duration-500 bg-white/5 p-2 backdrop-blur-sm border border-white/30 shadow-2xl transform rotate-2 hover:rotate-0">
+            <div class="rounded-2xl overflow-hidden">
+              <img src="https://placehold.co/600x1200/FF8C5E/FFFFFF?text=📈+Revenue+Tracker" alt="Analytics view" class="w-full aspect-[9/16] object-cover">
+            </div>
+          </div>
+        </div>
+        <p class="mt-10 text-white/70 text-sm">* Interactive previews — sleek, dark-friendly &amp; ready for launch</p>
+      </div>
+    </section>
 
-  <!-- Footer -->
-  <footer class="py-16 px-6 text-center text-sm opacity-80 border-t border-white/20">
-    <p>© 2026 NAGOH • Built for indie developers who want real-time insights without privacy compromises.</p>
-    <p class="mt-3">Coming soon • support@nagohcreative.com • Made with ❤️ in indie spirit</p>
-  </footer>
+    <!-- Features Grid — modern glassmorphism + refined icons -->
+    <section id="features" class="py-24 md:py-32 px-6">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-16">
+          <span class="text-sm uppercase tracking-[0.2em] bg-white/20 px-4 py-1.5 rounded-full inline-block mb-4">Core experience</span>
+          <h2 class="text-4xl md:text-6xl font-display font-bold">Everything you need,<br>nothing you don't.</h2>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8 lg:gap-12">
+          <div class="glass-card rounded-3xl p-8 text-center backdrop-blur-xl transition-all duration-300">
+            <div class="feature-icon mx-auto">⚡</div>
+            <h3 class="text-2xl md:text-3xl font-bold mb-4">Instant Alerts</h3>
+            <p class="text-white/85 text-lg leading-relaxed">Push notifications arrive within seconds of every sale — celebrate momentum, engage users, track performance in real time.</p>
+            <div class="mt-6 text-nagoh-teal text-sm font-semibold flex items-center justify-center gap-1"><span>Sub-second delivery</span> <span>→</span></div>
+          </div>
+          <div class="glass-card rounded-3xl p-8 text-center backdrop-blur-xl transition-all duration-300">
+            <div class="feature-icon mx-auto">🔒</div>
+            <h3 class="text-2xl md:text-3xl font-bold mb-4">Privacy First</h3>
+            <p class="text-white/85 text-lg leading-relaxed">Everything encrypted & stored locally on your device. Zero cloud storage, zero data mining, no telemetry. Your sales data is yours alone.</p>
+            <div class="mt-6 text-nagoh-teal text-sm font-semibold flex items-center justify-center gap-1"><span>GDPR compliant by design</span></div>
+          </div>
+          <div class="glass-card rounded-3xl p-8 text-center backdrop-blur-xl transition-all duration-300">
+            <div class="feature-icon mx-auto">🔗</div>
+            <h3 class="text-2xl md:text-3xl font-bold mb-4">Super Simple Setup</h3>
+            <p class="text-white/85 text-lg leading-relaxed">Just paste one secure webhook URL into App Store Connect. No complicated APIs, no backend maintenance — works in under 2 minutes.</p>
+            <div class="mt-6 text-nagoh-teal text-sm font-semibold">Copy → Paste → Get alerts</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
+    <!-- How It Works: modern step design with polished circles + micro-interactions -->
+    <section class="py-24 md:py-32 px-6 relative">
+      <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-16">
+          <div class="bg-white/20 inline-flex rounded-full px-4 py-1.5 text-sm font-semibold backdrop-blur-sm mb-5">⚙️ Zero complexity</div>
+          <h2 class="text-5xl md:text-6xl font-display font-bold">From Apple to your wrist<br><span class="text-white/80">in 3 magic steps</span></h2>
+        </div>
+        <div class="grid md:grid-cols-3 gap-10 relative">
+          <!-- connecting line (hidden on mobile) -->
+          <div class="hidden md:block absolute top-24 left-1/3 w-1/3 h-[2px] bg-gradient-to-r from-white/30 via-white/60 to-white/30"></div>
+          
+          <div class="relative text-center group">
+            <div class="step-number w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl font-black bg-white/20 backdrop-blur-md border border-white/40 shadow-xl mb-6 transition-all group-hover:scale-105">1</div>
+            <h3 class="text-2xl font-bold mb-3">Add your app</h3>
+            <p class="text-white/80 text-lg">Create a profile in NAGOH — instantly generates a secure, encrypted webhook URL.</p>
+          </div>
+          <div class="relative text-center group">
+            <div class="step-number w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl font-black bg-white/20 backdrop-blur-md border border-white/40 shadow-xl mb-6 transition-all group-hover:scale-105">2</div>
+            <h3 class="text-2xl font-bold mb-3">Paste into App Store Connect</h3>
+            <p class="text-white/80 text-lg">Go to “Server Notifications” section, paste the URL — Apple will forward all sales events.</p>
+          </div>
+          <div class="relative text-center group">
+            <div class="step-number w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl font-black bg-white/20 backdrop-blur-md border border-white/40 shadow-xl mb-6 transition-all group-hover:scale-105">3</div>
+            <h3 class="text-2xl font-bold mb-3">Celebrate every gain</h3>
+            <p class="text-white/80 text-lg">Real-time push notifications hit your iPhone + local history. Stay in the loop, privately.</p>
+          </div>
+        </div>
+        <div class="text-center mt-16 bg-white/10 backdrop-blur-md rounded-2xl py-5 px-6 max-w-xl mx-auto border border-white/20">
+          <p class="text-lg font-medium">💡 No server maintenance. No subscription fees. Ever.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust & privacy highlight block with fresh design -->
+    <section class="py-12 px-6">
+      <div class="max-w-5xl mx-auto bg-gradient-to-r from-white/10 to-white/5 rounded-3xl backdrop-blur-md p-10 md:p-14 border border-white/30 shadow-2xl text-center">
+        <div class="flex flex-wrap justify-center gap-8 items-center mb-6">
+          <span class="text-4xl">🛡️</span>
+          <span class="text-4xl">⚙️</span>
+          <span class="text-4xl">📲</span>
+        </div>
+        <h3 class="text-3xl md:text-4xl font-bold mb-4 font-display">Indie developer manifesto</h3>
+        <p class="text-xl max-w-2xl mx-auto leading-relaxed">No analytics SDKs, no tracking, no recurring costs. NAGOH is built by indie devs for indie devs — pure, honest, and powerful.</p>
+        <div class="mt-8 flex gap-3 justify-center text-sm font-mono bg-black/20 inline-flex rounded-full px-6 py-2 mx-auto">🔐 end-to-end local encryption • 🧾 open core</div>
+      </div>
+    </section>
+
+    <!-- Waitlist: refined form with micro UX and modern style -->
+    <section class="py-28 px-6 relative">
+      <div class="max-w-4xl mx-auto text-center">
+        <div class="bg-white/20 inline-flex rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide mb-6">🚀 launch window • Q2 2026</div>
+        <h2 class="text-5xl md:text-7xl font-display font-bold mb-8">Be the First to Know</h2>
+        <p class="text-2xl mb-8 text-white/90 max-w-2xl mx-auto">Get early access, exclusive launch offers & priority support.</p>
+        
+        <!-- Modern form with validation simulation (just frontend showcase) -->
+        <form id="waitlistForm" class="max-w-lg mx-auto flex flex-col sm:flex-row gap-4 items-center" onsubmit="event.preventDefault(); alert('✨ Thanks! You’re on the VIP waitlist. Stay tuned for launch updates.'); document.getElementById('emailInput').value='';">
+          <div class="relative flex-1 w-full">
+            <input type="email" id="emailInput" required placeholder="developer@studio.com" class="w-full px-7 py-5 rounded-full bg-white/10 backdrop-blur-md border border-white/40 focus:outline-none focus:ring-2 focus:ring-white/60 focus:border-transparent text-white placeholder:text-white/60 text-lg transition-all"/>
+          </div>
+          <button type="submit" class="px-9 py-5 bg-white text-nagoh-teal font-extrabold rounded-full shadow-2xl hover:shadow-white/20 transition-all duration-300 text-lg flex items-center gap-2 group btn-glow">
+            <span>Notify Me</span>
+            <svg class="w-5 h-5 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+          </button>
+        </form>
+        <p class="mt-6 text-white/60 text-sm flex items-center justify-center gap-1"><span>✉️</span> one-time updates, no spam — we mean it.</p>
+      </div>
+    </section>
+
+    <!-- Footer: Clean & modern, with links and social style -->
+    <footer class="py-14 px-6 border-t border-white/20 text-center text-white/80">
+      <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="flex items-center gap-2 text-xl font-display font-bold tracking-tight">NAGOH<span class="text-sm font-sans font-normal">™</span></div>
+        <div class="flex gap-8 text-sm font-medium">
+          <a href="#" class="hover:text-white transition">Privacy</a>
+          <a href="#" class="hover:text-white transition">Terms</a>
+          <a href="#" class="hover:text-white transition">Support</a>
+          <a href="#" class="hover:text-white transition">Twitter</a>
+        </div>
+        <div class="text-sm opacity-80">© 2026 NAGOH Creative — Real insights, zero bloat.</div>
+      </div>
+      <div class="mt-8 text-xs text-white/50 max-w-md mx-auto">Made with ❤️ for indie developers who value privacy & real-time feedback.</div>
+    </footer>
+  </main>
+
+  <!-- tiny script for smooth anchor scroll -->
+  <script>
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        const targetId = this.getAttribute('href').substring(1);
+        if(targetId && document.getElementById(targetId)) {
+          e.preventDefault();
+          document.getElementById(targetId).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
 </body>
 </html>
+```
