@@ -831,68 +831,93 @@
     }
 
     .screenshots-inner {
-      max-width: 1100px;
+      max-width: 1000px;
       margin: 0 auto;
     }
 
     .screenshots-grid {
       display: flex;
       justify-content: center;
-      align-items: flex-end;
+      align-items: center;
       gap: 2rem;
       margin-top: 3.5rem;
     }
 
     .screenshot-item {
-      flex: 1;
-      max-width: 280px;
+      flex: 0 0 auto;
+      width: 220px;
       position: relative;
-    }
-
-    .screenshot-item img {
-      width: 100%;
-      border-radius: 36px;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 24px 64px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.05);
-      display: block;
-      transition: transform 0.4s ease, box-shadow 0.4s ease;
-    }
-
-    .screenshot-item:hover img {
-      transform: translateY(-8px);
-      box-shadow: 0 36px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.08);
+      transition: transform 0.4s ease;
     }
 
     .screenshot-item.center {
-      transform: scale(1.06);
+      width: 250px;
       z-index: 2;
     }
 
-    .screenshot-item.center:hover img {
-      transform: translateY(-8px);
+    .screenshot-item:hover { transform: translateY(-10px); }
+    .screenshot-item.center:hover { transform: translateY(-10px); }
+
+    /* Fixed-ratio phone frame — holds shape even before image loads */
+    .screenshot-frame {
+      position: relative;
+      width: 100%;
+      /* iPhone aspect ratio ~19.5:9 → height = width * 2.165 */
+      padding-bottom: 216.5%;
+      border-radius: 36px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.05);
+      background: var(--dark-3);
+      transition: box-shadow 0.4s ease;
     }
 
+    .screenshot-item:hover .screenshot-frame {
+      box-shadow: 0 36px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.1);
+    }
+
+    .screenshot-frame img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Placeholder shown while image is loading or missing */
+    .screenshot-frame::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, var(--dark-3) 0%, var(--mid) 100%);
+      z-index: 0;
+    }
+
+    .screenshot-frame img { z-index: 1; }
+
     .screenshot-caption {
-      margin-top: 1.1rem;
-      font-size: 0.8rem;
+      margin-top: 1rem;
+      font-size: 0.78rem;
       font-weight: 500;
       color: var(--muted);
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
     @media (max-width: 720px) {
-      .screenshots-grid {
-        gap: 1rem;
-      }
-      .screenshot-item { max-width: 180px; }
-      .screenshot-item img { border-radius: 24px; }
+      .screenshots-grid { gap: 1rem; }
+      .screenshot-item { width: 160px; }
+      .screenshot-item.center { width: 185px; }
+      .screenshot-frame { border-radius: 24px; }
     }
 
     @media (max-width: 480px) {
       .screenshots-grid { gap: 0.6rem; }
-      .screenshot-item { max-width: 130px; }
-      .screenshot-item img { border-radius: 18px; }
-      .screenshot-caption { font-size: 0.7rem; }
+      .screenshot-item { width: 110px; }
+      .screenshot-item.center { width: 130px; }
+      .screenshot-frame { border-radius: 18px; }
+      .screenshot-caption { font-size: 0.65rem; }
     }
 
     /* ── ANIMATIONS ── */
@@ -1030,15 +1055,21 @@
 
       <div class="screenshots-grid">
         <div class="screenshot-item fade-up">
-          <img src="https://nagoh.xyz/images/02.png" alt="NAGOH splash screen with daily marketing tip" loading="lazy" />
+          <div class="screenshot-frame">
+            <img src="https://nagoh.xyz/images/02.png" alt="NAGOH splash screen with daily marketing tip" loading="lazy" />
+          </div>
           <p class="screenshot-caption">Splash · Daily Tip</p>
         </div>
         <div class="screenshot-item center fade-up">
-          <img src="https://nagoh.xyz/images/04.png" alt="NAGOH live sales dashboard" loading="lazy" />
+          <div class="screenshot-frame">
+            <img src="https://nagoh.xyz/images/04.png" alt="NAGOH live sales dashboard" loading="lazy" />
+          </div>
           <p class="screenshot-caption">Live Dashboard</p>
         </div>
         <div class="screenshot-item fade-up">
-          <img src="https://nagoh.xyz/images/06.png" alt="NAGOH developer business card" loading="lazy" />
+          <div class="screenshot-frame">
+            <img src="https://nagoh.xyz/images/06.png" alt="NAGOH developer business card" loading="lazy" />
+          </div>
           <p class="screenshot-caption">Business Card</p>
         </div>
       </div>
@@ -1188,6 +1219,8 @@
         <h3>Instant Alerts</h3>
         <p>The moment a sale happens, your iPhone notifies you. Track trends, celebrate milestones, and stay in sync with your business in real time.</p>
       </div>
+    </div>
+  </div>
 </section>
 
 <!-- COMPARISON -->
@@ -1257,7 +1290,7 @@
 <section>
   <div class="cta-section">
     <h2>Start knowing<br>when you earn.</h2>
-    <p>Download NAGOH free to try. No account creation, no commitment, no strings. Just instant, private App Store sales intelligence for iOS developers.</p>
+    <p>Download NAGOH free. No account creation, no subscription, no strings. Just instant, private App Store sales intelligence for iOS developers.</p>
     <a href="#" class="app-store-btn">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
       Download on the App Store
