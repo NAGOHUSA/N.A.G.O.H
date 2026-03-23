@@ -23,323 +23,192 @@
             sans: ['Inter', 'system-ui', 'sans-serif'],
           },
           animation: {
-            'float': 'float 6s ease-in-out infinite',
-            'glow-pulse': 'glowPulse 2s ease-out infinite',
+            'float': 'float 7s ease-in-out infinite',
+            'glow-pulse': 'glowPulse 3s ease-out infinite',
             'fade-up': 'fadeUp 0.8s ease-out forwards',
           },
           keyframes: {
-            float: {
-              '0%, 100%': { transform: 'translateY(0px)' },
-              '50%': { transform: 'translateY(-12px)' },
-            },
-            glowPulse: {
-              '0%': { boxShadow: '0 0 0 0 rgba(255,255,255,0.4)' },
-              '70%': { boxShadow: '0 0 0 20px rgba(255,255,255,0)' },
-              '100%': { boxShadow: '0 0 0 0 rgba(255,255,255,0)' },
-            },
-            fadeUp: {
-              '0%': { opacity: '0', transform: 'translateY(20px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
-            }
+            float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+            glowPulse: { '0%': { boxShadow: '0 0 0 0 rgba(255,255,255,0.3)' }, '70%': { boxShadow: '0 0 0 16px rgba(255,255,255,0)' }, '100%': { boxShadow: '0 0 0 0 rgba(255,255,255,0)' } },
+            fadeUp: { '0%': { opacity: '0', transform: 'translateY(16px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
           },
-          backdropBlur: {
-            xs: '2px',
-          }
+          backdropBlur: { xs: '2px' }
         }
       }
     }
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      background: radial-gradient(circle at 10% 30%, #FF6B35, #E8552E, #20C997);
-      background-attachment: fixed;
+      background: radial-gradient(circle at 20% 30%, #FF6B35, #E8552E, #20C997);
+      background-size: cover;
+      min-height: 100vh;
     }
-    /* Modern glass morphism enhancements */
     .glass-card {
-      background: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px); /* iOS support */
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
     }
-    .glass-card:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.45);
-      transform: translateY(-6px);
-    }
-    .hero-blur-bg {
-      background: radial-gradient(ellipse at 70% 40%, rgba(255,107,53,0.3), rgba(32,201,151,0.2));
-      filter: blur(90px);
-    }
-    .step-number {
-      background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 100%);
-      backdrop-filter: blur(4px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
-    .screenshot-frame {
-      transition: all 0.5s ease;
-      box-shadow: 0 25px 40px -12px rgba(0,0,0,0.35);
-    }
-    .screenshot-frame:hover {
-      transform: rotate(0deg) scale(1.02);
-      box-shadow: 0 35px 50px -18px rgba(0,0,0,0.45);
-    }
-    input::placeholder {
-      color: rgba(255,255,255,0.65);
-    }
-    .btn-glow {
-      transition: all 0.25s ease;
-    }
-    .btn-glow:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 20px 30px -12px rgba(0,0,0,0.3);
-    }
+    .glass-card:hover { background: rgba(255,255,255,0.15); transform: translateY(-4px); }
     .feature-icon {
-      background: rgba(255,255,240,0.2);
-      backdrop-filter: blur(4px);
-      width: 80px;
-      height: 80px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 2rem;
-      margin: 0 auto 1.5rem auto;
-      font-size: 3rem;
-      transition: all 0.3s;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(6px);
+      width: 70px; height: 70px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 1.5rem; margin: 0 auto 1.25rem;
+      font-size: 2.5rem;
+      transition: transform 0.3s;
     }
-    .glass-card:hover .feature-icon {
-      transform: scale(1.05);
-      background: rgba(255,255,255,0.3);
-    }
+    .glass-card:hover .feature-icon { transform: scale(1.08); }
     @media (max-width: 640px) {
-      .hero-title {
-        font-size: 3.2rem;
-        line-height: 1.2;
-      }
-      .hero-sub {
-        font-size: 1.5rem;
-      }
+      .hero-title { font-size: 3.5rem; line-height: 1.1; }
+      .hero-sub { font-size: 1.6rem; }
+      .screenshot-frame { transform: none !important; width: 85% !important; max-width: 320px; margin: 0 auto; }
     }
   </style>
 </head>
 <body class="font-sans text-white antialiased overflow-x-hidden">
 
-  <!-- Animated floating blobs background (polished atmosphere) -->
+  <!-- Subtle animated blobs – reduced for mobile perf -->
   <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-    <div class="absolute top-20 -left-20 w-96 h-96 bg-nagoh-teal rounded-full mix-blend-multiply opacity-30 blur-3xl animate-pulse" style="animation-duration: 12s;"></div>
-    <div class="absolute bottom-10 right-10 w-[28rem] h-[28rem] bg-nagoh-orange rounded-full mix-blend-overlay opacity-30 blur-3xl animate-pulse" style="animation-duration: 15s; animation-delay: 2s;"></div>
-    <div class="absolute top-1/3 left-1/4 w-80 h-80 bg-nagoh-cyan rounded-full mix-blend-soft-light opacity-20 blur-3xl animate-pulse" style="animation-duration: 18s;"></div>
+    <div class="absolute top-10 -left-16 w-80 h-80 bg-nagoh-teal rounded-full opacity-20 blur-3xl animate-pulse" style="animation-duration: 14s;"></div>
+    <div class="absolute bottom-8 right-8 w-96 h-96 bg-nagoh-orange rounded-full opacity-15 blur-3xl animate-pulse" style="animation-duration: 18s; animation-delay: 3s;"></div>
   </div>
 
   <main class="relative z-10">
-    <!-- Hero Section — modern, spacious, centered with polished typography -->
-    <header class="relative pt-20 pb-32 md:pt-28 md:pb-40 px-6 md:px-12 overflow-hidden">
-      <div class="max-w-6xl mx-auto text-center relative">
-        <!-- floating icon with glow animation -->
-        <div class="inline-block mb-8 p-4 rounded-full bg-white/20 backdrop-blur-xl shadow-2xl border border-white/30 animate-float">
-          <div class="relative">
-            <svg class="w-24 h-24 md:w-28 md:h-28 text-white drop-shadow-lg" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-            </svg>
-            <span class="absolute -top-2 -right-2 w-5 h-5 bg-nagoh-teal rounded-full animate-ping opacity-70"></span>
-          </div>
+    <!-- Hero -->
+    <header class="relative pt-16 pb-24 sm:pt-24 sm:pb-32 px-5 sm:px-8 md:px-12 text-center">
+      <div class="max-w-5xl mx-auto">
+        <div class="inline-block mb-6 p-3 sm:p-4 rounded-full bg-white/15 backdrop-blur-lg border border-white/25 animate-float">
+          <svg class="w-20 h-20 sm:w-24 sm:h-24 text-white" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+          </svg>
         </div>
-        
-        <h1 class="hero-title text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight drop-shadow-2xl font-display">
+        <h1 class="hero-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight drop-shadow-xl font-display">
           NAGOH
         </h1>
-        <div class="mt-4 mb-6 flex justify-center">
-          <div class="h-1 w-24 bg-white/60 rounded-full"></div>
-        </div>
-        <p class="hero-sub text-3xl md:text-5xl font-light mb-5 tracking-wide opacity-95">
+        <p class="hero-sub mt-3 text-2xl sm:text-3xl md:text-4xl font-light mb-6 opacity-95">
           Notify App Gains On Hand
         </p>
-        <p class="text-xl md:text-2xl max-w-4xl mx-auto leading-relaxed text-white/90 font-medium">
+        <p class="text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed text-white/90">
           Instant push notifications the moment someone buys your app.
-          <span class="inline-block mt-2 font-bold bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full text-base md:text-lg">🔐 Privacy-first • No servers • No Accounts • Zero tracking</span>
+          <span class="block mt-3 sm:mt-4 font-semibold bg-white/15 backdrop-blur px-5 py-2 rounded-full text-base sm:text-lg inline-block">🔐 Privacy-first • No servers • No Accounts • Zero tracking</span>
         </p>
-        
-        <div class="flex flex-col sm:flex-row justify-center gap-6 mt-14">
-          <a href="#features" class="group px-10 py-5 bg-white text-nagoh-orange font-bold rounded-full text-xl shadow-2xl transition-all duration-300 hover:shadow-white/30 hover:-translate-y-1 flex items-center justify-center gap-2 btn-glow">
-            <span>Discover How</span>
-            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+        <div class="flex flex-col sm:flex-row justify-center gap-5 mt-10 sm:mt-14">
+          <a href="#features" class="px-8 py-4 sm:px-10 sm:py-5 bg-white text-nagoh-orange font-bold rounded-full text-lg sm:text-xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all btn-glow">
+            Discover How
           </a>
-          <div class="px-10 py-5 bg-transparent border-2 border-white/70 font-semibold rounded-full text-xl backdrop-blur-sm hover:bg-white/20 transition-all duration-300 cursor-default">
+          <div class="px-8 py-4 sm:px-10 sm:py-5 bg-transparent border-2 border-white/60 font-semibold rounded-full text-lg sm:text-xl hover:bg-white/15 transition">
             Coming Soon to the App Store
           </div>
-        </div>
-        
-        <!-- subtle scroll hint -->
-        <div class="absolute bottom-[-2rem] left-1/2 transform -translate-x-1/2 hidden md:block animate-bounce">
-          <svg class="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7-7-7m14-6l-7 7-7-7"></path></svg>
         </div>
       </div>
     </header>
 
-    <!-- Visual Showcase / Polished screenshots with better mockup style -->
-    <section class="py-16 md:py-28 px-6 relative">
+    <!-- Screenshots – stack on mobile -->
+    <section class="py-12 sm:py-16 md:py-24 px-5 sm:px-8">
       <div class="max-w-6xl mx-auto text-center">
-        <div class="inline-block px-5 py-1 rounded-full bg-white/20 backdrop-blur-sm text-sm font-medium mb-6 tracking-wide">✨ LIVE PREVIEW</div>
-        <h2 class="text-4xl md:text-6xl font-bold mb-6 font-display">Real-Time. Beautiful. Yours.</h2>
-        <p class="text-xl text-white/80 max-w-2xl mx-auto mb-16">See your sales pop in real-time — elegant, minimal, and completely private.</p>
-        
-        <div class="flex flex-col md:flex-row justify-center gap-12 items-center">
-          <!-- first mockup -->
-          <div class="w-72 md:w-80 rounded-3xl overflow-hidden screenshot-frame transition-all duration-500 bg-white/5 p-2 backdrop-blur-sm border border-white/30 shadow-2xl transform -rotate-2 hover:rotate-0">
-            <div class="rounded-2xl overflow-hidden bg-white/10">
-              <img src="https://placehold.co/600x1200/FF6B35/FFFFFF?text=✨+NAGOH+Alert" alt="Notification preview" class="w-full object-cover aspect-[9/16] object-center">
-              <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
-            </div>
+        <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-display">Real-Time. Beautiful. Yours.</h2>
+        <p class="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto mb-10 sm:mb-14">See your sales pop in real-time — elegant, minimal, and completely private.</p>
+        <div class="flex flex-col items-center gap-10 sm:gap-12 md:flex-row md:justify-center md:gap-14">
+          <div class="screenshot-frame w-80 sm:w-72 md:w-80 rounded-3xl overflow-hidden bg-white/5 p-2 border border-white/25 shadow-2xl">
+            <img src="https://placehold.co/600x1200/FF6B35/FFFFFF?text=✨+NAGOH+Alert" alt="Notification preview" class="w-full rounded-2xl aspect-[9/19] object-cover">
           </div>
-          <!-- central elegant device frame with dynamic gradient image (realistic placeholder with modern UI) -->
-          <div class="relative w-80 md:w-[360px] rounded-[2.5rem] screenshot-frame transition-all duration-500 shadow-2xl border border-white/40 bg-gradient-to-br from-white/10 to-white/5 p-1 backdrop-blur-sm">
-            <div class="rounded-[2rem] overflow-hidden bg-black/20">
-              <img src="https://placehold.co/800x1600/20C997/FFFFFF?text=📱+Sale:+App+Purchase+%242.99" alt="NAGOH dashboard mock" class="w-full object-cover aspect-[9/19]">
+          <div class="screenshot-frame relative w-80 sm:w-80 md:w-[360px] rounded-[2.5rem] bg-gradient-to-br from-white/10 to-white/5 p-1.5 border border-white/35 shadow-2xl">
+            <div class="rounded-[2.2rem] overflow-hidden">
+              <img src="https://placehold.co/800x1600/20C997/FFFFFF?text=📱+Sale:+App+Purchase+%242.99" alt="NAGOH dashboard mock" class="w-full aspect-[9/19] object-cover">
             </div>
-            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 w-32 h-1.5 bg-white/40 rounded-full"></div>
+            <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-28 h-1 bg-white/40 rounded-full"></div>
           </div>
-          <!-- third mockup -->
-          <div class="w-72 md:w-80 rounded-3xl overflow-hidden screenshot-frame transition-all duration-500 bg-white/5 p-2 backdrop-blur-sm border border-white/30 shadow-2xl transform rotate-2 hover:rotate-0">
-            <div class="rounded-2xl overflow-hidden">
-              <img src="https://placehold.co/600x1200/FF8C5E/FFFFFF?text=📈+Revenue+Tracker" alt="Analytics view" class="w-full aspect-[9/16] object-cover">
-            </div>
+          <div class="screenshot-frame w-80 sm:w-72 md:w-80 rounded-3xl overflow-hidden bg-white/5 p-2 border border-white/25 shadow-2xl">
+            <img src="https://placehold.co/600x1200/FF8C5E/FFFFFF?text=📈+Revenue+Tracker" alt="Analytics view" class="w-full rounded-2xl aspect-[9/19] object-cover">
           </div>
         </div>
-        <p class="mt-10 text-white/70 text-sm">* Interactive previews — sleek, dark-friendly &amp; ready for launch</p>
       </div>
     </section>
 
-    <!-- Features Grid — modern glassmorphism + refined icons -->
-    <section id="features" class="py-24 md:py-32 px-6">
+    <!-- Features – smaller icons/padding on mobile -->
+    <section id="features" class="py-16 sm:py-20 md:py-28 px-5 sm:px-8">
       <div class="max-w-6xl mx-auto">
-        <div class="text-center mb-16">
-          <span class="text-sm uppercase tracking-[0.2em] bg-white/20 px-4 py-1.5 rounded-full inline-block mb-4">Core experience</span>
-          <h2 class="text-4xl md:text-6xl font-display font-bold">Everything you need,<br>nothing you don't.</h2>
+        <div class="text-center mb-12 sm:mb-16">
+          <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold">Everything you need,<br>nothing you don't.</h2>
         </div>
-        <div class="grid md:grid-cols-3 gap-8 lg:gap-12">
-          <div class="glass-card rounded-3xl p-8 text-center backdrop-blur-xl transition-all duration-300">
-            <div class="feature-icon mx-auto">⚡</div>
-            <h3 class="text-2xl md:text-3xl font-bold mb-4">Instant Alerts</h3>
-            <p class="text-white/85 text-lg leading-relaxed">Push notifications arrive within seconds of every sale — celebrate momentum, engage users, track performance in real time.</p>
-            <div class="mt-6 text-nagoh-teal text-sm font-semibold flex items-center justify-center gap-1"><span>Sub-second delivery</span> <span>→</span></div>
+        <div class="grid gap-8 sm:gap-10 md:grid-cols-3 md:gap-10 lg:gap-12">
+          <div class="glass-card rounded-3xl p-6 sm:p-8 text-center">
+            <div class="feature-icon">⚡</div>
+            <h3 class="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">Instant Alerts</h3>
+            <p class="text-white/85 text-base sm:text-lg leading-relaxed">Sub-second push notifications — react to every sale in real time.</p>
           </div>
-          <div class="glass-card rounded-3xl p-8 text-center backdrop-blur-xl transition-all duration-300">
-            <div class="feature-icon mx-auto">🔒</div>
-            <h3 class="text-2xl md:text-3xl font-bold mb-4">Privacy First</h3>
-            <p class="text-white/85 text-lg leading-relaxed">Everything encrypted & stored locally on your device. Zero cloud storage, zero data mining, no telemetry. Your sales data is yours alone.</p>
-            <div class="mt-6 text-nagoh-teal text-sm font-semibold flex items-center justify-center gap-1"><span>GDPR compliant by design</span></div>
+          <div class="glass-card rounded-3xl p-6 sm:p-8 text-center">
+            <div class="feature-icon">🔒</div>
+            <h3 class="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">Privacy First</h3>
+            <p class="text-white/85 text-base sm:text-lg leading-relaxed">Fully local, encrypted storage. No cloud, no tracking, no telemetry.</p>
           </div>
-          <div class="glass-card rounded-3xl p-8 text-center backdrop-blur-xl transition-all duration-300">
-            <div class="feature-icon mx-auto">🔗</div>
-            <h3 class="text-2xl md:text-3xl font-bold mb-4">Super Simple Setup</h3>
-            <p class="text-white/85 text-lg leading-relaxed">Just paste one secure webhook URL into App Store Connect. No complicated APIs, no backend maintenance — works in under 2 minutes.</p>
-            <div class="mt-6 text-nagoh-teal text-sm font-semibold">Copy → Paste → Get alerts</div>
+          <div class="glass-card rounded-3xl p-6 sm:p-8 text-center">
+            <div class="feature-icon">🔗</div>
+            <h3 class="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">Super Simple Setup</h3>
+            <p class="text-white/85 text-base sm:text-lg leading-relaxed">Paste one webhook URL into App Store Connect — done in under 2 minutes.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- How It Works: modern step design with polished circles + micro-interactions -->
-    <section class="py-24 md:py-32 px-6 relative">
-      <div class="max-w-5xl mx-auto">
-        <div class="text-center mb-16">
-          <div class="bg-white/20 inline-flex rounded-full px-4 py-1.5 text-sm font-semibold backdrop-blur-sm mb-5">⚙️ Zero complexity</div>
-          <h2 class="text-5xl md:text-6xl font-display font-bold">From Apple to your wrist<br><span class="text-white/80">in 3 magic steps</span></h2>
-        </div>
-        <div class="grid md:grid-cols-3 gap-10 relative">
-          <!-- connecting line (hidden on mobile) -->
-          <div class="hidden md:block absolute top-24 left-1/3 w-1/3 h-[2px] bg-gradient-to-r from-white/30 via-white/60 to-white/30"></div>
-          
-          <div class="relative text-center group">
-            <div class="step-number w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl font-black bg-white/20 backdrop-blur-md border border-white/40 shadow-xl mb-6 transition-all group-hover:scale-105">1</div>
-            <h3 class="text-2xl font-bold mb-3">Add your app</h3>
-            <p class="text-white/80 text-lg">Create a profile in NAGOH — instantly generates a secure, encrypted webhook URL.</p>
+    <!-- How It Works – adjusted spacing -->
+    <section class="py-16 sm:py-20 md:py-28 px-5 sm:px-8">
+      <div class="max-w-5xl mx-auto text-center">
+        <h2 class="text-4xl sm:text-5xl md:text-6xl font-display font-bold mb-10 sm:mb-14">From Apple to your phone<br><span class="text-white/80">in 3 simple steps</span></h2>
+        <div class="grid gap-10 sm:gap-12 md:grid-cols-3 relative">
+          <div class="hidden md:block absolute top-1/3 left-1/3 right-1/3 h-0.5 bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+          <div class="relative">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-white/15 backdrop-blur-md border border-white/30 flex items-center justify-center text-3xl sm:text-4xl font-black shadow-lg mb-4 sm:mb-6">1</div>
+            <h3 class="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">Add your app</h3>
+            <p class="text-white/80 text-base sm:text-lg">Generate your secure webhook URL instantly.</p>
           </div>
-          <div class="relative text-center group">
-            <div class="step-number w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl font-black bg-white/20 backdrop-blur-md border border-white/40 shadow-xl mb-6 transition-all group-hover:scale-105">2</div>
-            <h3 class="text-2xl font-bold mb-3">Paste into App Store Connect</h3>
-            <p class="text-white/80 text-lg">Go to “Server Notifications” section, paste the URL — Apple will forward all sales events.</p>
+          <div class="relative">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-white/15 backdrop-blur-md border border-white/30 flex items-center justify-center text-3xl sm:text-4xl font-black shadow-lg mb-4 sm:mb-6">2</div>
+            <h3 class="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">Paste in App Store Connect</h3>
+            <p class="text-white/80 text-base sm:text-lg">Server Notifications section — one click.</p>
           </div>
-          <div class="relative text-center group">
-            <div class="step-number w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl font-black bg-white/20 backdrop-blur-md border border-white/40 shadow-xl mb-6 transition-all group-hover:scale-105">3</div>
-            <h3 class="text-2xl font-bold mb-3">Celebrate every gain</h3>
-            <p class="text-white/80 text-lg">Real-time push notifications hit your iPhone + local history. Stay in the loop, privately.</p>
+          <div class="relative">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-white/15 backdrop-blur-md border border-white/30 flex items-center justify-center text-3xl sm:text-4xl font-black shadow-lg mb-4 sm:mb-6">3</div>
+            <h3 class="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">Get instant alerts</h3>
+            <p class="text-white/80 text-base sm:text-lg">Push + local history, fully private.</p>
           </div>
-        </div>
-        <div class="text-center mt-16 bg-white/10 backdrop-blur-md rounded-2xl py-5 px-6 max-w-xl mx-auto border border-white/20">
-          <p class="text-lg font-medium">💡 No server maintenance. No Account Sign-Up. Ever.</p>
         </div>
       </div>
     </section>
 
-    <!-- Trust & privacy highlight block with fresh design -->
-    <section class="py-12 px-6">
-      <div class="max-w-5xl mx-auto bg-gradient-to-r from-white/10 to-white/5 rounded-3xl backdrop-blur-md p-10 md:p-14 border border-white/30 shadow-2xl text-center">
-        <div class="flex flex-wrap justify-center gap-8 items-center mb-6">
-          <span class="text-4xl">🛡️</span>
-          <span class="text-4xl">⚙️</span>
-          <span class="text-4xl">📲</span>
-        </div>
-        <h3 class="text-3xl md:text-4xl font-bold mb-4 font-display">Indie developer manifesto</h3>
-        <p class="text-xl max-w-2xl mx-auto leading-relaxed">No analytics SDKs, no tracking, no recurring costs. NAGOH is built by indie devs for indie devs — pure, honest, and powerful.</p>
-        <div class="mt-8 flex gap-3 justify-center text-sm font-mono bg-black/20 inline-flex rounded-full px-6 py-2 mx-auto">🔐 end-to-end local encryption • 🧾 open core</div>
-      </div>
-    </section>
-
-    <!-- Waitlist: refined form with micro UX and modern style -->
-    <section class="py-28 px-6 relative">
-      <div class="max-w-4xl mx-auto text-center">
-        <div class="bg-white/20 inline-flex rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide mb-6">🚀 launch window • Q2 2026</div>
-        <h2 class="text-5xl md:text-7xl font-display font-bold mb-8">Be the First to Know</h2>
-        <p class="text-2xl mb-8 text-white/90 max-w-2xl mx-auto">Get early access, exclusive launch offers & priority support.</p>
-        
-        <!-- Modern form with validation simulation (just frontend showcase) -->
-        <form id="waitlistForm" class="max-w-lg mx-auto flex flex-col sm:flex-row gap-4 items-center" onsubmit="event.preventDefault(); alert('✨ Thanks! You’re on the VIP waitlist. Stay tuned for launch updates.'); document.getElementById('emailInput').value='';">
-          <div class="relative flex-1 w-full">
-            <input type="email" id="emailInput" required placeholder="developer@studio.com" class="w-full px-7 py-5 rounded-full bg-white/10 backdrop-blur-md border border-white/40 focus:outline-none focus:ring-2 focus:ring-white/60 focus:border-transparent text-white placeholder:text-white/60 text-lg transition-all"/>
-          </div>
-          <button type="submit" class="px-9 py-5 bg-white text-nagoh-teal font-extrabold rounded-full shadow-2xl hover:shadow-white/20 transition-all duration-300 text-lg flex items-center gap-2 group btn-glow">
-            <span>Notify Me</span>
-            <svg class="w-5 h-5 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-          </button>
+    <!-- Waitlist form – full width on mobile -->
+    <section class="py-16 sm:py-20 md:py-28 px-5 sm:px-8 text-center">
+      <div class="max-w-lg mx-auto">
+        <h2 class="text-4xl sm:text-5xl md:text-6xl font-display font-bold mb-6">Be the First to Know</h2>
+        <p class="text-lg sm:text-xl text-white/90 mb-8">Early access & launch updates — join the waitlist.</p>
+        <form class="flex flex-col sm:flex-row gap-4" onsubmit="event.preventDefault(); alert('Thanks! You’re on the list.'); this.reset();">
+          <input type="email" required placeholder="your@email.com" class="flex-1 px-6 py-4 rounded-full bg-white/12 backdrop-blur border border-white/30 focus:outline-none focus:border-white text-white placeholder-white/60 text-base sm:text-lg" />
+          <button type="submit" class="px-8 py-4 bg-white text-nagoh-teal font-bold rounded-full shadow-xl hover:shadow-2xl transition text-base sm:text-lg">Notify Me</button>
         </form>
-        <p class="mt-6 text-white/60 text-sm flex items-center justify-center gap-1"><span>✉️</span> one-time updates, no spam — we mean it.</p>
+        <p class="mt-6 text-sm text-white/60">One email only. No spam.</p>
       </div>
     </section>
 
-    <!-- Footer: Clean & modern, with links and social style -->
-    <footer class="py-14 px-6 border-t border-white/20 text-center text-white/80">
-      <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-        <div class="flex items-center gap-2 text-xl font-display font-bold tracking-tight">NAGOH<span class="text-sm font-sans font-normal">™</span></div>
-        <div class="flex gap-8 text-sm font-medium">
-          <a href="#" class="hover:text-white transition">Privacy</a>
-          <a href="#" class="hover:text-white transition">Terms</a>
-          <a href="#" class="hover:text-white transition">Support</a>
-          <a href="#" class="hover:text-white transition">Twitter</a>
-        </div>
-        <div class="text-sm opacity-80">© 2026 NAGOH Creative — Real insights, zero bloat.</div>
-      </div>
-      <div class="mt-8 text-xs text-white/50 max-w-md mx-auto">Made with ❤️ for indie developers who value privacy & real-time feedback.</div>
+    <!-- Footer -->
+    <footer class="py-12 px-5 sm:px-8 border-t border-white/20 text-center text-sm text-white/70">
+      <p>© 2026 NAGOH • Built for indie devs who value privacy & real-time insights.</p>
+      <p class="mt-2">Made with ❤️ • support@nagoh.xyz</p>
     </footer>
   </main>
 
-  <!-- tiny script for smooth anchor scroll -->
   <script>
+    // Smooth scroll for anchors
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
-        const targetId = this.getAttribute('href').substring(1);
-        if(targetId && document.getElementById(targetId)) {
-          e.preventDefault();
-          document.getElementById(targetId).scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+      anchor.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelector(anchor.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
       });
     });
   </script>
 </body>
 </html>
-
