@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NAGOH — Notify App Gains On Hand</title>
+  <meta name="description" content="Get instant notifications when someone buys your app — privacy-first, no cloud servers, no subscriptions."/>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              orange: '#FF6B35',
+              coral: '#FF8C5E',
+              teal: '#20C997',
+              cyan: '#0DCAF0',
+            },
+            gradient: {
+              start: '#FF6B35',
+              mid: '#FF8C5E',
+              end: '#0DCAF0',
+            }
+          },
+          backgroundImage: {
+            'app-gradient': 'linear-gradient(135deg, #FF6B35 0%, #FF8C5E 30%, #20C997 60%, #0DCAF0 100%)',
+            'soft-gradient': 'linear-gradient(to bottom right, #FFEDD5, #FFEFD5, #CCF0EA, #B9F5F0)',
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Google Fonts for modern sans-serif -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    h1, h2, h3 { font-family: 'Playfair Display', serif; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-orange-400 via-teal-400 to-cyan-500 min-h-screen text-white overflow-x-hidden">
+
+  <!-- Hero Section -->
+  <header class="relative pt-12 pb-24 px-6 md:px-12 lg:px-24 text-center">
+    <div class="absolute inset-0 bg-black opacity-10"></div>
+    <div class="relative z-10 max-w-5xl mx-auto">
+      <div class="inline-block mb-6 p-4 rounded-full bg-white/20 backdrop-blur-lg">
+        <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+        </svg>
+      </div>
+      <h1 class="text-5xl md:text-7xl font-bold mb-4 tracking-tight drop-shadow-lg">
+        NAGOH
+      </h1>
+      <p class="text-xl md:text-3xl font-light mb-8 opacity-90">
+        Notify App Gains On Hand
+      </p>
+      <p class="text-lg md:text-2xl max-w-3xl mx-auto mb-10 leading-relaxed">
+        Instant push notifications the second someone buys your app.<br class="hidden sm:inline"/>
+        <span class="font-medium">Privacy-first • No servers • No subscriptions • No data mining</span>
+      </p>
+      <div class="flex flex-col sm:flex-row justify-center gap-6">
+        <a href="#features" class="px-10 py-5 bg-white text-orange-600 font-semibold rounded-full text-lg shadow-2xl hover:bg-orange-50 transition transform hover:-translate-y-1">
+          Learn More
+        </a>
+        <p class="px-10 py-5 bg-transparent border-2 border-white/80 font-semibold rounded-full text-lg hover:bg-white/20 transition">
+          Coming Soon to the App Store
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <!-- App Screenshots / Visual Teaser (you can replace src with your own hosted images later) -->
+  <section class="py-16 px-6 bg-white/10 backdrop-blur-lg">
+    <div class="max-w-6xl mx-auto text-center">
+      <h2 class="text-4xl md:text-5xl font-bold mb-12">Beautiful & Instant</h2>
+      <div class="flex flex-col md:flex-row justify-center gap-12 items-center">
+        <!-- Screenshot placeholders - host your images and update src -->
+        <div class="w-80 rounded-3xl shadow-2xl overflow-hidden border-8 border-white/30 transform rotate-[-3deg] hover:rotate-0 transition">
+          <img src="https://placehold.co/320x690/orange/white?text=NAGOH+Splash" alt="NAGOH Splash Screen" class="w-full"/>
+        </div>
+        <div class="w-80 rounded-3xl shadow-2xl overflow-hidden border-8 border-white/30 transform rotate-[4deg] hover:rotate-0 transition">
+          <img src="https://placehold.co/320x690/teal/white?text=Dashboard+View" alt="NAGOH Dashboard" class="w-full"/>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="py-24 px-6">
+    <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-10 text-center">
+      <div class="bg-white/15 backdrop-blur-lg p-8 rounded-3xl shadow-xl">
+        <div class="text-5xl mb-6">⚡</div>
+        <h3 class="text-2xl font-semibold mb-4">Instant Alerts</h3>
+        <p class="opacity-90">Sales notifications hit your iPhone within seconds — no delays.</p>
+      </div>
+      <div class="bg-white/15 backdrop-blur-lg p-8 rounded-3xl shadow-xl">
+        <div class="text-5xl mb-6">🔒</div>
+        <h3 class="text-2xl font-semibold mb-4">Privacy First</h3>
+        <p class="opacity-90">All data stays encrypted on your device. Zero cloud storage, zero tracking.</p>
+      </div>
+      <div class="bg-white/15 backdrop-blur-lg p-8 rounded-3xl shadow-xl">
+        <div class="text-5xl mb-6">🆓</div>
+        <h3 class="text-2xl font-semibold mb-4">Zero Config Hassle</h3>
+        <p class="opacity-90">Just paste one webhook URL into App Store Connect — that's it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="py-20 px-6 bg-black/20">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-4xl md:text-5xl font-bold mb-12">How It Works</h2>
+      <div class="space-y-12">
+        <div>
+          <div class="text-6xl font-bold text-white/70 mb-4">1</div>
+          <p class="text-xl">Add your app in NAGOH — get a secure, encrypted webhook URL</p>
+        </div>
+        <div>
+          <div class="text-6xl font-bold text-white/70 mb-4">2</div>
+          <p class="text-xl">Paste it into App Store Connect server notifications</p>
+        </div>
+        <div>
+          <div class="text-6xl font-bold text-white/70 mb-4">3</div>
+          <p class="text-xl">When a sale happens → instant push to your phone + local storage</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action / Coming Soon -->
+  <section class="py-24 px-6 text-center">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-5xl font-bold mb-8">Get Notified First</h2>
+      <p class="text-xl mb-10 opacity-90 max-w-2xl mx-auto">
+        Launching soon. Be the first to know when NAGOH hits the App Store.
+      </p>
+      <form class="max-w-md mx-auto flex flex-col sm:flex-row gap-4">
+        <input type="email" placeholder="your@email.com" class="flex-1 px-6 py-4 rounded-full bg-white/20 border border-white/30 focus:outline-none focus:border-white text-white placeholder-white/60"/>
+        <button type="submit" class="px-10 py-4 bg-white text-teal-700 font-semibold rounded-full shadow-xl hover:bg-teal-50 transition">
+          Notify Me
+        </button>
+      </form>
+      <p class="mt-6 text-sm opacity-70">No spam. Ever. Just one launch email.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 px-6 text-center text-sm opacity-80 border-t border-white/20">
+    <p>© 2026 NAGOH • Made for indie devs who love real-time feedback without the privacy trade-offs.</p>
+    <p class="mt-2">Coming soon to the App Store • support@nagoh.xyz</p>
+  </footer>
+
+</body>
+</html>
