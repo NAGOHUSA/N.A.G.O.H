@@ -663,7 +663,7 @@ async function saveCell(id, field){
 
 async function patchSale(id, updates){
   try {
-    const r = await fetch(`${WORKER}/api/sales/${encodeURIComponent(id)}`, {
+    const r = await fetch(`${WORKER}/api/sales/${encodeURIComponent(id)}?bundleId=${encodeURIComponent(currentApp)}`, {
       method:'PATCH',
       headers:{Authorization:auth(),'Content-Type':'application/json'},
       body:JSON.stringify(updates)
@@ -694,14 +694,16 @@ function editRow(id){
 }
 
 // ── DELETE ──
+function saleDeleteUrl(id){ return `${WORKER}/api/sales/${encodeURIComponent(id)}?bundleId=${encodeURIComponent(currentApp)}`; }
+
 function confirmDeleteSale(id){
   openModal('Delete Sale','Permanently delete this sale record?', async()=>{
     try {
-      const r = await fetch(`${WORKER}/api/sales/${encodeURIComponent(id)}`,{method:'DELETE',headers:{Authorization:auth()}});
-      allSales = allSales.filter(s=>s.id!==id);
-      selectedIds.delete(id);
-      toast('Deleted','success');
-    } catch(e){ allSales=allSales.filter(s=>s.id!==id); toast('Deleted locally','info'); }
+      await fetch(saleDeleteUrl(id),{method:'DELETE',headers:{Authorization:auth()}});
+    } catch(e){}
+    allSales = allSales.filter(s=>s.id!==id);
+    selectedIds.delete(id);
+    toast('Deleted','success');
     updateStats(); applyFilters();
   });
 }
@@ -710,16 +712,12 @@ function bulkDelete(){
   const ids = [...selectedIds];
   if(!ids.length) return;
   openModal('Delete Selected',`Permanently delete ${ids.length} selected record(s)?`, async()=>{
-    let ok=0;
     for(const id of ids){
-      try {
-        await fetch(`${WORKER}/api/sales/${encodeURIComponent(id)}`,{method:'DELETE',headers:{Authorization:auth()}});
-        ok++;
-      } catch(e){ ok++; }
+      try { await fetch(saleDeleteUrl(id),{method:'DELETE',headers:{Authorization:auth()}}); } catch(e){}
       allSales = allSales.filter(s=>s.id!==id);
       selectedIds.delete(id);
     }
-    toast(`Deleted ${ok} records`,'success');
+    toast(`Deleted ${ids.length} records`,'success');
     updateStats(); applyFilters();
   });
 }
@@ -729,7 +727,7 @@ function bulkDeleteType(type){
   if(!ids.length){ toast(`No ${type} records selected`,'info'); return; }
   openModal(`Delete ${type} Records`,`Delete ${ids.length} ${type} record(s) from selection?`, async()=>{
     for(const id of ids){
-      try { await fetch(`${WORKER}/api/sales/${encodeURIComponent(id)}`,{method:'DELETE',headers:{Authorization:auth()}}); } catch(e){}
+      try { await fetch(saleDeleteUrl(id),{method:'DELETE',headers:{Authorization:auth()}}); } catch(e){}
       allSales = allSales.filter(s=>s.id!==id);
       selectedIds.delete(id);
     }
@@ -742,13 +740,11 @@ function confirmDeleteAllTests(){
   const tests = allSales.filter(s=>s.type==='TEST');
   if(!tests.length){ toast('No test data found','info'); return; }
   openModal('Purge All Test Data',`This will permanently delete all ${tests.length} TEST records for the current app. Are you sure?`, async()=>{
-    let ok=0;
     for(const s of tests){
-      try { await fetch(`${WORKER}/api/sales/${encodeURIComponent(s.id)}`,{method:'DELETE',headers:{Authorization:auth()}}); } catch(e){}
-      ok++;
+      try { await fetch(saleDeleteUrl(s.id),{method:'DELETE',headers:{Authorization:auth()}}); } catch(e){}
     }
     allSales = allSales.filter(s=>s.type!=='TEST');
-    toast(`Purged ${ok} test records`,'success');
+    toast(`Purged ${tests.length} test records`,'success');
     updateStats(); applyFilters();
   });
 }
