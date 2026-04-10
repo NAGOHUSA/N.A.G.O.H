@@ -739,11 +739,12 @@ function bulkDeleteType(type){
 function confirmDeleteAllTests(){
   const tests = allSales.filter(s=>s.type==='TEST');
   if(!tests.length){ toast('No test data found','info'); return; }
-  openModal('Purge All Test Data',`This will permanently delete all ${tests.length} TEST records for the current app. Are you sure?`, async()=>{
-    for(const s of tests){
-      try { await fetch(saleDeleteUrl(s.id),{method:'DELETE',headers:{Authorization:auth()}}); } catch(e){}
-    }
+  openModal('Purge All Test Data',`Permanently delete all ${tests.length} TEST records for this app?`, async()=>{
+    try {
+      await fetch(`${WORKER}/api/sales/purge-tests?bundleId=${encodeURIComponent(currentApp)}`,{method:'DELETE',headers:{Authorization:auth()}});
+    } catch(e){}
     allSales = allSales.filter(s=>s.type!=='TEST');
+    selectedIds.clear();
     toast(`Purged ${tests.length} test records`,'success');
     updateStats(); applyFilters();
   });
