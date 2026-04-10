@@ -698,12 +698,26 @@ function saleDeleteUrl(id){ return `${WORKER}/api/sales/${encodeURIComponent(id)
 
 function confirmDeleteSale(id){
   openModal('Delete Sale','Permanently delete this sale record?', async()=>{
+    const url = saleDeleteUrl(id);
+    console.log('[DELETE] calling:', url);
+    console.log('[DELETE] sale id:', id);
+    console.log('[DELETE] currentApp:', currentApp);
     try {
-      await fetch(saleDeleteUrl(id),{method:'DELETE',headers:{Authorization:auth()}});
-    } catch(e){}
-    allSales = allSales.filter(s=>s.id!==id);
+      const r = await fetch(url, {method:'DELETE', headers:{Authorization:auth()}});
+      const body = await r.json();
+      console.log('[DELETE] response status:', r.status, 'body:', JSON.stringify(body));
+      if (!r.ok) {
+        toast(`Worker error ${r.status}: ${body.error || 'unknown'}`, 'error');
+        return;
+      }
+    } catch(e){
+      toast('Network error: ' + e.message, 'error');
+      console.error('[DELETE] fetch failed:', e);
+      return;
+    }
+    allSales = allSales.filter(s => String(s.id) !== String(id));
     selectedIds.delete(id);
-    toast('Deleted','success');
+    toast('Deleted ✓', 'success');
     updateStats(); applyFilters();
   });
 }
@@ -740,12 +754,24 @@ function confirmDeleteAllTests(){
   const tests = allSales.filter(s=>s.type==='TEST');
   if(!tests.length){ toast('No test data found','info'); return; }
   openModal('Purge All Test Data',`Permanently delete all ${tests.length} TEST records for this app?`, async()=>{
+    const url = `${WORKER}/api/sales/purge-tests?bundleId=${encodeURIComponent(currentApp)}`;
+    console.log('[PURGE] calling:', url);
     try {
-      await fetch(`${WORKER}/api/sales/purge-tests?bundleId=${encodeURIComponent(currentApp)}`,{method:'DELETE',headers:{Authorization:auth()}});
-    } catch(e){}
+      const r = await fetch(url, {method:'DELETE', headers:{Authorization:auth()}});
+      const body = await r.json();
+      console.log('[PURGE] status:', r.status, 'body:', JSON.stringify(body));
+      if (!r.ok) {
+        toast(`Worker error ${r.status}: ${body.error || 'unknown'}`, 'error');
+        return;
+      }
+      toast(`Purged ${body.removed ?? tests.length} test records ✓`, 'success');
+    } catch(e){
+      toast('Network error: ' + e.message, 'error');
+      console.error('[PURGE] fetch failed:', e);
+      return;
+    }
     allSales = allSales.filter(s=>s.type!=='TEST');
     selectedIds.clear();
-    toast(`Purged ${tests.length} test records`,'success');
     updateStats(); applyFilters();
   });
 }
