@@ -1,388 +1,792 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nagoh App Store Sales Dashboard</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f7fb;min-height:100vh;}
-        .login-page{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);}
-        .login-card{background:white;border-radius:20px;padding:40px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
-        .login-card h1{color:#333;margin-bottom:10px;text-align:center;}
-        .input-group{margin-bottom:20px;}
-        .input-group label{display:block;margin-bottom:8px;color:#555;font-weight:500;}
-        .input-group input{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:10px;}
-        .login-btn{width:100%;padding:12px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;}
-        .error-msg{background:#fee;color:#c33;padding:10px;border-radius:8px;margin-top:15px;text-align:center;display:none;}
-        .dashboard{display:none;min-height:100vh;background:#f5f7fb;}
-        .nav-bar{background:white;border-bottom:1px solid #e0e0e0;padding:0 30px;height:70px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
-        .logo h1{font-size:20px;color:#333;}
-        .logout-btn{background:#dc3545;color:white;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;font-weight:600;}
-        .main-container{max-width:1600px;margin:0 auto;padding:20px;}
-        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:30px;}
-        .stat-card{background:white;border-radius:15px;padding:25px;box-shadow:0 2px 8px rgba(0,0,0,0.05);cursor:pointer;}
-        .stat-card:hover{transform:translateY(-5px);box-shadow:0 4px 20px rgba(0,0,0,0.1);}
-        .stat-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;}
-        .stat-header h3{color:#666;font-size:14px;font-weight:500;}
-        .stat-value{font-size:36px;font-weight:bold;color:#333;}
-        .quick-actions{background:white;border-radius:15px;padding:20px;margin-bottom:30px;display:flex;gap:15px;flex-wrap:wrap;align-items:center;}
-        .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600;}
-        .btn-danger{background:#dc3545;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600;}
-        .btn-success{background:#28a745;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600;}
-        .two-columns{display:grid;grid-template-columns:1fr 1.5fr;gap:30px;margin-bottom:30px;}
-        @media(max-width:768px){.two-columns{grid-template-columns:1fr;}}
-        .panel{background:white;border-radius:15px;padding:25px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
-        .panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:2px solid #f0f0f0;}
-        .form-group{margin-bottom:20px;}
-        .form-group label{display:block;margin-bottom:8px;color:#555;font-weight:500;}
-        .form-group input{width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;}
-        .app-list{max-height:400px;overflow-y:auto;}
-        .app-item{background:#f8f9fa;border-radius:10px;padding:15px;margin-bottom:10px;cursor:pointer;border:2px solid transparent;}
-        .app-item:hover{background:#e9ecef;}
-        .app-item.selected{background:#e7f3ff;border-color:#667eea;}
-        .app-name{font-weight:bold;color:#333;margin-bottom:5px;}
-        .app-bundle{font-family:monospace;color:#666;font-size:11px;margin-bottom:10px;}
-        .app-stats{display:flex;gap:15px;font-size:12px;margin-bottom:10px;}
-        .app-stats span{color:#667eea;font-weight:bold;}
-        .sales-table{width:100%;border-collapse:collapse;}
-        .sales-table th,.sales-table td{padding:12px;text-align:left;border-bottom:1px solid #e0e0e0;}
-        .sales-table th{background:#f8f9fa;font-weight:600;color:#555;}
-        .badge{display:inline-block;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;}
-        .badge.PURCHASE{background:#4caf50;color:white;}
-        .badge.TEST{background:#9c27b0;color:white;}
-        .webhook-box{background:#f8f9fa;padding:15px;border-radius:10px;margin-top:20px;}
-        .webhook-url{font-family:monospace;font-size:12px;word-break:break-all;color:#667eea;margin-top:5px;}
-        .alert{padding:12px;border-radius:8px;margin-bottom:20px;display:none;}
-        .alert.success{background:#d4edda;color:#155724;display:block;}
-        .alert.error{background:#f8d7da;color:#721c24;display:block;}
-        .empty-state{text-align:center;padding:40px;color:#999;}
-        .filter-bar{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;}
-        .filter-btn{background:#f8f9fa;border:1px solid #dee2e6;padding:5px 12px;border-radius:20px;cursor:pointer;}
-        .filter-btn.active{background:#667eea;color:white;}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nagoh Sales Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg: #0d0f14;
+  --surface: #151821;
+  --surface2: #1c2030;
+  --surface3: #222840;
+  --border: #2a3050;
+  --border2: #3a4470;
+  --text: #e8ecf8;
+  --text2: #8b96c0;
+  --text3: #5a6490;
+  --accent: #4f7cff;
+  --accent2: #7c5cff;
+  --green: #22c55e;
+  --red: #ef4444;
+  --amber: #f59e0b;
+  --purple: #a855f7;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --radius: 10px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:var(--sans); background:var(--bg); color:var(--text); min-height:100vh; font-size:14px; }
+
+/* ── LOGIN ── */
+.login-wrap { display:flex; align-items:center; justify-content:center; min-height:100vh; background:var(--bg); }
+.login-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:16px;
+  padding:44px 40px; width:360px; box-shadow:var(--shadow);
+}
+.login-card .brand { font-family:var(--mono); font-size:11px; letter-spacing:3px; color:var(--accent); text-transform:uppercase; margin-bottom:8px; }
+.login-card h1 { font-size:22px; font-weight:700; color:var(--text); margin-bottom:28px; }
+.field { margin-bottom:16px; }
+.field label { display:block; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--text3); margin-bottom:6px; }
+.field input {
+  width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius);
+  padding:10px 14px; color:var(--text); font-family:var(--mono); font-size:13px; outline:none;
+  transition:border 0.15s;
+}
+.field input:focus { border-color:var(--accent); }
+.btn { display:inline-flex; align-items:center; gap:6px; padding:10px 18px; border-radius:var(--radius); border:none; cursor:pointer; font-family:var(--sans); font-size:13px; font-weight:600; transition:all 0.15s; white-space:nowrap; }
+.btn-primary { background:var(--accent); color:#fff; }
+.btn-primary:hover { background:#6b93ff; }
+.btn-danger { background:transparent; border:1px solid var(--red); color:var(--red); }
+.btn-danger:hover { background:var(--red); color:#fff; }
+.btn-ghost { background:transparent; border:1px solid var(--border); color:var(--text2); }
+.btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
+.btn-amber { background:transparent; border:1px solid var(--amber); color:var(--amber); }
+.btn-amber:hover { background:var(--amber); color:#000; }
+.btn-green { background:transparent; border:1px solid var(--green); color:var(--green); }
+.btn-green:hover { background:var(--green); color:#000; }
+.btn-full { width:100%; justify-content:center; padding:12px; margin-top:4px; }
+.login-error { background:#2a1515; border:1px solid var(--red); color:var(--red); padding:10px 14px; border-radius:8px; font-size:13px; margin-top:12px; display:none; }
+
+/* ── SHELL ── */
+.shell { display:none; min-height:100vh; }
+.topbar {
+  position:sticky; top:0; z-index:200; background:var(--surface); border-bottom:1px solid var(--border);
+  height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; gap:16px;
+}
+.topbar-brand { font-family:var(--mono); font-size:12px; letter-spacing:2px; color:var(--accent); text-transform:uppercase; font-weight:600; }
+.topbar-right { display:flex; align-items:center; gap:12px; }
+.topbar-clock { font-family:var(--mono); font-size:11px; color:var(--text3); }
+
+/* ── LAYOUT ── */
+.layout { display:grid; grid-template-columns:300px 1fr; min-height:calc(100vh - 56px); }
+.sidebar { background:var(--surface); border-right:1px solid var(--border); padding:20px; overflow-y:auto; }
+.main { padding:24px; overflow-x:auto; }
+
+/* ── STATS ROW ── */
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; }
+.stat-label { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); margin-bottom:8px; }
+.stat-val { font-family:var(--mono); font-size:28px; font-weight:600; color:var(--text); }
+.stat-val.green { color:var(--green); }
+.stat-val.accent { color:var(--accent); }
+.stat-val.amber { color:var(--amber); }
+
+/* ── SECTION HEADER ── */
+.section-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+.section-hd h2 { font-size:13px; font-weight:700; letter-spacing:0.5px; color:var(--text); }
+.section-hd .actions { display:flex; gap:8px; }
+
+/* ── APP LIST ── */
+.app-item {
+  background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:14px;
+  margin-bottom:8px; cursor:pointer; transition:all 0.15s;
+}
+.app-item:hover { border-color:var(--border2); }
+.app-item.active { border-color:var(--accent); background:var(--surface3); }
+.app-item-name { font-weight:600; font-size:13px; color:var(--text); margin-bottom:4px; }
+.app-item-bundle { font-family:var(--mono); font-size:10px; color:var(--text3); margin-bottom:8px; word-break:break-all; }
+.app-item-footer { display:flex; align-items:center; justify-content:space-between; }
+.app-badge { font-family:var(--mono); font-size:10px; color:var(--text2); }
+
+/* ── ADD APP FORM ── */
+.add-form { margin-top:20px; padding-top:20px; border-top:1px solid var(--border); }
+.add-form-title { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--text3); margin-bottom:14px; }
+.field-sm { margin-bottom:10px; }
+.field-sm label { display:block; font-size:10px; font-weight:600; letter-spacing:1px; color:var(--text3); margin-bottom:4px; text-transform:uppercase; }
+.field-sm input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:var(--text); font-family:var(--mono); font-size:11px; outline:none; transition:border 0.15s; }
+.field-sm input:focus { border-color:var(--accent); }
+.webhook-info { margin-top:12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:12px; }
+.webhook-info .wh-label { font-size:10px; color:var(--text3); margin-bottom:4px; }
+.webhook-info .wh-url { font-family:var(--mono); font-size:10px; color:var(--accent); word-break:break-all; }
+
+/* ── TOOLBAR ── */
+.toolbar { display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+.toolbar-search { flex:1; min-width:180px; position:relative; }
+.toolbar-search input { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:8px 12px 8px 32px; color:var(--text); font-size:13px; outline:none; transition:border 0.15s; }
+.toolbar-search input:focus { border-color:var(--accent); }
+.toolbar-search .srch-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text3); font-size:12px; pointer-events:none; }
+.select-ctrl { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:8px 12px; color:var(--text); font-size:13px; outline:none; cursor:pointer; }
+.select-ctrl:focus { border-color:var(--accent); }
+.filter-chip { background:transparent; border:1px solid var(--border); border-radius:20px; padding:5px 14px; color:var(--text2); font-size:12px; cursor:pointer; transition:all 0.15s; }
+.filter-chip:hover { border-color:var(--accent); color:var(--accent); }
+.filter-chip.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+/* ── TABLE ── */
+.tbl-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); }
+table { width:100%; border-collapse:collapse; }
+thead tr { background:var(--surface); }
+th {
+  padding:10px 14px; text-align:left; font-size:10px; font-weight:700;
+  letter-spacing:1px; text-transform:uppercase; color:var(--text3);
+  border-bottom:1px solid var(--border); white-space:nowrap; user-select:none; cursor:pointer;
+}
+th:hover { color:var(--accent); }
+th .sort-icon { margin-left:4px; opacity:0.4; }
+th.sorted .sort-icon { opacity:1; color:var(--accent); }
+td { padding:10px 14px; border-bottom:1px solid var(--border); font-size:13px; color:var(--text2); vertical-align:middle; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:var(--surface3); }
+tr.test-row td { opacity:0.6; }
+.mono { font-family:var(--mono); font-size:11px; }
+.badge { display:inline-block; padding:3px 9px; border-radius:5px; font-size:10px; font-weight:700; letter-spacing:0.5px; font-family:var(--mono); }
+.badge-purchase { background:rgba(34,197,94,0.15); color:var(--green); border:1px solid rgba(34,197,94,0.3); }
+.badge-test { background:rgba(168,85,247,0.15); color:var(--purple); border:1px solid rgba(168,85,247,0.3); }
+.badge-refund { background:rgba(239,68,68,0.15); color:var(--red); border:1px solid rgba(239,68,68,0.3); }
+.row-cb { width:14px; height:14px; cursor:pointer; accent-color:var(--accent); }
+
+/* ── INLINE EDIT ── */
+.edit-input { background:var(--surface2); border:1px solid var(--accent); border-radius:6px; padding:4px 8px; color:var(--text); font-family:var(--mono); font-size:11px; width:100%; outline:none; }
+.edit-cell { display:flex; align-items:center; gap:6px; }
+.edit-save { background:var(--green); border:none; color:#000; border-radius:4px; padding:3px 8px; cursor:pointer; font-size:10px; font-weight:700; }
+.edit-cancel { background:transparent; border:1px solid var(--border); color:var(--text3); border-radius:4px; padding:3px 8px; cursor:pointer; font-size:10px; }
+.editable-cell { cursor:pointer; }
+.editable-cell:hover { color:var(--text); text-decoration:underline dashed var(--text3); text-underline-offset:2px; }
+
+/* ── BULK BAR ── */
+.bulk-bar {
+  display:none; align-items:center; gap:12px; background:var(--surface3); border:1px solid var(--border2);
+  border-radius:var(--radius); padding:10px 16px; margin-bottom:14px;
+}
+.bulk-bar.visible { display:flex; }
+.bulk-count { font-family:var(--mono); font-size:12px; color:var(--accent); }
+
+/* ── PAGINATION ── */
+.pagination { display:flex; align-items:center; justify-content:space-between; margin-top:14px; }
+.page-info { font-size:12px; color:var(--text3); font-family:var(--mono); }
+.page-btns { display:flex; gap:6px; }
+.page-btn { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:5px 12px; color:var(--text2); font-size:12px; cursor:pointer; }
+.page-btn:hover { border-color:var(--accent); color:var(--accent); }
+.page-btn:disabled { opacity:0.3; cursor:default; }
+
+/* ── TOAST ── */
+.toast-wrap { position:fixed; bottom:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
+.toast { background:var(--surface2); border:1px solid var(--border2); border-radius:10px; padding:12px 18px; font-size:13px; color:var(--text); box-shadow:var(--shadow); opacity:0; transform:translateY(10px); transition:all 0.25s; pointer-events:none; }
+.toast.show { opacity:1; transform:translateY(0); }
+.toast.success { border-color:var(--green); color:var(--green); }
+.toast.error { border-color:var(--red); color:var(--red); }
+.toast.info { border-color:var(--accent); color:var(--accent); }
+
+/* ── MODAL ── */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:500; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--surface); border:1px solid var(--border2); border-radius:16px; padding:28px; width:440px; max-width:90vw; box-shadow:var(--shadow); }
+.modal h2 { font-size:17px; font-weight:700; margin-bottom:8px; }
+.modal p { color:var(--text2); font-size:13px; margin-bottom:20px; line-height:1.5; }
+.modal-footer { display:flex; gap:10px; justify-content:flex-end; }
+
+/* ── EMPTY ── */
+.empty { text-align:center; padding:48px 20px; }
+.empty-icon { font-size:32px; margin-bottom:12px; }
+.empty p { color:var(--text3); font-size:13px; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .layout { grid-template-columns:1fr; }
+  .sidebar { border-right:none; border-bottom:1px solid var(--border); }
+  .stats-row { grid-template-columns:repeat(2,1fr); }
+}
+@media(max-width:500px){
+  .stats-row { grid-template-columns:1fr 1fr; }
+  .topbar-clock { display:none; }
+}
+</style>
 </head>
 <body>
-    <div id="loginPage" class="login-page">
-        <div class="login-card">
-            <h1>📊 Nagoh Sales Dashboard</h1>
-            <p>App Store Sales Monitor</p>
-            <div id="loginError" class="error-msg">Invalid username or password</div>
-            <div class="input-group"><label>Username</label><input type="text" id="username" placeholder="admin"></div>
-            <div class="input-group"><label>Password</label><input type="password" id="password" placeholder="admin"></div>
-            <button class="login-btn" onclick="login()">Login to Dashboard</button>
+
+<!-- LOGIN -->
+<div id="loginWrap" class="login-wrap">
+  <div class="login-card">
+    <div class="brand">Nagoh Creative</div>
+    <h1>Sales Dashboard</h1>
+    <div class="field"><label>Username</label><input type="text" id="username" placeholder="admin" onkeydown="if(event.key==='Enter')login()"></div>
+    <div class="field"><label>Password</label><input type="password" id="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"></div>
+    <button class="btn btn-primary btn-full" onclick="login()">Sign In →</button>
+    <div id="loginErr" class="login-error">Invalid credentials</div>
+  </div>
+</div>
+
+<!-- SHELL -->
+<div id="shell" class="shell">
+  <div class="topbar">
+    <div class="topbar-brand">◈ Nagoh · Sales Monitor</div>
+    <div class="topbar-right">
+      <span class="topbar-clock" id="clock"></span>
+      <button class="btn btn-ghost" onclick="refreshAll()">↻ Refresh</button>
+      <button class="btn btn-ghost" onclick="logout()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="section-hd">
+        <h2>Your Apps</h2>
+        <div class="actions">
+          <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="loadApps()">↻</button>
         </div>
+      </div>
+      <div id="appsList"><div class="empty"><div class="empty-icon">📱</div><p>No apps yet.</p></div></div>
+
+      <div class="add-form">
+        <div class="add-form-title">Register New App</div>
+        <div class="field-sm"><label>App Name</label><input type="text" id="appName" placeholder="My App"></div>
+        <div class="field-sm"><label>Bundle ID</label><input type="text" id="bundleId" placeholder="com.example.app"></div>
+        <div class="field-sm"><label>App Store URL</label><input type="url" id="appStoreUrl" placeholder="https://apps.apple.com/..."></div>
+        <button class="btn btn-primary btn-full" style="margin-top:8px;" onclick="addApp()">+ Register App</button>
+        <div class="webhook-info">
+          <div class="wh-label">Webhook URL for App Store Connect:</div>
+          <div class="wh-url">https://alerts.nagoh.xyz/api/app-store-webhook</div>
+        </div>
+      </div>
     </div>
 
-    <div id="dashboard" class="dashboard">
-        <div class="nav-bar">
-            <div class="logo"><h1>📱 Nagoh App Store Sales Monitor</h1></div>
-            <button class="logout-btn" onclick="logout()">Logout</button>
+    <!-- MAIN -->
+    <div class="main">
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Apps</div>
+          <div class="stat-val accent" id="statApps">—</div>
         </div>
-        <div class="main-container">
-            <div class="stats-grid">
-                <div class="stat-card"><div class="stat-header"><h3>Total Apps</h3></div><div class="stat-value" id="totalApps">0</div></div>
-                <div class="stat-card"><div class="stat-header"><h3>Today's Sales</h3></div><div class="stat-value" id="todaySales">0</div></div>
-                <div class="stat-card"><div class="stat-header"><h3>Total Sales</h3></div><div class="stat-value" id="totalSales">0</div></div>
-                <div class="stat-card"><div class="stat-header"><h3>Total Revenue</h3></div><div class="stat-value" id="totalRevenue">$0</div></div>
-            </div>
-
-            <div class="quick-actions">
-                <h3>⚡ Quick Actions:</h3>
-                <button class="btn-primary" onclick="scrollToAddApp()">+ Add New App</button>
-                <button class="btn-success" onclick="addTestSale()">🧪 Send Test Sale to Worker</button>
-                <button class="btn-primary" onclick="refreshAllData()">🔄 Refresh Data</button>
-            </div>
-
-            <div class="two-columns">
-                <div>
-                    <div class="panel" id="addAppPanel">
-                        <div class="panel-header"><h2>➕ Register New App</h2></div>
-                        <div id="alert"></div>
-                        <div class="form-group"><label>App Name</label><input type="text" id="appName" placeholder="My Awesome App"></div>
-                        <div class="form-group"><label>Bundle ID</label><input type="text" id="bundleId" placeholder="com.example.myapp"></div>
-                        <div class="form-group"><label>App Store URL</label><input type="url" id="appStoreUrl" placeholder="https://apps.apple.com/app/id123456789"></div>
-                        <button class="btn-primary" onclick="addApp()">Register App</button>
-                        <div class="webhook-box">
-                            <strong>📡 App Store Connect Webhook URL:</strong>
-                            <div class="webhook-url" id="webhookUrl">https://alerts.nagoh.xyz/api/app-store-webhook</div>
-                            <small>Copy this URL to App Store Connect</small>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <div class="panel">
-                        <div class="panel-header"><h2>📱 Your Apps</h2><button class="btn-primary" onclick="loadApps()" style="padding:5px 15px;">Refresh</button></div>
-                        <div id="appsList"><div class="empty-state">No apps registered yet.</div></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="panel">
-                <div class="panel-header"><h2>💰 Sales History</h2></div>
-                <div class="filter-bar">
-                    <button class="filter-btn active" onclick="filterSales('all')">All</button>
-                    <button class="filter-btn" onclick="filterSales('TEST')">🧪 Test</button>
-                    <button class="filter-btn" onclick="filterSales('PURCHASE')">💰 Purchases</button>
-                </div>
-                <div id="salesList"><div class="empty-state">Select an app to view sales</div></div>
-            </div>
+        <div class="stat-card">
+          <div class="stat-label">Today's Sales</div>
+          <div class="stat-val green" id="statToday">—</div>
         </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Sales</div>
+          <div class="stat-val" id="statTotal">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Revenue (real)</div>
+          <div class="stat-val amber" id="statRevenue">—</div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-search">
+          <span class="srch-icon">⌕</span>
+          <input type="text" id="searchInput" placeholder="Search by type, amount, details…" oninput="applyFilters()">
+        </div>
+
+        <button class="filter-chip on" data-filter="all" onclick="setTypeFilter(this,'all')">All</button>
+        <button class="filter-chip" data-filter="PURCHASE" onclick="setTypeFilter(this,'PURCHASE')">💰 Purchases</button>
+        <button class="filter-chip" data-filter="TEST" onclick="setTypeFilter(this,'TEST')">🧪 Test</button>
+        <button class="filter-chip" data-filter="REFUND" onclick="setTypeFilter(this,'REFUND')">↩ Refunds</button>
+
+        <select class="select-ctrl" id="sortField" onchange="applyFilters()">
+          <option value="timestamp-desc">Date ↓ newest</option>
+          <option value="timestamp-asc">Date ↑ oldest</option>
+          <option value="price-desc">Amount ↓ high</option>
+          <option value="price-asc">Amount ↑ low</option>
+          <option value="type-asc">Type A→Z</option>
+        </select>
+
+        <select class="select-ctrl" id="pageSize" onchange="applyFilters()">
+          <option value="25">25 rows</option>
+          <option value="50">50 rows</option>
+          <option value="100">100 rows</option>
+          <option value="all">All rows</option>
+        </select>
+      </div>
+
+      <!-- Bulk bar -->
+      <div class="bulk-bar" id="bulkBar">
+        <span class="bulk-count" id="bulkCount">0 selected</span>
+        <button class="btn btn-danger" onclick="bulkDelete()">🗑 Delete Selected</button>
+        <button class="btn btn-amber" onclick="bulkDeleteType('TEST')">🧪 Delete All Test</button>
+        <button class="btn btn-ghost" onclick="clearSelection()">✕ Deselect</button>
+      </div>
+
+      <!-- Action row -->
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-amber" onclick="confirmDeleteAllTests()">🧹 Purge All Test Data</button>
+        <button class="btn btn-green" onclick="sendTestSale()">🧪 Send Test Sale</button>
+        <span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3);" id="filterSummary"></span>
+      </div>
+
+      <!-- Table -->
+      <div class="tbl-wrap">
+        <table id="salesTable">
+          <thead>
+            <tr>
+              <th style="width:36px;"><input type="checkbox" id="selectAll" class="row-cb" onchange="toggleSelectAll()"></th>
+              <th onclick="sortBy('timestamp')" id="th-timestamp">Date & Time <span class="sort-icon">↕</span></th>
+              <th onclick="sortBy('type')" id="th-type">Type <span class="sort-icon">↕</span></th>
+              <th onclick="sortBy('price')" id="th-price">Amount <span class="sort-icon">↕</span></th>
+              <th>Details <span style="font-size:9px;color:var(--text3);font-weight:400;">(click to edit)</span></th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="salesBody">
+            <tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div><p>Select an app to view sales.</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="paginationRow" style="display:none;">
+        <span class="page-info" id="pageInfo"></span>
+        <div class="page-btns">
+          <button class="page-btn" id="prevBtn" onclick="changePage(-1)">← Prev</button>
+          <button class="page-btn" id="nextBtn" onclick="changePage(1)">Next →</button>
+        </div>
+      </div>
     </div>
+  </div>
+</div>
 
-    <script>
-        const WORKER_URL = 'https://alerts.nagoh.xyz';
-        let currentBundleId = null;
-        let currentSalesData = [];
-        let currentFilter = 'all';
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h2 id="modalTitle">Confirm Action</h2>
+    <p id="modalBody">Are you sure?</p>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" id="modalConfirmBtn">Confirm</button>
+    </div>
+  </div>
+</div>
 
-        // Set webhook URL - FIXED
-        document.getElementById('webhookUrl').innerHTML = 'https://alerts.nagoh.xyz/api/app-store-webhook';
+<!-- TOASTS -->
+<div class="toast-wrap" id="toastWrap"></div>
 
-        if (sessionStorage.getItem('nagoh_auth') === 'true') {
-            document.getElementById('loginPage').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-            loadApps();
-        }
+<script>
+const WORKER = 'https://alerts.nagoh.xyz';
+let apps = [];
+let allSales = [];
+let filteredSales = [];
+let currentApp = null;
+let currentPage = 1;
+let pageSize = 25;
+let sortField = 'timestamp';
+let sortDir = 'desc';
+let typeFilter = 'all';
+let selectedIds = new Set();
+let editingCell = null;
+let modalCallback = null;
 
-        async function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            if (username === 'admin' && password === 'admin') {
-                sessionStorage.setItem('nagoh_auth', 'true');
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                await loadApps();
-            } else {
-                document.getElementById('loginError').style.display = 'block';
-            }
-        }
+// ── AUTH ──
+const auth = () => 'Basic ' + btoa('admin:admin');
+function isLoggedIn(){ return sessionStorage.getItem('nagoh_auth')==='true'; }
+function logout(){ sessionStorage.removeItem('nagoh_auth'); location.reload(); }
 
-        function logout() {
-            sessionStorage.removeItem('nagoh_auth');
-            document.getElementById('loginPage').style.display = 'flex';
-            document.getElementById('dashboard').style.display = 'none';
-        }
+function login(){
+  const u = document.getElementById('username').value;
+  const p = document.getElementById('password').value;
+  if(u==='admin'&&p==='admin'){
+    sessionStorage.setItem('nagoh_auth','true');
+    document.getElementById('loginWrap').style.display='none';
+    document.getElementById('shell').style.display='block';
+    init();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+  }
+}
 
-        function getAuthHeader() {
-            return { 'Authorization': 'Basic ' + btoa('admin:admin') };
-        }
+// ── INIT ──
+function init(){
+  tickClock();
+  setInterval(tickClock, 1000);
+  loadApps();
+}
 
-        async function loadApps() {
-            try {
-                const response = await fetch(`${WORKER_URL}/api/apps`, {
-                    headers: getAuthHeader()
-                });
-                const apps = await response.json();
-                document.getElementById('totalApps').textContent = apps.length;
-                
-                const appsList = document.getElementById('appsList');
-                if (apps.length === 0) {
-                    appsList.innerHTML = '<div class="empty-state">✨ No apps registered yet.</div>';
-                    return;
-                }
-                
-                appsList.innerHTML = '<div class="app-list">' + apps.map(app => `
-                    <div class="app-item ${currentBundleId === app.bundleId ? 'selected' : ''}" onclick="selectApp('${app.bundleId}')">
-                        <div class="app-name">${escapeHtml(app.appName)}</div>
-                        <div class="app-bundle">${app.bundleId}</div>
-                        <button class="btn-danger" onclick="event.stopPropagation(); deleteApp('${app.bundleId}')" style="padding:5px 12px;font-size:12px;">Delete</button>
-                    </div>
-                `).join('') + '</div>';
-                
-                if (apps.length > 0 && !currentBundleId) {
-                    selectApp(apps[0].bundleId);
-                }
-            } catch (error) {
-                console.error('Error loading apps:', error);
-                showAlert('Error loading apps from worker', 'error');
-            }
-        }
+function tickClock(){
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
 
-        async function selectApp(bundleId) {
-            currentBundleId = bundleId;
-            await loadApps();
-            await loadSales(bundleId);
-        }
+if(isLoggedIn()){
+  document.getElementById('loginWrap').style.display='none';
+  document.getElementById('shell').style.display='block';
+  init();
+}
 
-        async function loadSales(bundleId) {
-            if (!bundleId) return;
-            
-            try {
-                const response = await fetch(`${WORKER_URL}/api/sales?bundleId=${encodeURIComponent(bundleId)}`, {
-                    headers: getAuthHeader()
-                });
-                const sales = await response.json();
-                currentSalesData = sales;
-                
-                const today = new Date().toDateString();
-                const todaySales = sales.filter(s => new Date(s.timestamp).toDateString() === today);
-                const totalRevenue = sales.reduce((sum, s) => sum + (s.price || 0), 0);
-                
-                document.getElementById('todaySales').textContent = todaySales.length;
-                document.getElementById('totalSales').textContent = sales.length;
-                document.getElementById('totalRevenue').textContent = '$' + totalRevenue.toFixed(2);
-                
-                applyFilter();
-            } catch (error) {
-                console.error('Error loading sales:', error);
-                showAlert('Error loading sales from worker', 'error');
-            }
-        }
+// ── APPS ──
+async function loadApps(){
+  try {
+    const r = await fetch(`${WORKER}/api/apps`,{headers:{Authorization:auth()}});
+    apps = await r.json();
+    document.getElementById('statApps').textContent = apps.length;
+    renderApps();
+    if(apps.length>0 && !currentApp) selectApp(apps[0].bundleId);
+  } catch(e){ toast('Failed to load apps','error'); }
+}
 
-        function applyFilter() {
-            let filtered = [...currentSalesData];
-            if (currentFilter !== 'all') {
-                filtered = filtered.filter(s => s.type === currentFilter);
-            }
-            renderSalesTable(filtered);
-        }
+function renderApps(){
+  const el = document.getElementById('appsList');
+  if(!apps.length){ el.innerHTML='<div class="empty"><div class="empty-icon">📱</div><p>No apps registered.</p></div>'; return; }
+  el.innerHTML = apps.map(a=>`
+    <div class="app-item ${currentApp===a.bundleId?'active':''}" onclick="selectApp('${a.bundleId}')">
+      <div class="app-item-name">${esc(a.appName)}</div>
+      <div class="app-item-bundle">${a.bundleId}</div>
+      <div class="app-item-footer">
+        <span class="app-badge">—</span>
+        <button class="btn btn-danger" style="padding:3px 10px;font-size:11px;" onclick="event.stopPropagation();confirmDeleteApp('${a.bundleId}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
 
-        function filterSales(type) {
-            currentFilter = type;
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            applyFilter();
-        }
+async function selectApp(bundleId){
+  currentApp = bundleId;
+  renderApps();
+  await loadSales();
+}
 
-        function renderSalesTable(sales) {
-            const salesList = document.getElementById('salesList');
-            if (sales.length === 0) {
-                salesList.innerHTML = '<div class="empty-state">📭 No sales found. Click "Send Test Sale to Worker" to test!</div>';
-                return;
-            }
-            
-            salesList.innerHTML = `
-                <table class="sales-table">
-                    <thead><tr><th>Date & Time</th><th>Type</th><th>Amount</th><th>Details</th></tr></thead>
-                    <tbody>
-                        ${sales.slice(0, 100).map(sale => `
-                            <tr>
-                                <td>${new Date(sale.timestamp).toLocaleString()}</td>
-                                <td><span class="badge ${sale.type}">${sale.type}</span></td>
-                                <td>$${(sale.price || 0).toFixed(2)}</td>
-                                <td>${sale.details || '-'}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-        }
+async function addApp(){
+  const name = document.getElementById('appName').value.trim();
+  const bundle = document.getElementById('bundleId').value.trim();
+  const url = document.getElementById('appStoreUrl').value.trim();
+  if(!name||!bundle||!url){ toast('Fill in all fields','error'); return; }
+  try {
+    const r = await fetch(`${WORKER}/api/apps`,{method:'POST',headers:{Authorization:auth(),'Content-Type':'application/json'},body:JSON.stringify({appName:name,bundleId:bundle,appStoreUrl:url})});
+    if(r.ok){ toast('App registered ✓','success'); document.getElementById('appName').value=''; document.getElementById('bundleId').value=''; document.getElementById('appStoreUrl').value=''; await loadApps(); }
+    else { const e=await r.json(); toast(e.error||'Error','error'); }
+  } catch(e){ toast('Network error','error'); }
+}
 
-        async function addApp() {
-            const appName = document.getElementById('appName').value.trim();
-            const bundleId = document.getElementById('bundleId').value.trim();
-            const appStoreUrl = document.getElementById('appStoreUrl').value.trim();
-            
-            if (!appName || !bundleId || !appStoreUrl) {
-                showAlert('Please fill in all fields', 'error');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${WORKER_URL}/api/apps`, {
-                    method: 'POST',
-                    headers: {
-                        ...getAuthHeader(),
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ appName, bundleId, appStoreUrl })
-                });
-                
-                if (response.ok) {
-                    showAlert('✅ App registered successfully!', 'success');
-                    document.getElementById('appName').value = '';
-                    document.getElementById('bundleId').value = '';
-                    document.getElementById('appStoreUrl').value = '';
-                    await loadApps();
-                } else {
-                    const error = await response.json();
-                    showAlert('❌ Error: ' + (error.error || 'Failed to register app'), 'error');
-                }
-            } catch (error) {
-                showAlert('❌ Error: ' + error.message, 'error');
-            }
-        }
+function confirmDeleteApp(bundleId){
+  openModal('Delete App','This will permanently delete the app and ALL its sales data. This cannot be undone.', async()=>{
+    try {
+      const r = await fetch(`${WORKER}/api/apps/${encodeURIComponent(bundleId)}`,{method:'DELETE',headers:{Authorization:auth()}});
+      if(r.ok){ toast('App deleted','success'); if(currentApp===bundleId){currentApp=null;allSales=[];filteredSales=[];renderTable();} await loadApps(); }
+      else toast('Error deleting app','error');
+    } catch(e){ toast('Network error','error'); }
+  });
+}
 
-        async function deleteApp(bundleId) {
-            if (!confirm('⚠️ Delete this app and ALL its sales data?')) return;
-            
-            try {
-                const response = await fetch(`${WORKER_URL}/api/apps/${encodeURIComponent(bundleId)}`, {
-                    method: 'DELETE',
-                    headers: getAuthHeader()
-                });
-                
-                if (response.ok) {
-                    showAlert('✅ App deleted successfully', 'success');
-                    if (currentBundleId === bundleId) {
-                        currentBundleId = null;
-                        document.getElementById('salesList').innerHTML = '<div class="empty-state">Select an app to view sales</div>';
-                    }
-                    await loadApps();
-                } else {
-                    showAlert('❌ Error deleting app', 'error');
-                }
-            } catch (error) {
-                showAlert('❌ Error: ' + error.message, 'error');
-            }
-        }
+// ── SALES ──
+async function loadSales(){
+  if(!currentApp) return;
+  try {
+    const r = await fetch(`${WORKER}/api/sales?bundleId=${encodeURIComponent(currentApp)}`,{headers:{Authorization:auth()}});
+    allSales = await r.json();
+    updateStats();
+    applyFilters();
+  } catch(e){ toast('Failed to load sales','error'); }
+}
 
-        async function addTestSale() {
-            if (!currentBundleId) {
-                showAlert('Please select an app first', 'error');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${WORKER_URL}/api/test-sale`, {
-                    method: 'POST',
-                    headers: {
-                        ...getAuthHeader(),
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ bundleId: currentBundleId })
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    showAlert('🎉 Test sale sent to Worker! Check Cloudflare logs.', 'success');
-                    await loadSales(currentBundleId);
-                } else {
-                    const error = await response.json();
-                    showAlert('❌ Error: ' + (error.error || 'Failed to send test sale'), 'error');
-                }
-            } catch (error) {
-                showAlert('❌ Error: ' + error.message, 'error');
-                console.error('Test sale error:', error);
-            }
-        }
+function updateStats(){
+  const today = new Date().toDateString();
+  const real = allSales.filter(s=>s.type==='PURCHASE');
+  document.getElementById('statToday').textContent = allSales.filter(s=>new Date(s.timestamp).toDateString()===today&&s.type==='PURCHASE').length;
+  document.getElementById('statTotal').textContent = real.length;
+  document.getElementById('statRevenue').textContent = '$'+real.reduce((s,x)=>s+(x.price||0),0).toFixed(2);
+}
 
-        async function refreshAllData() {
-            await loadApps();
-            if (currentBundleId) {
-                await loadSales(currentBundleId);
-            }
-            showAlert('Data refreshed from Worker!', 'success');
-        }
+async function refreshAll(){
+  await loadApps();
+  if(currentApp) await loadSales();
+  toast('Refreshed','info');
+}
 
-        function scrollToAddApp() {
-            document.getElementById('addAppPanel').scrollIntoView({ behavior: 'smooth' });
-        }
+// ── FILTERS & SORT ──
+function setTypeFilter(btn, val){
+  typeFilter = val;
+  document.querySelectorAll('.filter-chip').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  currentPage = 1;
+  applyFilters();
+}
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+function sortBy(field){
+  if(sortField===field) sortDir = sortDir==='asc'?'desc':'asc';
+  else { sortField=field; sortDir='desc'; }
+  document.getElementById('sortField').value = `${sortField}-${sortDir}`;
+  applyFilters();
+}
 
-        function showAlert(message, type) {
-            const alert = document.getElementById('alert');
-            alert.textContent = message;
-            alert.className = 'alert ' + type;
-            setTimeout(() => alert.className = 'alert', 3000);
-        }
-    </script>
+function applyFilters(){
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const sortVal = document.getElementById('sortField').value;
+  const [sf, sd] = sortVal.split('-');
+  sortField = sf; sortDir = sd;
+  const ps = document.getElementById('pageSize').value;
+  pageSize = ps==='all' ? 999999 : parseInt(ps);
+
+  let data = [...allSales];
+
+  // type filter
+  if(typeFilter!=='all') data = data.filter(s=>s.type===typeFilter);
+
+  // search
+  if(search) data = data.filter(s=>{
+    const row = `${s.type||''} ${s.price||''} ${s.details||''} ${new Date(s.timestamp).toLocaleString()}`.toLowerCase();
+    return row.includes(search);
+  });
+
+  // sort
+  data.sort((a,b)=>{
+    let av = a[sortField], bv = b[sortField];
+    if(sortField==='timestamp'){ av=new Date(av); bv=new Date(bv); }
+    if(sortField==='price'){ av=parseFloat(av)||0; bv=parseFloat(bv)||0; }
+    if(typeof av==='string') av=av.toLowerCase();
+    if(typeof bv==='string') bv=bv.toLowerCase();
+    return sortDir==='asc' ? (av>bv?1:-1) : (av<bv?1:-1);
+  });
+
+  filteredSales = data;
+  currentPage = Math.min(currentPage, Math.ceil(data.length/pageSize)||1);
+
+  // update sort icons
+  ['timestamp','type','price'].forEach(f=>{
+    const th = document.getElementById(`th-${f}`);
+    if(!th) return;
+    th.classList.toggle('sorted', f===sortField);
+    const ico = th.querySelector('.sort-icon');
+    if(ico) ico.textContent = f===sortField ? (sortDir==='asc'?'↑':'↓') : '↕';
+  });
+
+  document.getElementById('filterSummary').textContent = `${data.length} of ${allSales.length} records`;
+  renderTable();
+}
+
+// ── RENDER TABLE ──
+function renderTable(){
+  const tbody = document.getElementById('salesBody');
+  if(!allSales.length){
+    tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div><p>No sales data. Select an app or register one.</p></div></td></tr>';
+    document.getElementById('paginationRow').style.display='none';
+    return;
+  }
+  if(!filteredSales.length){
+    tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">🔍</div><p>No records match your filters.</p></div></td></tr>';
+    document.getElementById('paginationRow').style.display='none';
+    return;
+  }
+
+  const start = (currentPage-1)*pageSize;
+  const end = Math.min(start+pageSize, filteredSales.length);
+  const page = filteredSales.slice(start, end);
+
+  tbody.innerHTML = page.map(s=>{
+    const isTest = s.type==='TEST';
+    const badgeCls = s.type==='PURCHASE'?'badge-purchase':s.type==='REFUND'?'badge-refund':'badge-test';
+    const checked = selectedIds.has(s.id) ? 'checked' : '';
+    return `<tr class="${isTest?'test-row':''}" data-id="${s.id}">
+      <td><input type="checkbox" class="row-cb" ${checked} onchange="toggleSelect('${s.id}',this.checked)"></td>
+      <td class="mono">${new Date(s.timestamp).toLocaleString()}</td>
+      <td><span class="badge ${badgeCls}">${s.type}</span></td>
+      <td class="mono" ondblclick="editCell(this,'${s.id}','price',${s.price||0})">
+        <span class="editable-cell" title="Double-click to edit">$${(s.price||0).toFixed(2)}</span>
+      </td>
+      <td ondblclick="editCell(this,'${s.id}','details','${esc(s.details||'')}')">
+        <span class="editable-cell" title="Double-click to edit">${esc(s.details||'—')}</span>
+      </td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost" style="padding:3px 10px;font-size:11px;" onclick="editRow('${s.id}')">✎ Edit</button>
+          <button class="btn btn-danger" style="padding:3px 10px;font-size:11px;" onclick="confirmDeleteSale('${s.id}')">✕</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Pagination
+  const total = filteredSales.length;
+  const pages = Math.ceil(total/pageSize);
+  document.getElementById('paginationRow').style.display = pages>1?'flex':'none';
+  document.getElementById('pageInfo').textContent = `${start+1}–${end} of ${total}`;
+  document.getElementById('prevBtn').disabled = currentPage<=1;
+  document.getElementById('nextBtn').disabled = currentPage>=pages;
+
+  updateBulkBar();
+}
+
+function changePage(dir){
+  currentPage += dir;
+  renderTable();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── SELECTION ──
+function toggleSelect(id, checked){
+  if(checked) selectedIds.add(id); else selectedIds.delete(id);
+  updateBulkBar();
+}
+
+function toggleSelectAll(){
+  const all = document.getElementById('selectAll').checked;
+  const ps = filteredSales.slice((currentPage-1)*pageSize, currentPage*pageSize);
+  ps.forEach(s=>{ if(all) selectedIds.add(s.id); else selectedIds.delete(s.id); });
+  renderTable();
+}
+
+function clearSelection(){ selectedIds.clear(); renderTable(); }
+
+function updateBulkBar(){
+  const bar = document.getElementById('bulkBar');
+  if(selectedIds.size>0){
+    bar.classList.add('visible');
+    document.getElementById('bulkCount').textContent = `${selectedIds.size} selected`;
+  } else {
+    bar.classList.remove('visible');
+  }
+}
+
+// ── INLINE EDIT ──
+function editCell(td, id, field, currentVal){
+  if(editingCell) cancelEdit();
+  editingCell = td;
+  const displayEl = td.querySelector('.editable-cell,span');
+  td.innerHTML = `<div class="edit-cell">
+    <input class="edit-input" id="inlineInput" type="${field==='price'?'number':'text'}" value="${currentVal}" step="0.01">
+    <button class="edit-save" onclick="saveCell('${id}','${field}')">✓</button>
+    <button class="edit-cancel" onclick="cancelEdit()">✕</button>
+  </div>`;
+  const inp = document.getElementById('inlineInput');
+  inp.focus(); inp.select();
+  inp.onkeydown = e=>{ if(e.key==='Enter') saveCell(id,field); if(e.key==='Escape') cancelEdit(); };
+}
+
+function cancelEdit(){ editingCell=null; applyFilters(); }
+
+async function saveCell(id, field){
+  const val = document.getElementById('inlineInput').value;
+  await patchSale(id, {[field]: field==='price'?parseFloat(val):val});
+}
+
+async function patchSale(id, updates){
+  try {
+    const r = await fetch(`${WORKER}/api/sales/${encodeURIComponent(id)}`, {
+      method:'PATCH',
+      headers:{Authorization:auth(),'Content-Type':'application/json'},
+      body:JSON.stringify(updates)
+    });
+    if(r.ok){
+      const idx = allSales.findIndex(s=>s.id===id);
+      if(idx>-1) allSales[idx] = {...allSales[idx],...updates};
+      toast('Saved','success');
+    } else {
+      // If PATCH not supported, update locally
+      const idx = allSales.findIndex(s=>s.id===id);
+      if(idx>-1){ allSales[idx]={...allSales[idx],...updates}; toast('Saved locally (PATCH not supported by worker)','info'); }
+    }
+  } catch(e){
+    const idx = allSales.findIndex(s=>s.id===id);
+    if(idx>-1){ allSales[idx]={...allSales[idx],...updates}; toast('Saved locally','info'); }
+  }
+  editingCell = null;
+  updateStats();
+  applyFilters();
+}
+
+function editRow(id){
+  const sale = allSales.find(s=>s.id===id);
+  if(!sale) return;
+  const td = document.querySelector(`tr[data-id="${id}"] td:nth-child(5)`);
+  if(td) editCell(td, id, 'details', sale.details||'');
+}
+
+// ── DELETE ──
+function confirmDeleteSale(id){
+  openModal('Delete Sale','Permanently delete this sale record?', async()=>{
+    try {
+      const r = await fetch(`${WORKER}/api/sales/${encodeURIComponent(id)}`,{method:'DELETE',headers:{Authorization:auth()}});
+      allSales = allSales.filter(s=>s.id!==id);
+      selectedIds.delete(id);
+      toast('Deleted','success');
+    } catch(e){ allSales=allSales.filter(s=>s.id!==id); toast('Deleted locally','info'); }
+    updateStats(); applyFilters();
+  });
+}
+
+function bulkDelete(){
+  const ids = [...selectedIds];
+  if(!ids.length) return;
+  openModal('Delete Selected',`Permanently delete ${ids.length} selected record(s)?`, async()=>{
+    let ok=0;
+    for(const id of ids){
+      try {
+        await fetch(`${WORKER}/api/sales/${encodeURIComponent(id)}`,{method:'DELETE',headers:{Authorization:auth()}});
+        ok++;
+      } catch(e){ ok++; }
+      allSales = allSales.filter(s=>s.id!==id);
+      selectedIds.delete(id);
+    }
+    toast(`Deleted ${ok} records`,'success');
+    updateStats(); applyFilters();
+  });
+}
+
+function bulkDeleteType(type){
+  const ids = [...selectedIds].filter(id=>{ const s=allSales.find(x=>x.id===id); return s&&s.type===type; });
+  if(!ids.length){ toast(`No ${type} records selected`,'info'); return; }
+  openModal(`Delete ${type} Records`,`Delete ${ids.length} ${type} record(s) from selection?`, async()=>{
+    for(const id of ids){
+      try { await fetch(`${WORKER}/api/sales/${encodeURIComponent(id)}`,{method:'DELETE',headers:{Authorization:auth()}}); } catch(e){}
+      allSales = allSales.filter(s=>s.id!==id);
+      selectedIds.delete(id);
+    }
+    toast(`Deleted ${ids.length} ${type} records`,'success');
+    updateStats(); applyFilters();
+  });
+}
+
+function confirmDeleteAllTests(){
+  const tests = allSales.filter(s=>s.type==='TEST');
+  if(!tests.length){ toast('No test data found','info'); return; }
+  openModal('Purge All Test Data',`This will permanently delete all ${tests.length} TEST records for the current app. Are you sure?`, async()=>{
+    let ok=0;
+    for(const s of tests){
+      try { await fetch(`${WORKER}/api/sales/${encodeURIComponent(s.id)}`,{method:'DELETE',headers:{Authorization:auth()}}); } catch(e){}
+      ok++;
+    }
+    allSales = allSales.filter(s=>s.type!=='TEST');
+    toast(`Purged ${ok} test records`,'success');
+    updateStats(); applyFilters();
+  });
+}
+
+// ── TEST SALE ──
+async function sendTestSale(){
+  if(!currentApp){ toast('Select an app first','error'); return; }
+  try {
+    const r = await fetch(`${WORKER}/api/test-sale`,{method:'POST',headers:{Authorization:auth(),'Content-Type':'application/json'},body:JSON.stringify({bundleId:currentApp})});
+    if(r.ok){ toast('Test sale sent ✓','success'); await loadSales(); }
+    else { const e=await r.json(); toast(e.error||'Error','error'); }
+  } catch(e){ toast('Network error','error'); }
+}
+
+// ── MODAL ──
+function openModal(title, body, onConfirm){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').textContent = body;
+  document.getElementById('confirmModal').classList.add('open');
+  modalCallback = onConfirm;
+}
+document.getElementById('modalConfirmBtn').onclick = ()=>{ closeModal(); if(modalCallback) modalCallback(); };
+function closeModal(){ document.getElementById('confirmModal').classList.remove('open'); modalCallback=null; }
+document.getElementById('confirmModal').addEventListener('click', e=>{ if(e.target===document.getElementById('confirmModal')) closeModal(); });
+
+// ── TOAST ──
+function toast(msg, type='info'){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  wrap.appendChild(el);
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>el.classList.add('show')); });
+  setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),300); }, 2800);
+}
+
+// ── UTILS ──
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+</script>
 </body>
 </html>
