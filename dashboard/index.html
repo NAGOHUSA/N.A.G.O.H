@@ -1,1 +1,540 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Nagoh Sales Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f0f2f5 0%, #e6e9ef 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Login Panel */
+        .login-container {
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 25px 45px -12px rgba(0,0,0,0.25);
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem;
+            transition: all 0.2s ease;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e2a3a, #0f172a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .login-header p {
+            color: #475569;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #1e293b;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 24px;
+            font-size: 1rem;
+            transition: 0.2s;
+            background: #f8fafc;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+            background: white;
+        }
+
+        .login-btn {
+            width: 100%;
+            background: #0f172a;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .login-btn:hover {
+            background: #1e293b;
+            transform: scale(0.98);
+        }
+
+        .error-msg {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 10px;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.85rem;
+        }
+
+        /* Dashboard Main App (hidden by default) */
+        .dashboard {
+            display: none;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Dashboard Components */
+        .top-bar {
+            background: white;
+            border-radius: 28px;
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+
+        .logo-area h2 {
+            font-weight: 700;
+            background: linear-gradient(135deg, #0f172a, #2d3a5e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            transition: transform 0.1s ease;
+        }
+
+        .stat-card h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #475569;
+            margin-bottom: 12px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .recent-sales {
+            background: white;
+            border-radius: 28px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+
+        .recent-sales h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            color: #334155;
+            font-weight: 600;
+        }
+
+        .badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+
+        @media (max-width: 640px) {
+            .top-bar {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+            th, td {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SECTION -->
+<div id="loginPanel" class="login-container">
+    <div class="login-header">
+        <h1>📊 Nagoh Sales</h1>
+        <p>Enter your credentials to access dashboard</p>
+    </div>
+    <div class="input-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="admin" autocomplete="off">
+    </div>
+    <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••">
+    </div>
+    <button class="login-btn" id="doLogin">Sign In →</button>
+    <div id="loginError" class="error-msg" style="display: none;">❌ Invalid username or password. Use admin / admin</div>
+</div>
+
+<!-- MAIN DASHBOARD -->
+<div id="dashboardApp" class="dashboard">
+    <div class="top-bar">
+        <div class="logo-area">
+            <h2>📱 App Store Sales Monitor</h2>
+            <small style="color:#475569">Live · Nagoh Analytics</small>
+        </div>
+        <button class="logout-btn" id="logoutBtn">🚪 Logout</button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Sales (All time)</h3>
+            <div class="stat-number" id="totalSalesCount">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Today's Revenue</h3>
+            <div class="stat-number" id="todayRevenue">$0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Active Apps</h3>
+            <div class="stat-number" id="totalApps">3</div>
+        </div>
+        <div class="stat-card">
+            <h3>Last Sale</h3>
+            <div class="stat-number" id="lastSaleTime">—</div>
+        </div>
+    </div>
+
+    <div class="recent-sales">
+        <h3>📋 Recent Transactions</h3>
+        <div id="salesTableContainer">
+            <table id="salesTable">
+                <thead>
+                    <tr><th>App / Bundle ID</th><th>Type</th><th>Amount</th><th>Date</th></tr>
+                </thead>
+                <tbody id="salesTableBody">
+                    <tr><td colspan="4" class="empty-state">No sales recorded yet. Push a test notification or wait for live data.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top: 20px; font-size:12px; color:#6c757d; text-align:center;">
+            💡 Demo data: This dashboard stores sales in your browser (localStorage). 
+            To add real App Store notifications, integrate with your own relay endpoint.
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- CREDENTIALS ----------
+    const VALID_USER = "admin";
+    const VALID_PASS = "admin";
+
+    // ---------- STORAGE KEYS ----------
+    const SESSION_KEY = "nagoh_dashboard_auth";
+    const SALES_STORAGE_KEY = "nagoh_sales_data";
+
+    // ---------- MOCK / INITIAL SALES (for demo & testing) ----------
+    function getInitialSales() {
+        return [
+            { id: "sale1", appName: "My Fitness Tracker", bundleId: "com.nagoh.fitness", type: "PURCHASE", amount: 4.99, timestamp: new Date().toISOString() },
+            { id: "sale2", appName: "Photo Editor Pro", bundleId: "com.nagoh.photo", type: "RENEWAL", amount: 9.99, timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
+            { id: "sale3", appName: "Sleep Sounds", bundleId: "com.nagoh.sleep", type: "PURCHASE", amount: 2.99, timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() }
+        ];
+    }
+
+    // Load sales from localStorage or initialize with demo data
+    function loadSalesFromStorage() {
+        const stored = localStorage.getItem(SALES_STORAGE_KEY);
+        if (stored) {
+            try {
+                return JSON.parse(stored);
+            } catch(e) { return getInitialSales(); }
+        } else {
+            // first time: seed demo data
+            return getInitialSales();
+        }
+    }
+
+    // Save sales array
+    function persistSales(salesArray) {
+        localStorage.setItem(SALES_STORAGE_KEY, JSON.stringify(salesArray));
+    }
+
+    // Helper: get today's revenue from sales list
+    function getTodayRevenue(sales) {
+        const todayStart = new Date();
+        todayStart.setHours(0,0,0,0);
+        return sales.filter(sale => new Date(sale.timestamp) >= todayStart)
+                    .reduce((sum, sale) => sum + (sale.amount || 0), 0);
+    }
+
+    // Helper: get total sales count
+    function getTotalSalesCount(sales) {
+        return sales.length;
+    }
+
+    // Helper: last sale time formatted
+    function getLastSaleTime(sales) {
+        if (sales.length === 0) return "No sales";
+        const latest = new Date(Math.max(...sales.map(s => new Date(s.timestamp).getTime())));
+        return latest.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    }
+
+    // Render the dashboard with current sales data
+    function renderDashboard() {
+        const sales = loadSalesFromStorage();
+        const totalSales = getTotalSalesCount(sales);
+        const todayRev = getTodayRevenue(sales);
+        const lastTime = getLastSaleTime(sales);
+        // For active apps, we can simulate based on unique bundle IDs
+        const uniqueApps = new Set(sales.map(s => s.bundleId));
+        const activeAppsCount = uniqueApps.size || 3; // fallback demo
+
+        document.getElementById("totalSalesCount").innerText = totalSales;
+        document.getElementById("todayRevenue").innerText = `$${todayRev.toFixed(2)}`;
+        document.getElementById("totalApps").innerText = activeAppsCount;
+        document.getElementById("lastSaleTime").innerText = lastTime;
+
+        const tbody = document.getElementById("salesTableBody");
+        if (!sales.length) {
+            tbody.innerHTML = '<tr><td colspan="4" class="empty-state">✨ No transactions yet. Sales will appear here automatically.</td></tr>';
+            return;
+        }
+
+        // show recent first (descending)
+        const sorted = [...sales].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+        tbody.innerHTML = sorted.slice(0, 15).map(sale => `
+            <tr>
+                <td><strong>${escapeHtml(sale.appName || sale.bundleId)}</strong><br><span style="font-size:11px; color:#6c757d">${sale.bundleId}</span></td>
+                <td><span class="badge">${escapeHtml(sale.type)}</span></td>
+                <td>$${(sale.amount || 0).toFixed(2)}</td>
+                <td>${new Date(sale.timestamp).toLocaleString()}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Simple escape to avoid XSS
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Add a new sale (can be called from future webhook integration)
+    window.addSaleRecord = function(saleData) {
+        if (!saleData || !saleData.bundleId) return false;
+        const currentSales = loadSalesFromStorage();
+        const newSale = {
+            id: Date.now() + '_' + Math.random().toString(36),
+            appName: saleData.appName || "App Store Sale",
+            bundleId: saleData.bundleId,
+            type: saleData.type || "PURCHASE",
+            amount: typeof saleData.amount === 'number' ? saleData.amount : 0,
+            timestamp: new Date().toISOString(),
+            rawPayload: saleData.raw || null
+        };
+        currentSales.unshift(newSale);
+        // keep only last 200 sales for performance
+        const trimmed = currentSales.slice(0, 200);
+        persistSales(trimmed);
+        renderDashboard();
+        return true;
+    };
+
+    // Simulate real-time by listening to a custom event or interval (optional)
+    // This also simulates a "fake" random sale every 45 seconds for demo showing live feel (only if dashboard is active)
+    let intervalSimulation = null;
+    function startLiveDemoSimulation() {
+        if (intervalSimulation) clearInterval(intervalSimulation);
+        intervalSimulation = setInterval(() => {
+            // Only add mock sale if dashboard is visible and at least 1 minute passed after last sale?
+            // we just simulate a purchase to showcase real-time alert behavior.
+            const demoApps = [
+                { name: "Peak Workout", bundle: "com.nagoh.peak", price: 5.99 },
+                { name: "Sketch Art", bundle: "com.nagoh.sketch", price: 3.99 },
+                { name: "Nagoh Cloud", bundle: "com.nagoh.cloud", price: 12.99 }
+            ];
+            const randomApp = demoApps[Math.floor(Math.random() * demoApps.length)];
+            const eventTypes = ["PURCHASE", "RENEWAL", "CONSUMPTION"];
+            const randomType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+            addSaleRecord({
+                appName: randomApp.name,
+                bundleId: randomApp.bundle,
+                type: randomType,
+                amount: randomApp.price
+            });
+            // small UI toast effect (optional)
+            const container = document.getElementById("salesTableContainer");
+            if (container) {
+                const originalBg = container.style.transition;
+                container.style.transition = "background 0.2s";
+                container.style.backgroundColor = "#e6f7e6";
+                setTimeout(() => { container.style.backgroundColor = ""; }, 300);
+            }
+        }, 45000); // every 45 sec demo – you can remove or change to 0 to disable.
+    }
+
+    function stopLiveDemoSimulation() {
+        if (intervalSimulation) {
+            clearInterval(intervalSimulation);
+            intervalSimulation = null;
+        }
+    }
+
+    // ----- AUTH LOGIC -----
+    function checkAuth() {
+        const authFlag = sessionStorage.getItem(SESSION_KEY);
+        if (authFlag === "true") {
+            showDashboard();
+        } else {
+            showLogin();
+        }
+    }
+
+    function showDashboard() {
+        document.getElementById("loginPanel").style.display = "none";
+        document.getElementById("dashboardApp").style.display = "block";
+        renderDashboard();
+        startLiveDemoSimulation();   // optional live demo data – can be removed for production
+        // optional: refresh every 10 seconds to reflect storage changes
+        if (window._refreshInterval) clearInterval(window._refreshInterval);
+        window._refreshInterval = setInterval(() => {
+            if (document.getElementById("dashboardApp").style.display === "block") {
+                renderDashboard();
+            }
+        }, 10000);
+    }
+
+    function showLogin() {
+        document.getElementById("loginPanel").style.display = "block";
+        document.getElementById("dashboardApp").style.display = "none";
+        if (window._refreshInterval) clearInterval(window._refreshInterval);
+        stopLiveDemoSimulation();
+        // clear any error
+        const errDiv = document.getElementById("loginError");
+        if (errDiv) errDiv.style.display = "none";
+    }
+
+    function performLogin() {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+        const errorDiv = document.getElementById("loginError");
+        if (username === VALID_USER && password === VALID_PASS) {
+            sessionStorage.setItem(SESSION_KEY, "true");
+            errorDiv.style.display = "none";
+            showDashboard();
+        } else {
+            errorDiv.style.display = "block";
+        }
+    }
+
+    function logout() {
+        sessionStorage.removeItem(SESSION_KEY);
+        showLogin();
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+    }
+
+    // ----- EVENT LISTENERS -----
+    document.getElementById("doLogin").addEventListener("click", performLogin);
+    document.getElementById("logoutBtn").addEventListener("click", logout);
+    // Enter key in login fields
+    const passwordField = document.getElementById("password");
+    const userField = document.getElementById("username");
+    [passwordField, userField].forEach(field => {
+        if (field) {
+            field.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") performLogin();
+            });
+        }
+    });
+
+    // initial check
+    checkAuth();
+
+    // Expose addSaleRecord globally for possible webhook integration later (e.g., from Worker)
+    console.log("Nagoh Dashboard ready | Login: admin/admin | sales stored locally");
+</script>
+</body>
+</html>
