@@ -3,382 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nagoh App Store Sales Dashboard</title>
+    <title>Nagoh Sales Dashboard - Local Version</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        
-        .login-page {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .login-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        
-        .login-card h1 {
-            color: #333;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        
-        .login-card p {
-            color: #666;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-        }
-        
-        .input-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 14px;
-        }
-        
-        .input-group input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .login-btn {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        .error-msg {
-            background: #fee;
-            color: #c33;
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 15px;
-            text-align: center;
-            display: none;
-        }
-        
-        .dashboard {
-            display: none;
-            padding: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        .header {
-            background: white;
-            border-radius: 15px;
-            padding: 20px 30px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-        
-        .header h1 {
-            color: #333;
-            font-size: 24px;
-        }
-        
-        .logout-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-        
-        .stat-card h3 {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        
-        .stat-card .value {
-            font-size: 32px;
-            font-weight: bold;
-            color: #667eea;
-        }
-        
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 30px;
-        }
-        
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .panel {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-        
-        .panel h2 {
-            color: #333;
-            font-size: 20px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        
-        button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-        
-        .app-list {
-            list-style: none;
-        }
-        
-        .app-item {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        
-        .app-item:hover {
-            background: #e9ecef;
-            transform: translateX(5px);
-        }
-        
-        .app-name {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
-            font-size: 16px;
-        }
-        
-        .app-bundle {
-            font-family: monospace;
-            color: #666;
-            font-size: 12px;
-            margin-bottom: 10px;
-        }
-        
-        .app-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .delete-btn {
-            background: #dc3545;
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-        
-        .view-sales-btn {
-            background: #28a745;
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-        
-        .sales-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .sales-table th,
-        .sales-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .sales-table th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #555;
-            font-size: 13px;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 5px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        
-        .badge.PURCHASE { background: #4caf50; color: white; }
-        .badge.RENEWAL { background: #2196f3; color: white; }
-        .badge.REFUND { background: #ff9800; color: white; }
-        .badge.TEST { background: #9c27b0; color: white; }
-        
-        .alert {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .alert.success {
-            background: #d4edda;
-            color: #155724;
-            display: block;
-        }
-        
-        .alert.error {
-            background: #f8d7da;
-            color: #721c24;
-            display: block;
-        }
-        
-        .webhook-url {
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 11px;
-            margin-top: 20px;
-            word-break: break-all;
-            border: 1px solid #dee2e6;
-        }
-        
-        .test-sale-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px solid #e0e0e0;
-        }
-        
-        .test-sale-btn {
-            background: #28a745;
-            width: 100%;
-            margin-top: 10px;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-        
-        .refresh-btn {
-            float: right;
-            background: #6c757d;
-            padding: 5px 15px;
-            font-size: 12px;
-        }
-        
-        .selected-app {
-            background: #e7f3ff !important;
-            border-left: 4px solid #667eea;
-        }
+        /* Your existing styles here - keeping them compact for brevity */
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;}
+        .login-page{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;}
+        .login-card{background:white;border-radius:20px;padding:40px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+        .login-card h1{color:#333;margin-bottom:10px;text-align:center;}
+        .input-group{margin-bottom:20px;}
+        .input-group label{display:block;margin-bottom:8px;color:#555;font-weight:500;}
+        .input-group input{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:10px;}
+        .login-btn{width:100%;padding:12px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;}
+        .error-msg{background:#fee;color:#c33;padding:10px;border-radius:8px;margin-top:15px;text-align:center;display:none;}
+        .dashboard{display:none;padding:20px;max-width:1400px;margin:0 auto;}
+        .header{background:white;border-radius:15px;padding:20px 30px;margin-bottom:30px;display:flex;justify-content:space-between;align-items:center;}
+        .logout-btn{background:#dc3545;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;}
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-bottom:30px;}
+        .stat-card{background:white;border-radius:15px;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,0.1);}
+        .stat-card .value{font-size:32px;font-weight:bold;color:#667eea;}
+        .panel{background:white;border-radius:15px;padding:25px;margin-bottom:30px;}
+        .panel h2{margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #667eea;}
+        .form-group{margin-bottom:20px;}
+        .form-group input{width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;}
+        button{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;}
+        .delete-btn{background:#dc3545;}
+        .app-item{background:#f8f9fa;border-radius:10px;padding:15px;margin-bottom:15px;}
+        .app-name{font-weight:bold;margin-bottom:5px;}
+        .app-bundle{font-family:monospace;color:#666;font-size:12px;margin-bottom:10px;}
+        .badge{display:inline-block;padding:4px 8px;border-radius:5px;font-size:11px;font-weight:600;}
+        .badge.PURCHASE{background:#4caf50;color:white;}
+        .badge.TEST{background:#9c27b0;color:white;}
+        .sales-table{width:100%;border-collapse:collapse;}
+        .sales-table th,.sales-table td{padding:12px;text-align:left;border-bottom:1px solid #e0e0e0;}
+        .alert{padding:12px;border-radius:8px;margin-bottom:20px;display:none;}
+        .alert.success{background:#d4edda;color:#155724;display:block;}
+        .alert.error{background:#f8d7da;color:#721c24;display:block;}
+        .empty-state{text-align:center;padding:40px;color:#999;}
     </style>
 </head>
 <body>
     <div id="loginPage" class="login-page">
         <div class="login-card">
             <h1>📊 Nagoh Sales Dashboard</h1>
-            <p>App Store Sales Monitor</p>
+            <p>Local Version - Data stored in your browser</p>
             <div id="loginError" class="error-msg">Invalid username or password</div>
             <div class="input-group">
                 <label>Username</label>
@@ -394,246 +62,144 @@
     
     <div id="dashboard" class="dashboard">
         <div class="header">
-            <h1>📱 App Store Sales Monitor</h1>
+            <h1>📱 App Store Sales Monitor (Local Storage)</h1>
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
         
         <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Apps</h3>
-                <div class="value" id="totalApps">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Today's Sales</h3>
-                <div class="value" id="todaySales">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Total Sales</h3>
-                <div class="value" id="totalSales">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Total Revenue</h3>
-                <div class="value" id="totalRevenue">$0</div>
-            </div>
+            <div class="stat-card"><h3>Total Apps</h3><div class="value" id="totalApps">0</div></div>
+            <div class="stat-card"><h3>Today's Sales</h3><div class="value" id="todaySales">0</div></div>
+            <div class="stat-card"><h3>Total Sales</h3><div class="value" id="totalSales">0</div></div>
+            <div class="stat-card"><h3>Total Revenue</h3><div class="value" id="totalRevenue">$0</div></div>
         </div>
         
-        <div class="main-content">
-            <div class="panel">
-                <h2>➕ Register New App</h2>
-                <div id="alert"></div>
-                <div class="form-group">
-                    <label>App Name</label>
-                    <input type="text" id="appName" placeholder="My Awesome App">
-                </div>
-                <div class="form-group">
-                    <label>Bundle ID</label>
-                    <input type="text" id="bundleId" placeholder="com.example.myapp">
-                </div>
-                <div class="form-group">
-                    <label>App Store URL</label>
-                    <input type="url" id="appStoreUrl" placeholder="https://apps.apple.com/app/id123456789">
-                </div>
-                <button onclick="addApp()">Register App</button>
-                
-                <div class="webhook-url">
-                    <strong>📡 App Store Connect Webhook URL:</strong><br>
-                    <span id="webhookUrl"></span>
-                    <br><small>Copy this URL to App Store Connect → App Information → App Store Server Notifications</small>
-                </div>
-                
-                <div class="test-sale-section">
-                    <strong>🧪 Test Your Setup</strong>
-                    <button class="test-sale-btn" onclick="addTestSale()">Send Test Sale Event</button>
-                    <small style="display: block; margin-top: 8px; color: #666;">This will create a test sale for the currently selected app</small>
-                </div>
+        <div class="panel">
+            <h2>➕ Register New App</h2>
+            <div id="alert"></div>
+            <div class="form-group">
+                <label>App Name</label>
+                <input type="text" id="appName" placeholder="My Awesome App">
             </div>
+            <div class="form-group">
+                <label>Bundle ID</label>
+                <input type="text" id="bundleId" placeholder="com.example.myapp">
+            </div>
+            <div class="form-group">
+                <label>App Store URL</label>
+                <input type="url" id="appStoreUrl" placeholder="https://apps.apple.com/app/id123456789">
+            </div>
+            <button onclick="addApp()">Register App</button>
             
-            <div class="panel">
-                <h2>📱 Your Apps 
-                    <button class="refresh-btn" onclick="loadApps()">Refresh List</button>
-                </h2>
-                <div id="appsList">
-                    <div class="empty-state">No apps registered yet. Add your first app above!</div>
-                </div>
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+                <strong>🧪 Test Sale</strong>
+                <button onclick="addTestSale()" style="background:#28a745; width:100%; margin-top:10px;">Send Test Sale Event</button>
+                <small style="display: block; margin-top: 8px; color: #666;">This creates a test sale for the selected app</small>
             </div>
         </div>
         
-        <div class="panel" style="margin-top: 30px;">
-            <h2>💰 Sales History
-                <button class="refresh-btn" onclick="if(currentBundleId) loadSales(currentBundleId)">Refresh</button>
-            </h2>
-            <div id="salesList">
-                <div class="empty-state">Select an app from the list to view its sales</div>
-            </div>
+        <div class="panel">
+            <h2>📱 Your Apps <button onclick="loadApps()" style="float:right; background:#6c757d; padding:5px 15px;">Refresh</button></h2>
+            <div id="appsList"><div class="empty-state">No apps registered yet. Add your first app above!</div></div>
+        </div>
+        
+        <div class="panel">
+            <h2>💰 Sales History</h2>
+            <div id="salesList"><div class="empty-state">Select an app from the list to view its sales</div></div>
         </div>
     </div>
     
     <script>
-        const API_BASE = window.location.origin;
+        // Local Storage Version - No Worker Required
+        const STORAGE_KEYS = {
+            APPS: 'nagoh_apps',
+            SALES: 'nagoh_sales_'
+        };
+        
         let currentBundleId = null;
-        let refreshInterval = null;
         
-        document.getElementById('webhookUrl').textContent = API_BASE + '/api/app-store-webhook';
-        
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-            verifyToken(token);
-        }
-        
-        async function login() {
+        function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const auth = btoa(username + ':' + password);
             
-            try {
-                const response = await fetch(API_BASE + '/api/apps', {
-                    headers: { 'Authorization': 'Basic ' + auth }
-                });
-                
-                if (response.ok) {
-                    localStorage.setItem('auth_token', auth);
-                    showDashboard();
-                } else {
-                    document.getElementById('loginError').style.display = 'block';
-                }
-            } catch (error) {
+            if (username === 'admin' && password === 'admin') {
+                sessionStorage.setItem('nagoh_auth', 'true');
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadApps();
+            } else {
                 document.getElementById('loginError').style.display = 'block';
             }
         }
         
-        async function verifyToken(token) {
-            try {
-                const response = await fetch(API_BASE + '/api/apps', {
-                    headers: { 'Authorization': 'Basic ' + token }
-                });
-                
-                if (response.ok) {
-                    showDashboard();
-                } else {
-                    localStorage.removeItem('auth_token');
-                }
-            } catch (error) {
-                localStorage.removeItem('auth_token');
-            }
-        }
-        
-        function showDashboard() {
-            document.getElementById('loginPage').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-            loadApps();
-            
-            if (refreshInterval) clearInterval(refreshInterval);
-            refreshInterval = setInterval(() => {
-                if (currentBundleId) {
-                    loadSales(currentBundleId);
-                }
-                loadApps();
-            }, 15000);
-        }
-        
         function logout() {
-            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('nagoh_auth');
             document.getElementById('loginPage').style.display = 'flex';
             document.getElementById('dashboard').style.display = 'none';
-            if (refreshInterval) clearInterval(refreshInterval);
         }
         
-        function getAuthHeader() {
-            return { 'Authorization': 'Basic ' + localStorage.getItem('auth_token') };
-        }
-        
-        async function loadApps() {
-            try {
-                const response = await fetch(API_BASE + '/api/apps', {
-                    headers: getAuthHeader()
-                });
-                const apps = await response.json();
-                
-                document.getElementById('totalApps').textContent = apps.length;
-                
-                const appsList = document.getElementById('appsList');
-                if (apps.length === 0) {
-                    appsList.innerHTML = '<div class="empty-state">✨ No apps registered yet. Add your first app above!</div>';
-                    return;
-                }
-                
-                appsList.innerHTML = '<ul class="app-list">' + apps.map(app => `
-                    <li class="app-item ${currentBundleId === app.bundleId ? 'selected-app' : ''}" id="app-${app.bundleId.replace(/\./g, '_')}" onclick="selectApp('${app.bundleId}')">
-                        <div class="app-name">${escapeHtml(app.appName)}</div>
-                        <div class="app-bundle">${app.bundleId}</div>
-                        <div class="app-actions">
-                            <button class="delete-btn" onclick="event.stopPropagation(); deleteApp('${app.bundleId}')">Delete App</button>
-                        </div>
-                    </li>
-                `).join('') + '</ul>';
-                
-                if (apps.length > 0 && !currentBundleId) {
-                    selectApp(apps[0].bundleId);
-                }
-            } catch (error) {
-                console.error('Error loading apps:', error);
+        function loadApps() {
+            const apps = JSON.parse(localStorage.getItem(STORAGE_KEYS.APPS) || '[]');
+            document.getElementById('totalApps').textContent = apps.length;
+            
+            const appsList = document.getElementById('appsList');
+            if (apps.length === 0) {
+                appsList.innerHTML = '<div class="empty-state">✨ No apps registered yet. Add your first app above!</div>';
+                return;
+            }
+            
+            appsList.innerHTML = '<ul style="list-style:none;">' + apps.map(app => `
+                <li class="app-item" style="cursor:pointer;" onclick="selectApp('${app.bundleId}')">
+                    <div class="app-name">${escapeHtml(app.appName)}</div>
+                    <div class="app-bundle">${app.bundleId}</div>
+                    <button class="delete-btn" onclick="event.stopPropagation(); deleteApp('${app.bundleId}')">Delete App</button>
+                </li>
+            `).join('') + '</ul>';
+            
+            if (apps.length > 0 && !currentBundleId) {
+                selectApp(apps[0].bundleId);
             }
         }
         
-        async function selectApp(bundleId) {
+        function selectApp(bundleId) {
             currentBundleId = bundleId;
-            
-            document.querySelectorAll('.app-item').forEach(el => {
-                el.classList.remove('selected-app');
-            });
-            const selectedEl = document.getElementById('app-' + bundleId.replace(/\./g, '_'));
-            if (selectedEl) selectedEl.classList.add('selected-app');
-            
-            await loadSales(bundleId);
+            loadSales(bundleId);
         }
         
-        async function loadSales(bundleId) {
-            if (!bundleId) return;
+        function loadSales(bundleId) {
+            const sales = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALES + bundleId) || '[]');
             
-            try {
-                const response = await fetch(API_BASE + `/api/sales?bundleId=${encodeURIComponent(bundleId)}`, {
-                    headers: getAuthHeader()
-                });
-                const sales = await response.json();
-                
-                const today = new Date().toDateString();
-                const todaySales = sales.filter(s => new Date(s.timestamp).toDateString() === today);
-                const totalRevenue = sales.reduce((sum, s) => sum + (s.price || 0), 0);
-                
-                document.getElementById('todaySales').textContent = todaySales.length;
-                document.getElementById('totalSales').textContent = sales.length;
-                document.getElementById('totalRevenue').textContent = '$' + totalRevenue.toFixed(2);
-                
-                const salesList = document.getElementById('salesList');
-                if (sales.length === 0) {
-                    salesList.innerHTML = '<div class="empty-state">📭 No sales yet. Click "Send Test Sale Event" to test!</div>';
-                    return;
-                }
-                
-                salesList.innerHTML = `
-                    <table class="sales-table">
-                        <thead>
-                            <tr><th>Date & Time</th><th>Type</th><th>Amount</th><th>Details</th></tr>
-                        </thead>
-                        <tbody>
-                            ${sales.slice(0, 50).map(sale => `
-                                <tr>
-                                    <td>${new Date(sale.timestamp).toLocaleString()}</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></td>
-                                    <td><span class="badge ${sale.type}">${sale.type}</span></td>
-                                    <td>$${(sale.price || 0).toFixed(2)}</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></td>
-                                    <td>${sale.details || '-'}</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    ${sales.length > 50 ? '<div style="margin-top: 10px; color: #666; text-align: center;">Showing last 50 of ' + sales.length + ' sales</div>' : ''}
-                `;
-            } catch (error) {
-                console.error('Error loading sales:', error);
+            const today = new Date().toDateString();
+            const todaySales = sales.filter(s => new Date(s.timestamp).toDateString() === today);
+            const totalRevenue = sales.reduce((sum, s) => sum + (s.price || 0), 0);
+            
+            document.getElementById('todaySales').textContent = todaySales.length;
+            document.getElementById('totalSales').textContent = sales.length;
+            document.getElementById('totalRevenue').textContent = '$' + totalRevenue.toFixed(2);
+            
+            const salesList = document.getElementById('salesList');
+            if (sales.length === 0) {
+                salesList.innerHTML = '<div class="empty-state">📭 No sales yet. Click "Send Test Sale Event" to test!</div>';
+                return;
             }
+            
+            salesList.innerHTML = `
+                <table class="sales-table">
+                    <thead><tr><th>Date & Time</th><th>Type</th><th>Amount</th><th>Details</th></tr></thead>
+                    <tbody>
+                        ${sales.slice(0, 50).map(sale => `
+                            <tr>
+                                <td>${new Date(sale.timestamp).toLocaleString()}</td>
+                                <td><span class="badge ${sale.type}">${sale.type}</span></td>
+                                <td>$${(sale.price || 0).toFixed(2)}</td>
+                                <td>${sale.details || '-'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
         }
         
-        async function addApp() {
+        function addApp() {
             const appName = document.getElementById('appName').value.trim();
             const bundleId = document.getElementById('bundleId').value.trim();
             const appStoreUrl = document.getElementById('appStoreUrl').value.trim();
@@ -643,84 +209,64 @@
                 return;
             }
             
-            try {
-                const response = await fetch(API_BASE + '/api/apps', {
-                    method: 'POST',
-                    headers: {
-                        ...getAuthHeader(),
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ appName, bundleId, appStoreUrl })
-                });
-                
-                if (response.ok) {
-                    showAlert('✅ App registered successfully!', 'success');
-                    document.getElementById('appName').value = '';
-                    document.getElementById('bundleId').value = '';
-                    document.getElementById('appStoreUrl').value = '';
-                    loadApps();
-                } else {
-                    const error = await response.json();
-                    showAlert('❌ Error: ' + (error.error || 'Failed to register app'), 'error');
-                }
-            } catch (error) {
-                showAlert('❌ Error: ' + error.message, 'error');
+            const apps = JSON.parse(localStorage.getItem(STORAGE_KEYS.APPS) || '[]');
+            if (apps.find(a => a.bundleId === bundleId)) {
+                showAlert('App with this Bundle ID already exists', 'error');
+                return;
             }
+            
+            apps.push({ appName, bundleId, appStoreUrl, registeredAt: new Date().toISOString() });
+            localStorage.setItem(STORAGE_KEYS.APPS, JSON.stringify(apps));
+            
+            showAlert('✅ App registered successfully!', 'success');
+            document.getElementById('appName').value = '';
+            document.getElementById('bundleId').value = '';
+            document.getElementById('appStoreUrl').value = '';
+            loadApps();
         }
         
-        async function deleteApp(bundleId) {
+        function deleteApp(bundleId) {
             if (!confirm('⚠️ Delete this app and ALL its sales data? This cannot be undone.')) return;
             
-            try {
-                const response = await fetch(API_BASE + '/api/apps/' + encodeURIComponent(bundleId), {
-                    method: 'DELETE',
-                    headers: getAuthHeader()
-                });
-                
-                if (response.ok) {
-                    showAlert('✅ App deleted successfully', 'success');
-                    if (currentBundleId === bundleId) {
-                        currentBundleId = null;
-                        document.getElementById('salesList').innerHTML = '<div class="empty-state">Select an app from the list to view its sales</div>';
-                        document.getElementById('todaySales').textContent = '0';
-                        document.getElementById('totalSales').textContent = '0';
-                        document.getElementById('totalRevenue').textContent = '$0';
-                    }
-                    loadApps();
-                } else {
-                    showAlert('❌ Error deleting app', 'error');
-                }
-            } catch (error) {
-                showAlert('❌ Error: ' + error.message, 'error');
+            let apps = JSON.parse(localStorage.getItem(STORAGE_KEYS.APPS) || '[]');
+            apps = apps.filter(a => a.bundleId !== bundleId);
+            localStorage.setItem(STORAGE_KEYS.APPS, JSON.stringify(apps));
+            localStorage.removeItem(STORAGE_KEYS.SALES + bundleId);
+            
+            showAlert('✅ App deleted successfully', 'success');
+            if (currentBundleId === bundleId) {
+                currentBundleId = null;
+                document.getElementById('salesList').innerHTML = '<div class="empty-state">Select an app from the list to view its sales</div>';
             }
+            loadApps();
         }
         
-        async function addTestSale() {
+        function addTestSale() {
             if (!currentBundleId) {
                 showAlert('Please select an app first by clicking on any app in the list', 'error');
                 return;
             }
             
-            try {
-                const response = await fetch(API_BASE + '/api/test-sale', {
-                    method: 'POST',
-                    headers: {
-                        ...getAuthHeader(),
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ bundleId: currentBundleId })
-                });
-                
-                if (response.ok) {
-                    showAlert('🎉 Test sale added successfully! Check the sales history below.', 'success');
-                    await loadSales(currentBundleId);
-                } else {
-                    const error = await response.json();
-                    showAlert('❌ Error: ' + (error.error || 'Failed to add test sale'), 'error');
-                }
-            } catch (error) {
-                showAlert('❌ Error: ' + error.message, 'error');
-            }
+            const apps = JSON.parse(localStorage.getItem(STORAGE_KEYS.APPS) || '[]');
+            const app = apps.find(a => a.bundleId === currentBundleId);
+            
+            const testPrices = [4.99, 9.99, 2.99, 19.99, 49.99];
+            const randomPrice = testPrices[Math.floor(Math.random() * testPrices.length)];
+            
+            const testSale = {
+                id: Date.now() + '_' + Math.random(),
+                timestamp: new Date().toISOString(),
+                type: 'TEST',
+                price: randomPrice,
+                details: `Test Sale - ${app ? app.appName : currentBundleId}`
+            };
+            
+            const sales = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALES + currentBundleId) || '[]');
+            sales.unshift(testSale);
+            localStorage.setItem(STORAGE_KEYS.SALES + currentBundleId, JSON.stringify(sales.slice(0, 200)));
+            
+            showAlert('🎉 Test sale added successfully!', 'success');
+            loadSales(currentBundleId);
         }
         
         function escapeHtml(text) {
@@ -733,9 +279,14 @@
             const alert = document.getElementById('alert');
             alert.textContent = message;
             alert.className = 'alert ' + type;
-            setTimeout(() => {
-                alert.className = 'alert';
-            }, 3000);
+            setTimeout(() => alert.className = 'alert', 3000);
+        }
+        
+        // Check if already logged in
+        if (sessionStorage.getItem('nagoh_auth') === 'true') {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            loadApps();
         }
     </script>
 </body>
