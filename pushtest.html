@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nagoh Worker Tester</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; padding: 40px; background: #f4f4f9; color: #333; }
+        .card { max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: #007AFF; }
+        label { display: block; margin: 15px 0 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { background: #007AFF; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 20px; }
+        button:hover { background: #005bb5; }
+        #status { margin-top: 20px; padding: 15px; border-radius: 6px; display: none; word-break: break-all; }
+        .success { background: #e1f7d5; border: 1px solid #a3d977; color: #2e5c14; }
+        .error { background: #ffe5e5; border: 1px solid #ffb3b3; color: #8b0000; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>🚀 Nagoh Push Tester</h2>
+    <p>Simulate an App Store sale to test your Cloudflare Worker.</p>
+
+    <label>Your Push Server URL</label>
+    <input type="text" id="workerUrl" placeholder="https://alerts.nagoh.xyz/v1/push/B0xcKs1..." value="https://alerts.nagoh.xyz/v1/push/B0xcKs1nh0OmpoOL-KyB6H9Edaig5phZGdfRZqqr9JbXzW74HDt__cK00kN020rNwFObWkAZPn3FjQAVEllK1xyBtgCd025NChIRfRC7PaIOP1M74PjGPIHRDZ8QGeMHJRBYtOG61muYgiT5AW0tsWQ0RwFqj3Dr7IxVvXYy6Ut4S_RHrqTNzNbGPMOELtboVMDLzTFMhqAzQ7WEGCfAbRjraw">
+
+    <label>Event Type</label>
+    <select id="event">
+        <option value="SUBSCRIBED">SUBSCRIBED (New Sale)</option>
+        <option value="RENEWAL">DID_RENEW</option>
+        <option value="REFUND">REFUND</option>
+    </select>
+
+    <label>Price (USD Cents)</label>
+    <input type="number" id="price" value="999">
+
+    <button onclick="sendTest()">Send Test Push</button>
+
+    <div id="status"></div>
+</div>
+
+<script>
+    async function sendTest() {
+        const url = document.getElementById('workerUrl').value;
+        const statusDiv = document.getElementById('status');
+        const eventType = document.getElementById('event').value;
+        const price = document.getElementById('price').value;
+
+        statusDiv.style.display = 'block';
+        statusDiv.className = '';
+        statusDiv.innerText = 'Sending...';
+
+        // 1. Create a mock Decoded Payload
+        const mockPayload = {
+            notificationType: eventType,
+            subtype: "INITIAL_BUY",
+            data: {
+                signedTransactionInfo: "header." + btoa(JSON.stringify({
+                    price: parseInt(price),
+                    currency: "USD",
+                    productId: "com.nagoh.pro"
+                })) + ".signature"
+            }
+        };
+
+        // 2. Wrap it in a "signedPayload" format (Header.Payload.Signature)
+        // Your worker uses atob(payloadParts[1]), so we put the data in the middle part.
+        const signedPayload = "eyJhbGciOiJFUzI1NiJ9." + btoa(JSON.stringify(mockPayload)) + ".mock_signature";
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ signedPayload: signedPayload })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                statusDiv.className = 'success';
+                statusDiv.innerText = "✅ Success: " + (result.message || "Notification Sent!");
+            } else {
+                statusDiv.className = 'error';
+                statusDiv.innerText = "❌ Error: " + (result.message || result.error || "Failed");
+            }
+        } catch (err) {
+            statusDiv.className = 'error';
+            statusDiv.innerText = "❌ Network Error: " + err.message;
+        }
+    }
+</script>
+
+</body>
+</html>
