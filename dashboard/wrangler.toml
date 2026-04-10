@@ -7,4 +7,6 @@ kv_namespaces = [
 ]
 
 [triggers]
-routes = ["nagoh.xyz/dashboard*"]
+routes = [
+  { pattern = "alerts.nagoh.xyz", custom_domain = true }
+]
