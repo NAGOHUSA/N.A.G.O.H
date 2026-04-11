@@ -523,9 +523,17 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 // ══ CONFIG ══════════════════════════════════════════════
 const WORKER = 'https://alerts.nagoh.xyz';
 const authB64 = btoa('admin:admin');
-// Only include Content-Type when sending a body — DELETE requests must NOT have it
-const authHdr  = ()             => ({ 'Authorization': 'Basic ' + authB64, 'Content-Type': 'application/json' });
-const authOnly = ()             => ({ 'Authorization': 'Basic ' + authB64 });
+
+// For GET/POST with body: use Authorization header (simple request, no preflight)
+const authHdr = () => ({ 'Authorization': 'Basic ' + authB64, 'Content-Type': 'application/json' });
+
+// For DELETE requests: Authorization header triggers a CORS preflight.
+// Instead, pass auth as a query param ?_auth=... — the updated worker accepts this.
+// This makes DELETE a "simple" cross-origin request with no preflight needed.
+function authUrl(base) {
+  const sep = base.includes('?') ? '&' : '?';
+  return `${base}${sep}_auth=${encodeURIComponent(authB64)}`;
+}
 
 // Debug log — shown in the debug panel
 const dbLogs = [];
@@ -653,7 +661,7 @@ function confirmDeleteApp(bundleId, name){
     `Delete "${name}" and ALL its sales data permanently? This cannot be undone.`,
     async () => {
       try {
-        await fetch(`${WORKER}/api/apps/${encodeURIComponent(bundleId)}`,{ method:'DELETE', headers:authHdr() });
+        await fetch(authUrl(`${WORKER}/api/apps/${encodeURIComponent(bundleId)}`), { method: 'DELETE' });
         toast('App deleted','success');
         if(curApp === bundleId){ curApp = null; allSales = []; renderTable(); }
         await loadApps();
@@ -837,20 +845,21 @@ function updateBulkBar(){
 }
 
 // ══ DELETE ═══════════════════════════════════════════════
+// Auth via ?_auth= query param on all DELETE requests.
+// Sending Authorization header on a cross-origin DELETE triggers a CORS preflight.
+// Cloudflare Workers sometimes reject or stall preflights on custom domains.
+// Moving auth to a query param makes DELETE a "simple" cross-origin request — no preflight.
 function saleUrl(id){
-  // Double-encode isn't needed — worker uses decodeURIComponent on the path segment
-  const url = `${WORKER}/api/sales/${encodeURIComponent(String(id))}?bundleId=${encodeURIComponent(curApp)}`;
+  const url = authUrl(`${WORKER}/api/sales/${encodeURIComponent(String(id))}?bundleId=${encodeURIComponent(curApp)}`);
   dbLog('saleUrl', url);
   return url;
 }
 
 function confirmDeleteSale(id){
   openModal('Delete Sale','Remove this sale record permanently?', async () => {
-    const url = saleUrl(id);
     dbLog('DELETE sale', { id, curApp });
     try {
-      // No Content-Type on DELETE — body-less requests
-      const r = await fetch(url, { method:'DELETE', headers: authOnly() });
+      const r = await fetch(saleUrl(id), { method: 'DELETE' });
       dbLog('DELETE response', { status: r.status, ok: r.ok });
       let d = {};
       try { d = await r.json(); } catch(_){}
@@ -875,12 +884,17 @@ async function bulkDelete(){
   openModal('Delete Selected', `Permanently delete ${ids.length} record(s)?`, async () => {
     let ok=0, fail=0;
     for(const id of ids){
-      dbLog('bulk DELETE', { id, curApp });
+      dbLog('bulk DELETE', { id });
       try {
-        const r = await fetch(saleUrl(id), { method:'DELETE', headers: authOnly() });
+        const r = await fetch(saleUrl(id), { method: 'DELETE' });
         dbLog('bulk DELETE resp', { id, status: r.status, ok: r.ok });
-        if(r.ok){ allSales = allSales.filter(s => String(s.id) !== String(id)); selected.delete(id); ok++; }
-        else { let d={}; try{d=await r.json();}catch(_){} dbLog('bulk DELETE err', d); fail++; }
+        if(r.ok){
+          allSales = allSales.filter(s => String(s.id) !== String(id));
+          selected.delete(id); ok++;
+        } else {
+          let d={}; try{d=await r.json();}catch(_){}
+          dbLog('bulk DELETE err', d); fail++;
+        }
       } catch(e){ dbLog('bulk DELETE catch', e.message); fail++; }
     }
     updateStats(); applyFilters();
@@ -896,10 +910,10 @@ async function confirmPurgeTests(){
     'Purge All Test Data',
     `⚠️ Permanently delete ALL ${tests.length} TEST records for this app? This cannot be undone.`,
     async () => {
-      const url = `${WORKER}/api/sales/purge-tests?bundleId=${encodeURIComponent(curApp)}`;
+      const url = authUrl(`${WORKER}/api/sales/purge-tests?bundleId=${encodeURIComponent(curApp)}`);
       dbLog('PURGE', { curApp, url });
       try {
-        const r = await fetch(url, { method:'DELETE', headers: authOnly() });
+        const r = await fetch(url, { method: 'DELETE' });
         dbLog('PURGE resp', { status: r.status, ok: r.ok });
         let d = {};
         try { d = await r.json(); } catch(_){}
@@ -966,7 +980,7 @@ async function testDirectDelete(){
   dbLog('testDelete id type', typeof s.id);
   dbLog('testDelete raw id', s.id);
   try {
-    const r = await fetch(url, { method:'DELETE', headers: authOnly() });
+    const r = await fetch(authUrl(url), { method: 'DELETE' });
     dbLog('testDelete status', r.status);
     dbLog('testDelete ok', r.ok);
     const txt = await r.text();
