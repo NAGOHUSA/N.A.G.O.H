@@ -1,4 +1,380 @@
-<!DOCTYPE html>
+// App Store Sales Monitor
+// Nagoh Creative
+
+const VALID_USERNAME = "admin";
+const VALID_PASSWORD = "admin";
+
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Expose-Headers": "*"
+};
+
+export default {
+  async fetch(request, env) {
+    const url    = new URL(request.url);
+    const path   = url.pathname;
+    const method = request.method;
+
+    if (method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: CORS });
+    }
+
+    // Auth check for all /api/ routes
+    if (path.startsWith('/api/')) {
+      if (!isAuthenticated(request.headers.get('Authorization'))) {
+        return json({ error: "Unauthorized" }, 401, {
+          ...CORS, 'WWW-Authenticate': 'Basic realm="App Sales Monitor"'
+        });
+      }
+    }
+
+    // ── Apps ──────────────────────────────────────────────────────────────
+    if (path === '/api/apps') {
+      if (method === 'GET')  return getApps(env);
+      if (method === 'POST') return registerApp(request, env);
+    }
+
+    const appMatch = path.match(/^\/api\/apps\/(.+)$/);
+    if (appMatch && method === 'DELETE') {
+      return deleteApp(decodeURIComponent(appMatch[1]), env);
+    }
+
+    // ── Sales ─────────────────────────────────────────────────────────────
+    if (path === '/api/sales' && method === 'GET') {
+      return getSales(url.searchParams.get('bundleId'), env);
+    }
+
+    // DELETE /api/sales/purge-tests?bundleId=...
+    if (path === '/api/sales/purge-tests' && method === 'DELETE') {
+      return purgeTests(url.searchParams.get('bundleId'), env);
+    }
+
+    // DELETE|PATCH /api/sales/:id?bundleId=...
+    const saleMatch = path.match(/^\/api\/sales\/(.+)$/);
+    if (saleMatch) {
+      const saleId   = decodeURIComponent(saleMatch[1]);
+      const bundleId = url.searchParams.get('bundleId');
+      if (method === 'DELETE') return deleteSale(saleId, bundleId, env);
+      if (method === 'PATCH')  return patchSale(request, saleId, bundleId, env);
+    }
+
+    // ── Other ─────────────────────────────────────────────────────────────
+    if (path === '/api/test-sale' && method === 'POST') {
+      return addTestSale(request, env);
+    }
+
+    if (path === '/api/app-store-webhook' && method === 'POST') {
+      return handleWebhook(request, env);
+    }
+
+    // ── Debug endpoint (remove in production) ──
+    if (path === '/api/debug/kv' && method === 'GET') {
+      const bundleId = url.searchParams.get('bundleId');
+      if (!bundleId) return json({ error: "Missing bundleId" }, 400);
+      const sales = await kvSales(env, bundleId);
+      return json({ 
+        exists: !!sales,
+        count: sales?.length || 0,
+        types: sales?.reduce((acc, s) => {
+          acc[s.type] = (acc[s.type] || 0) + 1;
+          return acc;
+        }, {}) || {},
+        sample: sales?.slice(0, 3) || []
+      });
+    }
+
+    // ── Dashboard HTML ──
+    if (path === '/' || path === '/dashboard' || path === '/dashboard/') {
+      const html = getDashboardHTML();
+      return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    }
+
+    return json({ error: "Not Found" }, 404);
+  }
+};
+
+// ── Auth ──────────────────────────────────────────────────────────────────
+
+function isAuthenticated(header) {
+  if (!header || !header.startsWith('Basic ')) return false;
+  try {
+    const [user, pass] = atob(header.slice(6)).split(':');
+    return user === VALID_USERNAME && pass === VALID_PASSWORD;
+  } catch(e) {
+    return false;
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+
+function json(data, status = 200, headers = CORS) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...headers, 'Content-Type': 'application/json' }
+  });
+}
+
+function makeId(suffix = '') {
+  return `${Date.now()}_${suffix}_${Math.random().toString(36).slice(2)}`;
+}
+
+async function kvSales(env, bundleId) {
+  if (!bundleId) return [];
+  const data = await env.SALES_KV.get(`sales_${bundleId}`, 'json');
+  return data || [];
+}
+
+async function putSales(env, bundleId, sales) {
+  // Keep last 5000 sales to avoid KV limits
+  const trimmed = sales.slice(0, 5000);
+  await env.SALES_KV.put(`sales_${bundleId}`, JSON.stringify(trimmed));
+}
+
+// ── App handlers ──────────────────────────────────────────────────────────
+
+async function getApps(env) {
+  const apps = await env.SALES_KV.get('registered_apps', 'json') || [];
+  return json(apps);
+}
+
+async function registerApp(request, env) {
+  try {
+    const { appName, bundleId, appStoreUrl } = await request.json();
+    if (!appName || !bundleId || !appStoreUrl) return json({ error: "Missing required fields" }, 400);
+
+    const apps = await env.SALES_KV.get('registered_apps', 'json') || [];
+    if (apps.find(a => a.bundleId === bundleId)) return json({ error: "Bundle ID already registered" }, 400);
+
+    apps.push({ appName, bundleId, appStoreUrl, registeredAt: new Date().toISOString() });
+    await env.SALES_KV.put('registered_apps', JSON.stringify(apps));
+    return json({ success: true });
+  } catch (e) {
+    return json({ error: e.message }, 500);
+  }
+}
+
+async function deleteApp(bundleId, env) {
+  let apps = await env.SALES_KV.get('registered_apps', 'json') || [];
+  apps = apps.filter(a => a.bundleId !== bundleId);
+  await env.SALES_KV.put('registered_apps', JSON.stringify(apps));
+  await env.SALES_KV.delete(`sales_${bundleId}`);
+  return json({ success: true });
+}
+
+// ── Sale handlers ─────────────────────────────────────────────────────────
+
+async function getSales(bundleId, env) {
+  if (!bundleId) return json({ error: "Missing bundleId" }, 400);
+  return json(await kvSales(env, bundleId));
+}
+
+async function deleteSale(saleId, bundleId, env) {
+  if (!bundleId) return json({ error: "Missing bundleId query param" }, 400);
+  try {
+    let sales = await kvSales(env, bundleId);
+    const before = sales.length;
+    
+    sales = sales.filter(s => String(s.id) !== String(saleId));
+    const removed = before - sales.length;
+    
+    await putSales(env, bundleId, sales);
+    
+    if (removed === 0) {
+      return json({ success: false, error: "Sale not found", removed: 0 }, 404);
+    }
+    
+    return json({ success: true, removed });
+  } catch (e) {
+    return json({ error: e.message }, 500);
+  }
+}
+
+async function purgeTests(bundleId, env) {
+  if (!bundleId) return json({ error: "Missing bundleId query param" }, 400);
+  try {
+    let sales = await kvSales(env, bundleId);
+    const before = sales.length;
+    
+    // Fixed: Actually filter out TEST records
+    const remaining = sales.filter(s => s.type !== 'TEST');
+    const removed = before - remaining.length;
+    
+    console.log(`[PURGE] bundleId: ${bundleId}, before: ${before}, removed: ${removed}`);
+    
+    await putSales(env, bundleId, remaining);
+    
+    return json({ success: true, removed: removed });
+  } catch (e) {
+    console.error(`[PURGE] Error: ${e.message}`);
+    return json({ error: e.message }, 500);
+  }
+}
+
+async function patchSale(request, saleId, bundleId, env) {
+  if (!bundleId) return json({ error: "Missing bundleId query param" }, 400);
+  try {
+    const updates = await request.json();
+    let sales = await kvSales(env, bundleId);
+    const idx = sales.findIndex(s => String(s.id) === String(saleId));
+    if (idx === -1) return json({ error: "Sale not found" }, 404);
+    
+    if (updates.price !== undefined) sales[idx].price = parseFloat(updates.price);
+    if (updates.details !== undefined) sales[idx].details = String(updates.details);
+    if (updates.type !== undefined) sales[idx].type = String(updates.type);
+    
+    await putSales(env, bundleId, sales);
+    return json({ success: true, sale: sales[idx] });
+  } catch (e) {
+    return json({ error: e.message }, 500);
+  }
+}
+
+async function addTestSale(request, env) {
+  try {
+    const { bundleId } = await request.json();
+    if (!bundleId) return json({ error: "Missing bundleId" }, 400);
+
+    const apps = await env.SALES_KV.get('registered_apps', 'json') || [];
+    const app = apps.find(a => a.bundleId === bundleId);
+    if (!app) return json({ error: "App not found" }, 404);
+
+    const prices = [4.99, 9.99, 2.99, 19.99, 49.99];
+    const sale = {
+      id: makeId('test'),
+      timestamp: new Date().toISOString(),
+      type: 'TEST',
+      subtype: 'MANUAL_TEST',
+      bundleId,
+      price: prices[Math.floor(Math.random() * prices.length)],
+      details: `Test Sale - ${app.appName} (Manual Test)`
+    };
+
+    const sales = await kvSales(env, bundleId);
+    sales.unshift(sale);
+    await putSales(env, bundleId, sales);
+    return json({ success: true, sale });
+  } catch (e) {
+    return json({ error: e.message }, 500);
+  }
+}
+
+async function handleWebhook(request, env) {
+  try {
+    const rawBody = await request.text();
+    console.log(`[WEBHOOK] Raw body: ${rawBody.substring(0, 500)}`);
+    
+    let notification;
+    try {
+      notification = JSON.parse(rawBody);
+    } catch (e) {
+      console.error(`[WEBHOOK] Failed to parse JSON: ${e.message}`);
+      return json({ error: "Invalid JSON" }, 400);
+    }
+    
+    // Handle different App Store notification formats
+    let notificationType = 'UNKNOWN';
+    let subtype = '';
+    let bundleId = 'unknown';
+    let price = 0;
+    let transactionId = '';
+    let originalTransactionId = '';
+    
+    // Check for signedPayload (V2 notifications)
+    if (notification.signedPayload) {
+      try {
+        const payload = JSON.parse(atob(notification.signedPayload.split('.')[1]));
+        notificationType = payload.notificationType || payload.type || 'UNKNOWN';
+        subtype = payload.subtype || '';
+        bundleId = payload.bundleId || payload.bundle_id || 'unknown';
+        
+        if (payload.data && payload.data.signedTransactionInfo) {
+          const tx = JSON.parse(atob(payload.data.signedTransactionInfo.split('.')[1]));
+          price = parseFloat(tx.price) || 0;
+          transactionId = tx.transactionId || '';
+          originalTransactionId = tx.originalTransactionId || '';
+        }
+      } catch (e) {
+        console.error(`[WEBHOOK] Failed to parse signedPayload: ${e.message}`);
+      }
+    } 
+    // Check for unifiedReceipt (V1 notifications)
+    else if (notification.unified_receipt || notification.password) {
+      notificationType = notification.notification_type || 'PURCHASE';
+      bundleId = notification.bid || notification.bundle_id || 'unknown';
+      if (notification.unified_receipt && notification.unified_receipt.latest_receipt_info) {
+        const receipt = notification.unified_receipt.latest_receipt_info[0];
+        if (receipt) {
+          price = parseFloat(receipt.price) || 0;
+          transactionId = receipt.transaction_id || '';
+          originalTransactionId = receipt.original_transaction_id || '';
+        }
+      }
+    }
+    // Direct V2 notification format
+    else {
+      notificationType = notification.notificationType || notification.type || 'PURCHASE';
+      subtype = notification.subtype || '';
+      bundleId = notification.bundleId || notification.bundle_id || 'unknown';
+      
+      if (notification.data && notification.data.signedTransactionInfo) {
+        try {
+          const tx = JSON.parse(atob(notification.data.signedTransactionInfo.split('.')[1]));
+          price = parseFloat(tx.price) || 0;
+          transactionId = tx.transactionId || '';
+          originalTransactionId = tx.originalTransactionId || '';
+        } catch (e) {}
+      }
+    }
+    
+    // Map notification types to our display types
+    let displayType = 'PURCHASE';
+    if (notificationType === 'REFUND' || notificationType === 'REFUND_DECLINED' || 
+        notificationType === 'CONSUMPTION_REQUEST' || notificationType === 'REFUND_REVERSED') {
+      displayType = 'REFUND';
+    } else if (notificationType === 'TEST' || notificationType === 'SANDBOX' || 
+               notificationType.includes('TEST')) {
+      displayType = 'TEST';
+    } else if (notificationType === 'DID_RENEW' || notificationType === 'INITIAL_BUY' ||
+               notificationType === 'DID_CHANGE_RENEWAL_PREF' || notificationType === 'PURCHASE') {
+      displayType = 'PURCHASE';
+    } else if (notificationType === 'CANCEL' || notificationType === 'DID_FAIL_TO_RENEW') {
+      displayType = 'REFUND';
+    } else {
+      displayType = 'PURCHASE';
+    }
+    
+    const sale = {
+      id: makeId('webhook'),
+      timestamp: new Date().toISOString(),
+      type: displayType,
+      originalType: notificationType,
+      subtype: subtype,
+      bundleId: bundleId,
+      price: price,
+      transactionId: transactionId,
+      originalTransactionId: originalTransactionId,
+      details: `${notificationType}${subtype ? ` - ${subtype}` : ''}${transactionId ? ` - TX: ${transactionId.slice(-8)}` : ''}`
+    };
+    
+    console.log(`[WEBHOOK] Processed: ${sale.type} for ${bundleId} - $${price}`);
+    
+    // Store the sale
+    const sales = await kvSales(env, bundleId);
+    sales.unshift(sale);
+    await putSales(env, bundleId, sales);
+    
+    return json({ success: true, sale: { type: sale.type, bundleId: sale.bundleId, price: sale.price } });
+  } catch (e) {
+    console.error(`[WEBHOOK] Error: ${e.message}`);
+    console.error(`[WEBHOOK] Stack: ${e.stack}`);
+    return json({ error: e.message }, 500);
+  }
+}
+
+function getDashboardHTML() {
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -32,7 +408,6 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:var(--sans); background:var(--bg); color:var(--text); min-height:100vh; font-size:14px; }
 
-/* ── LOGIN ── */
 .login-wrap { display:flex; align-items:center; justify-content:center; min-height:100vh; background:var(--bg); }
 .login-card {
   background:var(--surface); border:1px solid var(--border); border-radius:16px;
@@ -62,7 +437,6 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .btn-full { width:100%; justify-content:center; padding:12px; margin-top:4px; }
 .login-error { background:#2a1515; border:1px solid var(--red); color:var(--red); padding:10px 14px; border-radius:8px; font-size:13px; margin-top:12px; display:none; }
 
-/* ── SHELL ── */
 .shell { display:none; min-height:100vh; }
 .topbar {
   position:sticky; top:0; z-index:200; background:var(--surface); border-bottom:1px solid var(--border);
@@ -72,12 +446,10 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .topbar-right { display:flex; align-items:center; gap:12px; }
 .topbar-clock { font-family:var(--mono); font-size:11px; color:var(--text3); }
 
-/* ── LAYOUT ── */
 .layout { display:grid; grid-template-columns:300px 1fr; min-height:calc(100vh - 56px); }
 .sidebar { background:var(--surface); border-right:1px solid var(--border); padding:20px; overflow-y:auto; }
 .main { padding:24px; overflow-x:auto; }
 
-/* ── STATS ROW ── */
 .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
 .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; }
 .stat-label { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); margin-bottom:8px; }
@@ -86,12 +458,10 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .stat-val.accent { color:var(--accent); }
 .stat-val.amber { color:var(--amber); }
 
-/* ── SECTION HEADER ── */
 .section-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); }
 .section-hd h2 { font-size:13px; font-weight:700; letter-spacing:0.5px; color:var(--text); }
 .section-hd .actions { display:flex; gap:8px; }
 
-/* ── APP LIST ── */
 .app-item {
   background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:14px;
   margin-bottom:8px; cursor:pointer; transition:all 0.15s;
@@ -103,7 +473,6 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .app-item-footer { display:flex; align-items:center; justify-content:space-between; }
 .app-badge { font-family:var(--mono); font-size:10px; color:var(--text2); }
 
-/* ── ADD APP FORM ── */
 .add-form { margin-top:20px; padding-top:20px; border-top:1px solid var(--border); }
 .add-form-title { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--text3); margin-bottom:14px; }
 .field-sm { margin-bottom:10px; }
@@ -114,7 +483,6 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .webhook-info .wh-label { font-size:10px; color:var(--text3); margin-bottom:4px; }
 .webhook-info .wh-url { font-family:var(--mono); font-size:10px; color:var(--accent); word-break:break-all; }
 
-/* ── TOOLBAR ── */
 .toolbar { display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
 .toolbar-search { flex:1; min-width:180px; position:relative; }
 .toolbar-search input { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:8px 12px 8px 32px; color:var(--text); font-size:13px; outline:none; transition:border 0.15s; }
@@ -126,7 +494,6 @@ body { font-family:var(--sans); background:var(--bg); color:var(--text); min-hei
 .filter-chip:hover { border-color:var(--accent); color:var(--accent); }
 .filter-chip.on { background:var(--accent); border-color:var(--accent); color:#fff; }
 
-/* ── TABLE ── */
 .tbl-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); }
 table { width:100%; border-collapse:collapse; }
 thead tr { background:var(--surface); }
@@ -149,7 +516,6 @@ tr.test-row td { opacity:0.6; }
 .badge-refund { background:rgba(239,68,68,0.15); color:var(--red); border:1px solid rgba(239,68,68,0.3); }
 .row-cb { width:14px; height:14px; cursor:pointer; accent-color:var(--accent); }
 
-/* ── INLINE EDIT ── */
 .edit-input { background:var(--surface2); border:1px solid var(--accent); border-radius:6px; padding:4px 8px; color:var(--text); font-family:var(--mono); font-size:11px; width:100%; outline:none; }
 .edit-cell { display:flex; align-items:center; gap:6px; }
 .edit-save { background:var(--green); border:none; color:#000; border-radius:4px; padding:3px 8px; cursor:pointer; font-size:10px; font-weight:700; }
@@ -157,7 +523,6 @@ tr.test-row td { opacity:0.6; }
 .editable-cell { cursor:pointer; }
 .editable-cell:hover { color:var(--text); text-decoration:underline dashed var(--text3); text-underline-offset:2px; }
 
-/* ── BULK BAR ── */
 .bulk-bar {
   display:none; align-items:center; gap:12px; background:var(--surface3); border:1px solid var(--border2);
   border-radius:var(--radius); padding:10px 16px; margin-bottom:14px;
@@ -165,7 +530,6 @@ tr.test-row td { opacity:0.6; }
 .bulk-bar.visible { display:flex; }
 .bulk-count { font-family:var(--mono); font-size:12px; color:var(--accent); }
 
-/* ── PAGINATION ── */
 .pagination { display:flex; align-items:center; justify-content:space-between; margin-top:14px; }
 .page-info { font-size:12px; color:var(--text3); font-family:var(--mono); }
 .page-btns { display:flex; gap:6px; }
@@ -173,7 +537,6 @@ tr.test-row td { opacity:0.6; }
 .page-btn:hover { border-color:var(--accent); color:var(--accent); }
 .page-btn:disabled { opacity:0.3; cursor:default; }
 
-/* ── TOAST ── */
 .toast-wrap { position:fixed; bottom:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
 .toast { background:var(--surface2); border:1px solid var(--border2); border-radius:10px; padding:12px 18px; font-size:13px; color:var(--text); box-shadow:var(--shadow); opacity:0; transform:translateY(10px); transition:all 0.25s; pointer-events:none; }
 .toast.show { opacity:1; transform:translateY(0); }
@@ -181,7 +544,6 @@ tr.test-row td { opacity:0.6; }
 .toast.error { border-color:var(--red); color:var(--red); }
 .toast.info { border-color:var(--accent); color:var(--accent); }
 
-/* ── MODAL ── */
 .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:500; align-items:center; justify-content:center; }
 .modal-overlay.open { display:flex; }
 .modal { background:var(--surface); border:1px solid var(--border2); border-radius:16px; padding:28px; width:440px; max-width:90vw; box-shadow:var(--shadow); }
@@ -189,12 +551,10 @@ tr.test-row td { opacity:0.6; }
 .modal p { color:var(--text2); font-size:13px; margin-bottom:20px; line-height:1.5; }
 .modal-footer { display:flex; gap:10px; justify-content:flex-end; }
 
-/* ── EMPTY ── */
 .empty { text-align:center; padding:48px 20px; }
 .empty-icon { font-size:32px; margin-bottom:12px; }
 .empty p { color:var(--text3); font-size:13px; }
 
-/* ── RESPONSIVE ── */
 @media(max-width:900px){
   .layout { grid-template-columns:1fr; }
   .sidebar { border-right:none; border-bottom:1px solid var(--border); }
@@ -208,7 +568,6 @@ tr.test-row td { opacity:0.6; }
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="loginWrap" class="login-wrap">
   <div class="login-card">
     <div class="brand">Nagoh Creative</div>
@@ -220,7 +579,6 @@ tr.test-row td { opacity:0.6; }
   </div>
 </div>
 
-<!-- SHELL -->
 <div id="shell" class="shell">
   <div class="topbar">
     <div class="topbar-brand">◈ Nagoh · Sales Monitor</div>
@@ -232,7 +590,6 @@ tr.test-row td { opacity:0.6; }
   </div>
 
   <div class="layout">
-    <!-- SIDEBAR -->
     <div class="sidebar">
       <div class="section-hd">
         <h2>Your Apps</h2>
@@ -250,14 +607,12 @@ tr.test-row td { opacity:0.6; }
         <button class="btn btn-primary btn-full" style="margin-top:8px;" onclick="addApp()">+ Register App</button>
         <div class="webhook-info">
           <div class="wh-label">Webhook URL for App Store Connect:</div>
-          <div class="wh-url">https://alerts.nagoh.xyz/api/app-store-webhook</div>
+          <div class="wh-url" id="webhookUrl">https://alerts.nagoh.xyz/api/app-store-webhook</div>
         </div>
       </div>
     </div>
 
-    <!-- MAIN -->
     <div class="main">
-      <!-- Stats -->
       <div class="stats-row">
         <div class="stat-card">
           <div class="stat-label">Total Apps</div>
@@ -277,7 +632,6 @@ tr.test-row td { opacity:0.6; }
         </div>
       </div>
 
-      <!-- Toolbar -->
       <div class="toolbar">
         <div class="toolbar-search">
           <span class="srch-icon">⌕</span>
@@ -305,7 +659,6 @@ tr.test-row td { opacity:0.6; }
         </select>
       </div>
 
-      <!-- Bulk bar -->
       <div class="bulk-bar" id="bulkBar">
         <span class="bulk-count" id="bulkCount">0 selected</span>
         <button class="btn btn-danger" onclick="bulkDelete()">🗑 Delete Selected</button>
@@ -313,14 +666,13 @@ tr.test-row td { opacity:0.6; }
         <button class="btn btn-ghost" onclick="clearSelection()">✕ Deselect</button>
       </div>
 
-      <!-- Action row -->
       <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
         <button class="btn btn-amber" onclick="confirmDeleteAllTests()">🧹 Purge All Test Data</button>
         <button class="btn btn-green" onclick="sendTestSale()">🧪 Send Test Sale</button>
+        <button class="btn btn-primary" onclick="startAutoRefresh()" id="autoRefreshBtn">🔄 Auto-refresh OFF</button>
         <span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3);" id="filterSummary"></span>
       </div>
 
-      <!-- Table -->
       <div class="tbl-wrap">
         <table id="salesTable">
           <thead>
@@ -339,7 +691,6 @@ tr.test-row td { opacity:0.6; }
         </table>
       </div>
 
-      <!-- Pagination -->
       <div class="pagination" id="paginationRow" style="display:none;">
         <span class="page-info" id="pageInfo"></span>
         <div class="page-btns">
@@ -351,7 +702,6 @@ tr.test-row td { opacity:0.6; }
   </div>
 </div>
 
-<!-- CONFIRM MODAL -->
 <div class="modal-overlay" id="confirmModal">
   <div class="modal">
     <h2 id="modalTitle">Confirm Action</h2>
@@ -363,11 +713,10 @@ tr.test-row td { opacity:0.6; }
   </div>
 </div>
 
-<!-- TOASTS -->
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script>
-const WORKER = 'https://alerts.nagoh.xyz';
+const WORKER = window.location.origin;
 let apps = [];
 let allSales = [];
 let filteredSales = [];
@@ -380,11 +729,16 @@ let typeFilter = 'all';
 let selectedIds = new Set();
 let editingCell = null;
 let modalCallback = null;
+let autoRefreshInterval = null;
+let autoRefreshEnabled = false;
 
-// ── AUTH ──
 const auth = () => 'Basic ' + btoa('admin:admin');
 function isLoggedIn(){ return sessionStorage.getItem('nagoh_auth')==='true'; }
-function logout(){ sessionStorage.removeItem('nagoh_auth'); location.reload(); }
+function logout(){ 
+  if(autoRefreshInterval) clearInterval(autoRefreshInterval);
+  sessionStorage.removeItem('nagoh_auth'); 
+  location.reload(); 
+}
 
 function login(){
   const u = document.getElementById('username').value;
@@ -399,16 +753,47 @@ function login(){
   }
 }
 
-// ── INIT ──
 function init(){
   tickClock();
   setInterval(tickClock, 1000);
   loadApps();
+  // Set the correct webhook URL
+  const webhookUrlEl = document.getElementById('webhookUrl');
+  if (webhookUrlEl) {
+    webhookUrlEl.textContent = window.location.origin + '/api/app-store-webhook';
+  }
 }
 
 function tickClock(){
   const now = new Date();
   document.getElementById('clock').textContent = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+function startAutoRefresh() {
+  autoRefreshEnabled = !autoRefreshEnabled;
+  const btn = document.getElementById('autoRefreshBtn');
+  if (autoRefreshEnabled) {
+    if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+    autoRefreshInterval = setInterval(() => {
+      if (currentApp) {
+        loadSales();
+        toast('Auto-refresh ✓', 'info');
+      }
+    }, 10000); // Refresh every 10 seconds
+    btn.textContent = '🔄 Auto-refresh ON';
+    btn.style.background = 'var(--green)';
+    btn.style.color = '#000';
+    toast('Auto-refresh enabled (every 10s)', 'success');
+  } else {
+    if (autoRefreshInterval) {
+      clearInterval(autoRefreshInterval);
+      autoRefreshInterval = null;
+    }
+    btn.textContent = '🔄 Auto-refresh OFF';
+    btn.style.background = '';
+    btn.style.color = '';
+    toast('Auto-refresh disabled', 'info');
+  }
 }
 
 if(isLoggedIn()){
@@ -417,10 +802,9 @@ if(isLoggedIn()){
   init();
 }
 
-// ── APPS ──
 async function loadApps(){
   try {
-    const r = await fetch(`${WORKER}/api/apps`,{headers:{Authorization:auth()}});
+    const r = await fetch(\`\${WORKER}/api/apps\`,{headers:{Authorization:auth()}});
     apps = await r.json();
     document.getElementById('statApps').textContent = apps.length;
     renderApps();
@@ -431,15 +815,15 @@ async function loadApps(){
 function renderApps(){
   const el = document.getElementById('appsList');
   if(!apps.length){ el.innerHTML='<div class="empty"><div class="empty-icon">📱</div><p>No apps registered.</p></div>'; return; }
-  el.innerHTML = apps.map(a=>`
-    <div class="app-item ${currentApp===a.bundleId?'active':''}" onclick="selectApp('${a.bundleId}')">
-      <div class="app-item-name">${esc(a.appName)}</div>
-      <div class="app-item-bundle">${a.bundleId}</div>
+  el.innerHTML = apps.map(a=>\`
+    <div class="app-item \${currentApp===a.bundleId?'active':''}" onclick="selectApp('\${a.bundleId}')">
+      <div class="app-item-name">\${esc(a.appName)}</div>
+      <div class="app-item-bundle">\${a.bundleId}</div>
       <div class="app-item-footer">
         <span class="app-badge">—</span>
-        <button class="btn btn-danger" style="padding:3px 10px;font-size:11px;" onclick="event.stopPropagation();confirmDeleteApp('${a.bundleId}')">Delete</button>
+        <button class="btn btn-danger" style="padding:3px 10px;font-size:11px;" onclick="event.stopPropagation();confirmDeleteApp('\${a.bundleId}')">Delete</button>
       </div>
-    </div>`).join('');
+    </div>\`).join('');
 }
 
 async function selectApp(bundleId){
@@ -454,7 +838,7 @@ async function addApp(){
   const url = document.getElementById('appStoreUrl').value.trim();
   if(!name||!bundle||!url){ toast('Fill in all fields','error'); return; }
   try {
-    const r = await fetch(`${WORKER}/api/apps`,{method:'POST',headers:{Authorization:auth(),'Content-Type':'application/json'},body:JSON.stringify({appName:name,bundleId:bundle,appStoreUrl:url})});
+    const r = await fetch(\`\${WORKER}/api/apps\`,{method:'POST',headers:{Authorization:auth(),'Content-Type':'application/json'},body:JSON.stringify({appName:name,bundleId:bundle,appStoreUrl:url})});
     if(r.ok){ toast('App registered ✓','success'); document.getElementById('appName').value=''; document.getElementById('bundleId').value=''; document.getElementById('appStoreUrl').value=''; await loadApps(); }
     else { const e=await r.json(); toast(e.error||'Error','error'); }
   } catch(e){ toast('Network error','error'); }
@@ -463,18 +847,17 @@ async function addApp(){
 function confirmDeleteApp(bundleId){
   openModal('Delete App','This will permanently delete the app and ALL its sales data. This cannot be undone.', async()=>{
     try {
-      const r = await fetch(`${WORKER}/api/apps/${encodeURIComponent(bundleId)}`,{method:'DELETE',headers:{Authorization:auth()}});
+      const r = await fetch(\`\${WORKER}/api/apps/\${encodeURIComponent(bundleId)}\`,{method:'DELETE',headers:{Authorization:auth()}});
       if(r.ok){ toast('App deleted','success'); if(currentApp===bundleId){currentApp=null;allSales=[];filteredSales=[];renderTable();} await loadApps(); }
       else toast('Error deleting app','error');
     } catch(e){ toast('Network error','error'); }
   });
 }
 
-// ── SALES ──
 async function loadSales(){
   if(!currentApp) return;
   try {
-    const r = await fetch(`${WORKER}/api/sales?bundleId=${encodeURIComponent(currentApp)}`,{headers:{Authorization:auth()}});
+    const r = await fetch(\`\${WORKER}/api/sales?bundleId=\${encodeURIComponent(currentApp)}\`,{headers:{Authorization:auth()}});
     allSales = await r.json();
     updateStats();
     applyFilters();
@@ -486,7 +869,8 @@ function updateStats(){
   const real = allSales.filter(s=>s.type==='PURCHASE');
   document.getElementById('statToday').textContent = allSales.filter(s=>new Date(s.timestamp).toDateString()===today&&s.type==='PURCHASE').length;
   document.getElementById('statTotal').textContent = real.length;
-  document.getElementById('statRevenue').textContent = '$'+real.reduce((s,x)=>s+(x.price||0),0).toFixed(2);
+  const revenue = real.reduce((s,x)=>s+(x.price||0),0);
+  document.getElementById('statRevenue').textContent = '$'+revenue.toFixed(2);
 }
 
 async function refreshAll(){
@@ -495,7 +879,6 @@ async function refreshAll(){
   toast('Refreshed','info');
 }
 
-// ── FILTERS & SORT ──
 function setTypeFilter(btn, val){
   typeFilter = val;
   document.querySelectorAll('.filter-chip').forEach(b=>b.classList.remove('on'));
@@ -507,7 +890,7 @@ function setTypeFilter(btn, val){
 function sortBy(field){
   if(sortField===field) sortDir = sortDir==='asc'?'desc':'asc';
   else { sortField=field; sortDir='desc'; }
-  document.getElementById('sortField').value = `${sortField}-${sortDir}`;
+  document.getElementById('sortField').value = \`\${sortField}-\${sortDir}\`;
   applyFilters();
 }
 
@@ -521,16 +904,13 @@ function applyFilters(){
 
   let data = [...allSales];
 
-  // type filter
   if(typeFilter!=='all') data = data.filter(s=>s.type===typeFilter);
 
-  // search
   if(search) data = data.filter(s=>{
-    const row = `${s.type||''} ${s.price||''} ${s.details||''} ${new Date(s.timestamp).toLocaleString()}`.toLowerCase();
+    const row = \`\${s.type||''} \${s.price||''} \${s.details||''} \${new Date(s.timestamp).toLocaleString()}\`.toLowerCase();
     return row.includes(search);
   });
 
-  // sort
   data.sort((a,b)=>{
     let av = a[sortField], bv = b[sortField];
     if(sortField==='timestamp'){ av=new Date(av); bv=new Date(bv); }
@@ -543,20 +923,18 @@ function applyFilters(){
   filteredSales = data;
   currentPage = Math.min(currentPage, Math.ceil(data.length/pageSize)||1);
 
-  // update sort icons
   ['timestamp','type','price'].forEach(f=>{
-    const th = document.getElementById(`th-${f}`);
+    const th = document.getElementById(\`th-\${f}\`);
     if(!th) return;
     th.classList.toggle('sorted', f===sortField);
     const ico = th.querySelector('.sort-icon');
     if(ico) ico.textContent = f===sortField ? (sortDir==='asc'?'↑':'↓') : '↕';
   });
 
-  document.getElementById('filterSummary').textContent = `${data.length} of ${allSales.length} records`;
+  document.getElementById('filterSummary').textContent = \`\${data.length} of \${allSales.length} records\`;
   renderTable();
 }
 
-// ── RENDER TABLE ──
 function renderTable(){
   const tbody = document.getElementById('salesBody');
   if(!allSales.length){
@@ -578,30 +956,29 @@ function renderTable(){
     const isTest = s.type==='TEST';
     const badgeCls = s.type==='PURCHASE'?'badge-purchase':s.type==='REFUND'?'badge-refund':'badge-test';
     const checked = selectedIds.has(s.id) ? 'checked' : '';
-    return `<tr class="${isTest?'test-row':''}" data-id="${s.id}">
-      <td><input type="checkbox" class="row-cb" ${checked} onchange="toggleSelect('${s.id}',this.checked)"></td>
-      <td class="mono">${new Date(s.timestamp).toLocaleString()}</td>
-      <td><span class="badge ${badgeCls}">${s.type}</span></td>
-      <td class="mono" ondblclick="editCell(this,'${s.id}','price',${s.price||0})">
-        <span class="editable-cell" title="Double-click to edit">$${(s.price||0).toFixed(2)}</span>
+    return \`<tr class="\${isTest?'test-row':''}" data-id="\${s.id}">
+      <td><input type="checkbox" class="row-cb" \${checked} onchange="toggleSelect('\${s.id}',this.checked)"></td>
+      <td class="mono">\${new Date(s.timestamp).toLocaleString()}</td>
+      <td><span class="badge \${badgeCls}">\${s.type}</span></td>
+      <td class="mono" ondblclick="editCell(this,'\${s.id}','price',\${s.price||0})">
+        <span class="editable-cell" title="Double-click to edit">$\${(s.price||0).toFixed(2)}</span>
       </td>
-      <td ondblclick="editCell(this,'${s.id}','details','${esc(s.details||'')}')">
-        <span class="editable-cell" title="Double-click to edit">${esc(s.details||'—')}</span>
+      <td ondblclick="editCell(this,'\${s.id}','details','\${esc(s.details||'')}')">
+        <span class="editable-cell" title="Double-click to edit">\${esc(s.details||'—')}</span>
       </td>
       <td>
         <div style="display:flex;gap:6px;">
-          <button class="btn btn-ghost" style="padding:3px 10px;font-size:11px;" onclick="editRow('${s.id}')">✎ Edit</button>
-          <button class="btn btn-danger" style="padding:3px 10px;font-size:11px;" onclick="confirmDeleteSale('${s.id}')">✕</button>
+          <button class="btn btn-ghost" style="padding:3px 10px;font-size:11px;" onclick="editRow('\${s.id}')">✎ Edit</button>
+          <button class="btn btn-danger" style="padding:3px 10px;font-size:11px;" onclick="confirmDeleteSale('\${s.id}')">✕</button>
         </div>
       </td>
-    </tr>`;
+    </tr>\`;
   }).join('');
 
-  // Pagination
   const total = filteredSales.length;
   const pages = Math.ceil(total/pageSize);
   document.getElementById('paginationRow').style.display = pages>1?'flex':'none';
-  document.getElementById('pageInfo').textContent = `${start+1}–${end} of ${total}`;
+  document.getElementById('pageInfo').textContent = \`\${start+1}–\${end} of \${total}\`;
   document.getElementById('prevBtn').disabled = currentPage<=1;
   document.getElementById('nextBtn').disabled = currentPage>=pages;
 
@@ -614,7 +991,6 @@ function changePage(dir){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// ── SELECTION ──
 function toggleSelect(id, checked){
   if(checked) selectedIds.add(id); else selectedIds.delete(id);
   updateBulkBar();
@@ -633,22 +1009,20 @@ function updateBulkBar(){
   const bar = document.getElementById('bulkBar');
   if(selectedIds.size>0){
     bar.classList.add('visible');
-    document.getElementById('bulkCount').textContent = `${selectedIds.size} selected`;
+    document.getElementById('bulkCount').textContent = \`\${selectedIds.size} selected\`;
   } else {
     bar.classList.remove('visible');
   }
 }
 
-// ── INLINE EDIT ──
 function editCell(td, id, field, currentVal){
   if(editingCell) cancelEdit();
   editingCell = td;
-  const displayEl = td.querySelector('.editable-cell,span');
-  td.innerHTML = `<div class="edit-cell">
-    <input class="edit-input" id="inlineInput" type="${field==='price'?'number':'text'}" value="${currentVal}" step="0.01">
-    <button class="edit-save" onclick="saveCell('${id}','${field}')">✓</button>
+  td.innerHTML = \`<div class="edit-cell">
+    <input class="edit-input" id="inlineInput" type="\${field==='price'?'number':'text'}" value="\${currentVal}" step="0.01">
+    <button class="edit-save" onclick="saveCell('\${id}','\${field}')">✓</button>
     <button class="edit-cancel" onclick="cancelEdit()">✕</button>
-  </div>`;
+  </div>\`;
   const inp = document.getElementById('inlineInput');
   inp.focus(); inp.select();
   inp.onkeydown = e=>{ if(e.key==='Enter') saveCell(id,field); if(e.key==='Escape') cancelEdit(); };
@@ -663,7 +1037,7 @@ async function saveCell(id, field){
 
 async function patchSale(id, updates){
   try {
-    const r = await fetch(`${WORKER}/api/sales/${encodeURIComponent(id)}?bundleId=${encodeURIComponent(currentApp)}`, {
+    const r = await fetch(\`\${WORKER}/api/sales/\${encodeURIComponent(id)}?bundleId=\${encodeURIComponent(currentApp)}\`, {
       method:'PATCH',
       headers:{Authorization:auth(),'Content-Type':'application/json'},
       body:JSON.stringify(updates)
@@ -673,9 +1047,8 @@ async function patchSale(id, updates){
       if(idx>-1) allSales[idx] = {...allSales[idx],...updates};
       toast('Saved','success');
     } else {
-      // If PATCH not supported, update locally
       const idx = allSales.findIndex(s=>s.id===id);
-      if(idx>-1){ allSales[idx]={...allSales[idx],...updates}; toast('Saved locally (PATCH not supported by worker)','info'); }
+      if(idx>-1){ allSales[idx]={...allSales[idx],...updates}; toast('Saved locally','info'); }
     }
   } catch(e){
     const idx = allSales.findIndex(s=>s.id===id);
@@ -689,30 +1062,24 @@ async function patchSale(id, updates){
 function editRow(id){
   const sale = allSales.find(s=>s.id===id);
   if(!sale) return;
-  const td = document.querySelector(`tr[data-id="${id}"] td:nth-child(5)`);
+  const td = document.querySelector(\`tr[data-id="\${id}"] td:nth-child(5)\`);
   if(td) editCell(td, id, 'details', sale.details||'');
 }
 
-// ── DELETE ──
-function saleDeleteUrl(id){ return `${WORKER}/api/sales/${encodeURIComponent(id)}?bundleId=${encodeURIComponent(currentApp)}`; }
+function saleDeleteUrl(id){ return \`\${WORKER}/api/sales/\${encodeURIComponent(id)}?bundleId=\${encodeURIComponent(currentApp)}\`; }
 
 function confirmDeleteSale(id){
   openModal('Delete Sale','Permanently delete this sale record?', async()=>{
     const url = saleDeleteUrl(id);
-    console.log('[DELETE] calling:', url);
-    console.log('[DELETE] sale id:', id);
-    console.log('[DELETE] currentApp:', currentApp);
     try {
       const r = await fetch(url, {method:'DELETE', headers:{Authorization:auth()}});
       const body = await r.json();
-      console.log('[DELETE] response status:', r.status, 'body:', JSON.stringify(body));
       if (!r.ok) {
-        toast(`Worker error ${r.status}: ${body.error || 'unknown'}`, 'error');
+        toast(\`Error: \${body.error || 'Unknown error'}\`, 'error');
         return;
       }
     } catch(e){
       toast('Network error: ' + e.message, 'error');
-      console.error('[DELETE] fetch failed:', e);
       return;
     }
     allSales = allSales.filter(s => String(s.id) !== String(id));
@@ -725,68 +1092,63 @@ function confirmDeleteSale(id){
 function bulkDelete(){
   const ids = [...selectedIds];
   if(!ids.length) return;
-  openModal('Delete Selected',`Permanently delete ${ids.length} selected record(s)?`, async()=>{
+  openModal('Delete Selected',\`Permanently delete \${ids.length} selected record(s)?\`, async()=>{
     for(const id of ids){
       try { await fetch(saleDeleteUrl(id),{method:'DELETE',headers:{Authorization:auth()}}); } catch(e){}
       allSales = allSales.filter(s=>s.id!==id);
       selectedIds.delete(id);
     }
-    toast(`Deleted ${ids.length} records`,'success');
+    toast(\`Deleted \${ids.length} records\`,'success');
     updateStats(); applyFilters();
   });
 }
 
 function bulkDeleteType(type){
   const ids = [...selectedIds].filter(id=>{ const s=allSales.find(x=>x.id===id); return s&&s.type===type; });
-  if(!ids.length){ toast(`No ${type} records selected`,'info'); return; }
-  openModal(`Delete ${type} Records`,`Delete ${ids.length} ${type} record(s) from selection?`, async()=>{
+  if(!ids.length){ toast(\`No \${type} records selected\`,'info'); return; }
+  openModal(\`Delete \${type} Records\`,\`Delete \${ids.length} \${type} record(s) from selection?\`, async()=>{
     for(const id of ids){
       try { await fetch(saleDeleteUrl(id),{method:'DELETE',headers:{Authorization:auth()}}); } catch(e){}
       allSales = allSales.filter(s=>s.id!==id);
       selectedIds.delete(id);
     }
-    toast(`Deleted ${ids.length} ${type} records`,'success');
+    toast(\`Deleted \${ids.length} \${type} records\`,'success');
     updateStats(); applyFilters();
   });
 }
 
 function confirmDeleteAllTests(){
-  const tests = allSales.filter(s=>s.type==='TEST');
-  if(!tests.length){ toast('No test data found','info'); return; }
-  openModal('Purge All Test Data',`Permanently delete all ${tests.length} TEST records for this app?`, async()=>{
-    const url = `${WORKER}/api/sales/purge-tests?bundleId=${encodeURIComponent(currentApp)}`;
-    console.log('[PURGE] calling:', url);
+  const tests = allSales.filter(s => s.type === 'TEST');
+  if(!tests.length){ toast('No test data found', 'info'); return; }
+  openModal('Purge All Test Data', \`Permanently delete all \${tests.length} TEST records for this app?\`, async() => {
+    const url = \`\${WORKER}/api/sales/purge-tests?bundleId=\${encodeURIComponent(currentApp)}\`;
     try {
-      const r = await fetch(url, {method:'DELETE', headers:{Authorization:auth()}});
+      const r = await fetch(url, { method: 'DELETE', headers: { Authorization: auth() } });
       const body = await r.json();
-      console.log('[PURGE] status:', r.status, 'body:', JSON.stringify(body));
       if (!r.ok) {
-        toast(`Worker error ${r.status}: ${body.error || 'unknown'}`, 'error');
+        toast(\`Error: \${body.error || 'Unknown error'}\`, 'error');
         return;
       }
-      toast(`Purged ${body.removed ?? tests.length} test records ✓`, 'success');
-    } catch(e){
+      allSales = allSales.filter(s => s.type !== 'TEST');
+      selectedIds.clear();
+      toast(\`Deleted \${body.removed || tests.length} test records ✓\`, 'success');
+      updateStats();
+      applyFilters();
+    } catch(e) {
       toast('Network error: ' + e.message, 'error');
-      console.error('[PURGE] fetch failed:', e);
-      return;
     }
-    allSales = allSales.filter(s=>s.type!=='TEST');
-    selectedIds.clear();
-    updateStats(); applyFilters();
   });
 }
 
-// ── TEST SALE ──
 async function sendTestSale(){
   if(!currentApp){ toast('Select an app first','error'); return; }
   try {
-    const r = await fetch(`${WORKER}/api/test-sale`,{method:'POST',headers:{Authorization:auth(),'Content-Type':'application/json'},body:JSON.stringify({bundleId:currentApp})});
+    const r = await fetch(\`\${WORKER}/api/test-sale\`,{method:'POST',headers:{Authorization:auth(),'Content-Type':'application/json'},body:JSON.stringify({bundleId:currentApp})});
     if(r.ok){ toast('Test sale sent ✓','success'); await loadSales(); }
     else { const e=await r.json(); toast(e.error||'Error','error'); }
   } catch(e){ toast('Network error','error'); }
 }
 
-// ── MODAL ──
 function openModal(title, body, onConfirm){
   document.getElementById('modalTitle').textContent = title;
   document.getElementById('modalBody').textContent = body;
@@ -797,19 +1159,18 @@ document.getElementById('modalConfirmBtn').onclick = ()=>{ closeModal(); if(moda
 function closeModal(){ document.getElementById('confirmModal').classList.remove('open'); modalCallback=null; }
 document.getElementById('confirmModal').addEventListener('click', e=>{ if(e.target===document.getElementById('confirmModal')) closeModal(); });
 
-// ── TOAST ──
 function toast(msg, type='info'){
   const wrap = document.getElementById('toastWrap');
   const el = document.createElement('div');
-  el.className = `toast ${type}`;
+  el.className = \`toast \${type}\`;
   el.textContent = msg;
   wrap.appendChild(el);
   requestAnimationFrame(()=>{ requestAnimationFrame(()=>el.classList.add('show')); });
   setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),300); }, 2800);
 }
 
-// ── UTILS ──
 function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 </script>
 </body>
-</html>
+</html>`;
+}
