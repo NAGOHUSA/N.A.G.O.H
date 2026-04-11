@@ -317,6 +317,7 @@ tr.test-row td { opacity:0.6; }
       <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
         <button class="btn btn-amber" onclick="confirmDeleteAllTests()">🧹 Purge All Test Data</button>
         <button class="btn btn-green" onclick="sendTestSale()">🧪 Send Test Sale</button>
+        <button class="btn btn-primary" onclick="hardRefresh()" id="hardRefreshBtn">🔄 Hard Refresh (Reload from Server)</button>
         <span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3);" id="filterSummary"></span>
       </div>
 
@@ -495,6 +496,18 @@ async function refreshAll(){
   toast('Refreshed','info');
 }
 
+// Hard refresh - clears local cache and reloads from server
+async function hardRefresh(){
+  if(currentApp) {
+    toast('Hard refreshing from server...', 'info');
+    await loadSales();
+    selectedIds.clear();
+    toast('Data reloaded from server ✓', 'success');
+  } else {
+    toast('Select an app first', 'error');
+  }
+}
+
 // ── FILTERS & SORT ──
 function setTypeFilter(btn, val){
   typeFilter = val;
@@ -594,7 +607,7 @@ function renderTable(){
           <button class="btn btn-danger" style="padding:3px 10px;font-size:11px;" onclick="confirmDeleteSale('${s.id}')">✕</button>
         </div>
       </td>
-    </tr>`;
+    </table>`;
   }).join('');
 
   // Pagination
@@ -699,26 +712,22 @@ function saleDeleteUrl(id){ return `${WORKER}/api/sales/${encodeURIComponent(id)
 function confirmDeleteSale(id){
   openModal('Delete Sale','Permanently delete this sale record?', async()=>{
     const url = saleDeleteUrl(id);
-    console.log('[DELETE] calling:', url);
-    console.log('[DELETE] sale id:', id);
-    console.log('[DELETE] currentApp:', currentApp);
     try {
       const r = await fetch(url, {method:'DELETE', headers:{Authorization:auth()}});
       const body = await r.json();
-      console.log('[DELETE] response status:', r.status, 'body:', JSON.stringify(body));
       if (!r.ok) {
         toast(`Worker error ${r.status}: ${body.error || 'unknown'}`, 'error');
         return;
       }
     } catch(e){
       toast('Network error: ' + e.message, 'error');
-      console.error('[DELETE] fetch failed:', e);
       return;
     }
     allSales = allSales.filter(s => String(s.id) !== String(id));
     selectedIds.delete(id);
     toast('Deleted ✓', 'success');
-    updateStats(); applyFilters();
+    updateStats(); 
+    applyFilters();
   });
 }
 
@@ -732,7 +741,8 @@ function bulkDelete(){
       selectedIds.delete(id);
     }
     toast(`Deleted ${ids.length} records`,'success');
-    updateStats(); applyFilters();
+    updateStats(); 
+    applyFilters();
   });
 }
 
@@ -746,33 +756,60 @@ function bulkDeleteType(type){
       selectedIds.delete(id);
     }
     toast(`Deleted ${ids.length} ${type} records`,'success');
-    updateStats(); applyFilters();
+    updateStats(); 
+    applyFilters();
   });
 }
 
-function confirmDeleteAllTests(){
-  const tests = allSales.filter(s=>s.type==='TEST');
-  if(!tests.length){ toast('No test data found','info'); return; }
-  openModal('Purge All Test Data',`Permanently delete all ${tests.length} TEST records for this app?`, async()=>{
+// FIXED: Purge function that properly reloads data from server after purging
+async function confirmDeleteAllTests(){
+  if(!currentApp){ toast('No app selected', 'error'); return; }
+  
+  // Count current test records
+  const tests = allSales.filter(s => s.type === 'TEST');
+  if(!tests.length){ toast('No test data found for this app', 'info'); return; }
+  
+  openModal('Purge All Test Data', `⚠️ Permanently delete ALL ${tests.length} TEST records for this app? This action cannot be undone.`, async() => {
     const url = `${WORKER}/api/sales/purge-tests?bundleId=${encodeURIComponent(currentApp)}`;
-    console.log('[PURGE] calling:', url);
+    
     try {
-      const r = await fetch(url, {method:'DELETE', headers:{Authorization:auth()}});
+      const r = await fetch(url, { 
+        method: 'DELETE', 
+        headers: { Authorization: auth() } 
+      });
+      
       const body = await r.json();
-      console.log('[PURGE] status:', r.status, 'body:', JSON.stringify(body));
+      
       if (!r.ok) {
-        toast(`Worker error ${r.status}: ${body.error || 'unknown'}`, 'error');
+        toast(`Error: ${body.error || 'Unknown error'}`, 'error');
+        console.error('Purge failed:', body);
         return;
       }
-      toast(`Purged ${body.removed ?? tests.length} test records ✓`, 'success');
-    } catch(e){
+      
+      toast(`✓ Purged ${body.removed || tests.length} test records from server`, 'success');
+      
+      // IMPORTANT: Reload sales from server to sync local cache
+      await loadSales();
+      
+      // Clear selections
+      selectedIds.clear();
+      
+      // Force refresh the display
+      updateStats();
+      applyFilters();
+      
+      // Show success message with count
+      const remainingTests = allSales.filter(s => s.type === 'TEST').length;
+      if (remainingTests === 0) {
+        toast('All test data has been cleared! ✓', 'success');
+      } else {
+        toast(`Purged ${body.removed} records. ${remainingTests} test records remain.`, 'info');
+      }
+      
+    } catch(e) {
       toast('Network error: ' + e.message, 'error');
-      console.error('[PURGE] fetch failed:', e);
-      return;
+      console.error('Purge network error:', e);
     }
-    allSales = allSales.filter(s=>s.type!=='TEST');
-    selectedIds.clear();
-    updateStats(); applyFilters();
   });
 }
 
@@ -781,7 +818,10 @@ async function sendTestSale(){
   if(!currentApp){ toast('Select an app first','error'); return; }
   try {
     const r = await fetch(`${WORKER}/api/test-sale`,{method:'POST',headers:{Authorization:auth(),'Content-Type':'application/json'},body:JSON.stringify({bundleId:currentApp})});
-    if(r.ok){ toast('Test sale sent ✓','success'); await loadSales(); }
+    if(r.ok){ 
+      toast('Test sale sent ✓','success'); 
+      await loadSales(); // Reload after adding test sale
+    }
     else { const e=await r.json(); toast(e.error||'Error','error'); }
   } catch(e){ toast('Network error','error'); }
 }
