@@ -436,8 +436,25 @@ tr:hover td{background:rgba(255,255,255,0.02);}
         <button class="btn btn-amber btn-sm" onclick="confirmPurgeTests()">🧹 Purge Test Data</button>
         <button class="btn btn-green btn-sm" onclick="sendTest()">🧪 Send Test Sale</button>
         <button class="btn btn-ghost btn-sm" onclick="doHardRefresh()">🔄 Reload from Server</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleDebug()">🐛 Debug</button>
         <div class="spacer"></div>
         <span class="filter-info" id="filterInfo"></span>
+      </div>
+
+      <!-- Debug Panel -->
+      <div id="debugPanel" style="display:none;margin-bottom:16px;background:#060810;border:1px solid rgba(61,139,255,0.25);border-radius:8px;padding:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:2px;">DEBUG LOG</span>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost btn-xs" onclick="testDirectDelete()">🔬 Test Delete API</button>
+            <button class="btn btn-ghost btn-xs" onclick="dbLogs.length=0;document.getElementById('debugLog').textContent=''">Clear</button>
+          </div>
+        </div>
+        <pre id="debugLog" style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.7;max-height:220px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;"></pre>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-family:var(--mono);font-size:9px;color:var(--dim);">
+          Worker: <span style="color:var(--blue);">https://alerts.nagoh.xyz</span> &nbsp;|&nbsp;
+          App: <span id="dbCurApp" style="color:var(--amber);">none</span>
+        </div>
       </div>
 
       <!-- Bulk bar -->
@@ -506,7 +523,20 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 // ══ CONFIG ══════════════════════════════════════════════
 const WORKER = 'https://alerts.nagoh.xyz';
 const authB64 = btoa('admin:admin');
-const authHdr = () => ({ 'Authorization': 'Basic ' + authB64, 'Content-Type': 'application/json' });
+// Only include Content-Type when sending a body — DELETE requests must NOT have it
+const authHdr  = ()             => ({ 'Authorization': 'Basic ' + authB64, 'Content-Type': 'application/json' });
+const authOnly = ()             => ({ 'Authorization': 'Basic ' + authB64 });
+
+// Debug log — shown in the debug panel
+const dbLogs = [];
+function dbLog(msg, data){
+  const ts = new Date().toLocaleTimeString();
+  const entry = `[${ts}] ${msg}${data !== undefined ? ' → ' + JSON.stringify(data) : ''}`;
+  dbLogs.unshift(entry);
+  if(dbLogs.length > 30) dbLogs.pop();
+  const el = document.getElementById('debugLog');
+  if(el) el.textContent = dbLogs.join('\n');
+}
 
 // ══ STATE ════════════════════════════════════════════════
 let apps         = [];
@@ -590,6 +620,8 @@ async function selectApp(bundleId){
   curApp = bundleId;
   const app = apps.find(a => a.bundleId === bundleId);
   document.getElementById('topbarApp').textContent = app ? app.appName : bundleId;
+  const dbA = document.getElementById('dbCurApp');
+  if(dbA) dbA.textContent = bundleId;
   renderAppList();
   await loadSales();
 }
@@ -805,36 +837,54 @@ function updateBulkBar(){
 }
 
 // ══ DELETE ═══════════════════════════════════════════════
-function saleUrl(id){ return `${WORKER}/api/sales/${encodeURIComponent(id)}?bundleId=${encodeURIComponent(curApp)}`; }
+function saleUrl(id){
+  // Double-encode isn't needed — worker uses decodeURIComponent on the path segment
+  const url = `${WORKER}/api/sales/${encodeURIComponent(String(id))}?bundleId=${encodeURIComponent(curApp)}`;
+  dbLog('saleUrl', url);
+  return url;
+}
 
 function confirmDeleteSale(id){
   openModal('Delete Sale','Remove this sale record permanently?', async () => {
+    const url = saleUrl(id);
+    dbLog('DELETE sale', { id, curApp });
     try {
-      const r = await fetch(saleUrl(id),{ method:'DELETE', headers:authHdr() });
-      if(!r.ok){ const d=await r.json(); toast(d.error||`Server error ${r.status}`,'error'); return; }
-    } catch(e){ toast('Network error: '+e.message,'error'); return; }
+      // No Content-Type on DELETE — body-less requests
+      const r = await fetch(url, { method:'DELETE', headers: authOnly() });
+      dbLog('DELETE response', { status: r.status, ok: r.ok });
+      let d = {};
+      try { d = await r.json(); } catch(_){}
+      dbLog('DELETE body', d);
+      if(!r.ok){ toast(d.error || `Server error ${r.status}`, 'error'); return; }
+    } catch(e){
+      dbLog('DELETE catch', e.message);
+      toast('Network error: ' + e.message, 'error');
+      return;
+    }
     allSales = allSales.filter(s => String(s.id) !== String(id));
     selected.delete(id);
     updateStats();
     applyFilters();
-    toast('Deleted ✓','success');
+    toast('Deleted ✓', 'success');
   });
 }
 
 async function bulkDelete(){
   const ids = [...selected];
   if(!ids.length) return;
-  openModal('Delete Selected',`Permanently delete ${ids.length} record(s)?`, async () => {
+  openModal('Delete Selected', `Permanently delete ${ids.length} record(s)?`, async () => {
     let ok=0, fail=0;
     for(const id of ids){
+      dbLog('bulk DELETE', { id, curApp });
       try {
-        const r = await fetch(saleUrl(id),{ method:'DELETE', headers:authHdr() });
-        if(r.ok){ allSales = allSales.filter(s=>s.id!==id); selected.delete(id); ok++; }
-        else fail++;
-      } catch(e){ fail++; }
+        const r = await fetch(saleUrl(id), { method:'DELETE', headers: authOnly() });
+        dbLog('bulk DELETE resp', { id, status: r.status, ok: r.ok });
+        if(r.ok){ allSales = allSales.filter(s => String(s.id) !== String(id)); selected.delete(id); ok++; }
+        else { let d={}; try{d=await r.json();}catch(_){} dbLog('bulk DELETE err', d); fail++; }
+      } catch(e){ dbLog('bulk DELETE catch', e.message); fail++; }
     }
     updateStats(); applyFilters();
-    toast(`Deleted ${ok}${fail?`, ${fail} failed`:''}`, fail?'warn':'success');
+    toast(`Deleted ${ok}${fail ? `, ${fail} failed` : ''}`, fail ? 'warn' : 'success');
   });
 }
 
@@ -846,15 +896,18 @@ async function confirmPurgeTests(){
     'Purge All Test Data',
     `⚠️ Permanently delete ALL ${tests.length} TEST records for this app? This cannot be undone.`,
     async () => {
+      const url = `${WORKER}/api/sales/purge-tests?bundleId=${encodeURIComponent(curApp)}`;
+      dbLog('PURGE', { curApp, url });
       try {
-        const r = await fetch(`${WORKER}/api/sales/purge-tests?bundleId=${encodeURIComponent(curApp)}`,{
-          method:'DELETE', headers:authHdr()
-        });
-        const d = await r.json();
-        if(!r.ok){ toast(d.error||`Error ${r.status}`,'error'); return; }
-        toast(`Purged ${d.removed} test record(s) ✓`,'success');
+        const r = await fetch(url, { method:'DELETE', headers: authOnly() });
+        dbLog('PURGE resp', { status: r.status, ok: r.ok });
+        let d = {};
+        try { d = await r.json(); } catch(_){}
+        dbLog('PURGE body', d);
+        if(!r.ok){ toast(d.error || `Error ${r.status}`, 'error'); return; }
+        toast(`Purged ${d.removed} test record(s) ✓`, 'success');
         await loadSales();
-      } catch(e){ toast('Network error: '+e.message,'error'); }
+      } catch(e){ dbLog('PURGE catch', e.message); toast('Network error: ' + e.message, 'error'); }
     },
     'Purge All Tests'
   );
@@ -893,6 +946,40 @@ function toast(msg, type='info'){
   wrap.appendChild(el);
   requestAnimationFrame(()=>{ requestAnimationFrame(()=>el.classList.add('in')); });
   setTimeout(()=>{ el.classList.remove('in'); setTimeout(()=>el.remove(),300); }, 3000);
+}
+
+// ══ DEBUG ════════════════════════════════════════════════
+function toggleDebug(){
+  const p = document.getElementById('debugPanel');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  const a = document.getElementById('dbCurApp');
+  if(a) a.textContent = curApp || 'none';
+}
+
+// Fires a raw DELETE against the first sale in allSales and logs every step
+async function testDirectDelete(){
+  if(!allSales.length){ dbLog('testDelete', 'No sales loaded'); return; }
+  if(!curApp){ dbLog('testDelete', 'No curApp set'); return; }
+  const s = allSales[0];
+  const url = `${WORKER}/api/sales/${encodeURIComponent(String(s.id))}?bundleId=${encodeURIComponent(curApp)}`;
+  dbLog('testDelete URL', url);
+  dbLog('testDelete id type', typeof s.id);
+  dbLog('testDelete raw id', s.id);
+  try {
+    const r = await fetch(url, { method:'DELETE', headers: authOnly() });
+    dbLog('testDelete status', r.status);
+    dbLog('testDelete ok', r.ok);
+    const txt = await r.text();
+    dbLog('testDelete body', txt);
+    if(r.ok){
+      dbLog('testDelete SUCCESS - reloading');
+      allSales = allSales.filter(x => String(x.id) !== String(s.id));
+      updateStats(); applyFilters();
+      toast('Test delete succeeded ✓','success');
+    }
+  } catch(e){
+    dbLog('testDelete CATCH', e.message);
+  }
 }
 
 // ══ UTILS ════════════════════════════════════════════════
