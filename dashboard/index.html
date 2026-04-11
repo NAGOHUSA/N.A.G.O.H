@@ -3,853 +3,904 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nagoh Sales Dashboard</title>
+<title>Nagoh · Sales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600;700&display=swap');
-
 :root {
-  --bg: #0d0f14;
-  --surface: #151821;
-  --surface2: #1c2030;
-  --surface3: #222840;
-  --border: #2a3050;
-  --border2: #3a4470;
-  --text: #e8ecf8;
-  --text2: #8b96c0;
-  --text3: #5a6490;
-  --accent: #4f7cff;
-  --accent2: #7c5cff;
-  --green: #22c55e;
-  --red: #ef4444;
-  --amber: #f59e0b;
-  --purple: #a855f7;
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'DM Sans', sans-serif;
-  --radius: 10px;
-  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --bg:       #080a0f;
+  --s1:       #0e1118;
+  --s2:       #141820;
+  --s3:       #1a2030;
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.12);
+  --text:     #eef0f8;
+  --muted:    #6b7490;
+  --dim:      #3a4060;
+  --blue:     #3d8bff;
+  --green:    #18d97a;
+  --red:      #ff4757;
+  --amber:    #ffb830;
+  --purple:   #b06eff;
+  --mono:     'Space Mono', monospace;
+  --sans:     'Sora', sans-serif;
+  --r:        8px;
 }
 
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:var(--sans); background:var(--bg); color:var(--text); min-height:100vh; font-size:14px; }
+*{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:14px;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
 
-/* ── LOGIN ── */
-.login-wrap { display:flex; align-items:center; justify-content:center; min-height:100vh; background:var(--bg); }
-.login-card {
-  background:var(--surface); border:1px solid var(--border); border-radius:16px;
-  padding:44px 40px; width:360px; box-shadow:var(--shadow);
+/* ─── LOGIN ─────────────────────────── */
+#login{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 80%, rgba(61,139,255,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 20%, rgba(176,110,255,0.06) 0%, transparent 60%),
+    var(--bg);
 }
-.login-card .brand { font-family:var(--mono); font-size:11px; letter-spacing:3px; color:var(--accent); text-transform:uppercase; margin-bottom:8px; }
-.login-card h1 { font-size:22px; font-weight:700; color:var(--text); margin-bottom:28px; }
-.field { margin-bottom:16px; }
-.field label { display:block; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--text3); margin-bottom:6px; }
-.field input {
-  width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius);
-  padding:10px 14px; color:var(--text); font-family:var(--mono); font-size:13px; outline:none;
+.login-box{
+  width:360px;
+  background:var(--s1);
+  border:1px solid var(--border2);
+  border-radius:16px;
+  padding:40px;
+  box-shadow:0 24px 80px rgba(0,0,0,0.5);
+}
+.login-logo{
+  font-family:var(--mono);font-size:11px;letter-spacing:4px;
+  color:var(--blue);text-transform:uppercase;margin-bottom:6px;
+}
+.login-box h1{font-size:20px;font-weight:600;margin-bottom:32px;color:var(--text);}
+.inp-group{margin-bottom:14px;}
+.inp-group label{display:block;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-bottom:6px;}
+.inp-group input{
+  width:100%;background:var(--s2);border:1px solid var(--border2);
+  border-radius:var(--r);padding:10px 14px;
+  color:var(--text);font-family:var(--mono);font-size:12px;outline:none;
   transition:border 0.15s;
 }
-.field input:focus { border-color:var(--accent); }
-.btn { display:inline-flex; align-items:center; gap:6px; padding:10px 18px; border-radius:var(--radius); border:none; cursor:pointer; font-family:var(--sans); font-size:13px; font-weight:600; transition:all 0.15s; white-space:nowrap; }
-.btn-primary { background:var(--accent); color:#fff; }
-.btn-primary:hover { background:#6b93ff; }
-.btn-danger { background:transparent; border:1px solid var(--red); color:var(--red); }
-.btn-danger:hover { background:var(--red); color:#fff; }
-.btn-ghost { background:transparent; border:1px solid var(--border); color:var(--text2); }
-.btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
-.btn-amber { background:transparent; border:1px solid var(--amber); color:var(--amber); }
-.btn-amber:hover { background:var(--amber); color:#000; }
-.btn-green { background:transparent; border:1px solid var(--green); color:var(--green); }
-.btn-green:hover { background:var(--green); color:#000; }
-.btn-full { width:100%; justify-content:center; padding:12px; margin-top:4px; }
-.login-error { background:#2a1515; border:1px solid var(--red); color:var(--red); padding:10px 14px; border-radius:8px; font-size:13px; margin-top:12px; display:none; }
-
-/* ── SHELL ── */
-.shell { display:none; min-height:100vh; }
-.topbar {
-  position:sticky; top:0; z-index:200; background:var(--surface); border-bottom:1px solid var(--border);
-  height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; gap:16px;
+.inp-group input:focus{border-color:var(--blue);}
+.login-err{
+  display:none;margin-top:12px;
+  background:rgba(255,71,87,0.1);border:1px solid rgba(255,71,87,0.3);
+  color:var(--red);border-radius:var(--r);padding:10px 14px;font-size:12px;
 }
-.topbar-brand { font-family:var(--mono); font-size:12px; letter-spacing:2px; color:var(--accent); text-transform:uppercase; font-weight:600; }
-.topbar-right { display:flex; align-items:center; gap:12px; }
-.topbar-clock { font-family:var(--mono); font-size:11px; color:var(--text3); }
 
-/* ── LAYOUT ── */
-.layout { display:grid; grid-template-columns:300px 1fr; min-height:calc(100vh - 56px); }
-.sidebar { background:var(--surface); border-right:1px solid var(--border); padding:20px; overflow-y:auto; }
-.main { padding:24px; overflow-x:auto; }
-
-/* ── STATS ROW ── */
-.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
-.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; }
-.stat-label { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); margin-bottom:8px; }
-.stat-val { font-family:var(--mono); font-size:28px; font-weight:600; color:var(--text); }
-.stat-val.green { color:var(--green); }
-.stat-val.accent { color:var(--accent); }
-.stat-val.amber { color:var(--amber); }
-
-/* ── SECTION HEADER ── */
-.section-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); }
-.section-hd h2 { font-size:13px; font-weight:700; letter-spacing:0.5px; color:var(--text); }
-.section-hd .actions { display:flex; gap:8px; }
-
-/* ── APP LIST ── */
-.app-item {
-  background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:14px;
-  margin-bottom:8px; cursor:pointer; transition:all 0.15s;
+/* ─── BUTTONS ────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:var(--r);border:none;
+  cursor:pointer;font-family:var(--sans);font-size:12px;font-weight:600;
+  transition:all 0.15s;white-space:nowrap;line-height:1;
 }
-.app-item:hover { border-color:var(--border2); }
-.app-item.active { border-color:var(--accent); background:var(--surface3); }
-.app-item-name { font-weight:600; font-size:13px; color:var(--text); margin-bottom:4px; }
-.app-item-bundle { font-family:var(--mono); font-size:10px; color:var(--text3); margin-bottom:8px; word-break:break-all; }
-.app-item-footer { display:flex; align-items:center; justify-content:space-between; }
-.app-badge { font-family:var(--mono); font-size:10px; color:var(--text2); }
+.btn-primary{background:var(--blue);color:#fff;}
+.btn-primary:hover{background:#5a9fff;transform:translateY(-1px);}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted);}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue);}
+.btn-danger{background:transparent;border:1px solid rgba(255,71,87,0.4);color:var(--red);}
+.btn-danger:hover{background:rgba(255,71,87,0.15);}
+.btn-amber{background:transparent;border:1px solid rgba(255,184,48,0.4);color:var(--amber);}
+.btn-amber:hover{background:rgba(255,184,48,0.12);}
+.btn-green{background:transparent;border:1px solid rgba(24,217,122,0.4);color:var(--green);}
+.btn-green:hover{background:rgba(24,217,122,0.12);}
+.btn-full{width:100%;justify-content:center;padding:12px;}
+.btn-sm{padding:5px 12px;font-size:11px;}
+.btn-xs{padding:3px 9px;font-size:10px;}
 
-/* ── ADD APP FORM ── */
-.add-form { margin-top:20px; padding-top:20px; border-top:1px solid var(--border); }
-.add-form-title { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--text3); margin-bottom:14px; }
-.field-sm { margin-bottom:10px; }
-.field-sm label { display:block; font-size:10px; font-weight:600; letter-spacing:1px; color:var(--text3); margin-bottom:4px; text-transform:uppercase; }
-.field-sm input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:var(--text); font-family:var(--mono); font-size:11px; outline:none; transition:border 0.15s; }
-.field-sm input:focus { border-color:var(--accent); }
-.webhook-info { margin-top:12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:12px; }
-.webhook-info .wh-label { font-size:10px; color:var(--text3); margin-bottom:4px; }
-.webhook-info .wh-url { font-family:var(--mono); font-size:10px; color:var(--accent); word-break:break-all; }
+/* ─── APP SHELL ──────────────────────── */
+#app{display:none;flex-direction:column;min-height:100vh;}
 
-/* ── TOOLBAR ── */
-.toolbar { display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
-.toolbar-search { flex:1; min-width:180px; position:relative; }
-.toolbar-search input { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:8px 12px 8px 32px; color:var(--text); font-size:13px; outline:none; transition:border 0.15s; }
-.toolbar-search input:focus { border-color:var(--accent); }
-.toolbar-search .srch-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text3); font-size:12px; pointer-events:none; }
-.select-ctrl { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:8px 12px; color:var(--text); font-size:13px; outline:none; cursor:pointer; }
-.select-ctrl:focus { border-color:var(--accent); }
-.filter-chip { background:transparent; border:1px solid var(--border); border-radius:20px; padding:5px 14px; color:var(--text2); font-size:12px; cursor:pointer; transition:all 0.15s; }
-.filter-chip:hover { border-color:var(--accent); color:var(--accent); }
-.filter-chip.on { background:var(--accent); border-color:var(--accent); color:#fff; }
-
-/* ── TABLE ── */
-.tbl-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); }
-table { width:100%; border-collapse:collapse; }
-thead tr { background:var(--surface); }
-th {
-  padding:10px 14px; text-align:left; font-size:10px; font-weight:700;
-  letter-spacing:1px; text-transform:uppercase; color:var(--text3);
-  border-bottom:1px solid var(--border); white-space:nowrap; user-select:none; cursor:pointer;
+/* ─── TOP BAR ────────────────────────── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  height:52px;padding:0 20px;
+  background:var(--s1);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;
 }
-th:hover { color:var(--accent); }
-th .sort-icon { margin-left:4px; opacity:0.4; }
-th.sorted .sort-icon { opacity:1; color:var(--accent); }
-td { padding:10px 14px; border-bottom:1px solid var(--border); font-size:13px; color:var(--text2); vertical-align:middle; }
-tr:last-child td { border-bottom:none; }
-tr:hover td { background:var(--surface3); }
-tr.test-row td { opacity:0.6; }
-.mono { font-family:var(--mono); font-size:11px; }
-.badge { display:inline-block; padding:3px 9px; border-radius:5px; font-size:10px; font-weight:700; letter-spacing:0.5px; font-family:var(--mono); }
-.badge-purchase { background:rgba(34,197,94,0.15); color:var(--green); border:1px solid rgba(34,197,94,0.3); }
-.badge-test { background:rgba(168,85,247,0.15); color:var(--purple); border:1px solid rgba(168,85,247,0.3); }
-.badge-refund { background:rgba(239,68,68,0.15); color:var(--red); border:1px solid rgba(239,68,68,0.3); }
-.row-cb { width:14px; height:14px; cursor:pointer; accent-color:var(--accent); }
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.topbar-brand{font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--blue);text-transform:uppercase;}
+.topbar-sep{width:1px;height:20px;background:var(--border2);}
+.topbar-app{font-size:12px;color:var(--muted);font-weight:500;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.clock{font-family:var(--mono);font-size:11px;color:var(--dim);margin-right:4px;}
 
-/* ── INLINE EDIT ── */
-.edit-input { background:var(--surface2); border:1px solid var(--accent); border-radius:6px; padding:4px 8px; color:var(--text); font-family:var(--mono); font-size:11px; width:100%; outline:none; }
-.edit-cell { display:flex; align-items:center; gap:6px; }
-.edit-save { background:var(--green); border:none; color:#000; border-radius:4px; padding:3px 8px; cursor:pointer; font-size:10px; font-weight:700; }
-.edit-cancel { background:transparent; border:1px solid var(--border); color:var(--text3); border-radius:4px; padding:3px 8px; cursor:pointer; font-size:10px; }
-.editable-cell { cursor:pointer; }
-.editable-cell:hover { color:var(--text); text-decoration:underline dashed var(--text3); text-underline-offset:2px; }
-
-/* ── BULK BAR ── */
-.bulk-bar {
-  display:none; align-items:center; gap:12px; background:var(--surface3); border:1px solid var(--border2);
-  border-radius:var(--radius); padding:10px 16px; margin-bottom:14px;
+/* ─── BODY LAYOUT ────────────────────── */
+.body{display:flex;flex:1;}
+.sidebar{
+  width:260px;flex-shrink:0;
+  background:var(--s1);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  height:calc(100vh - 52px);position:sticky;top:52px;overflow-y:auto;
 }
-.bulk-bar.visible { display:flex; }
-.bulk-count { font-family:var(--mono); font-size:12px; color:var(--accent); }
+.main{flex:1;padding:24px;overflow-x:hidden;}
 
-/* ── PAGINATION ── */
-.pagination { display:flex; align-items:center; justify-content:space-between; margin-top:14px; }
-.page-info { font-size:12px; color:var(--text3); font-family:var(--mono); }
-.page-btns { display:flex; gap:6px; }
-.page-btn { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:5px 12px; color:var(--text2); font-size:12px; cursor:pointer; }
-.page-btn:hover { border-color:var(--accent); color:var(--accent); }
-.page-btn:disabled { opacity:0.3; cursor:default; }
+/* ─── SIDEBAR ────────────────────────── */
+.sidebar-hd{
+  padding:16px 16px 10px;
+  font-size:9px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;color:var(--dim);
+  border-bottom:1px solid var(--border);
+}
+.app-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;cursor:pointer;
+  border-bottom:1px solid var(--border);
+  transition:background 0.12s;
+}
+.app-item:hover{background:var(--s2);}
+.app-item.active{background:var(--s2);border-left:2px solid var(--blue);}
+.app-item-info{flex:1;min-width:0;}
+.app-item-name{font-weight:600;font-size:12px;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.app-item-bundle{font-family:var(--mono);font-size:9px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.delete-app-btn{
+  flex-shrink:0;width:22px;height:22px;border-radius:4px;
+  background:transparent;border:none;cursor:pointer;
+  color:var(--dim);font-size:14px;display:flex;align-items:center;justify-content:center;
+  transition:all 0.12s;margin-left:8px;
+}
+.delete-app-btn:hover{color:var(--red);background:rgba(255,71,87,0.12);}
 
-/* ── TOAST ── */
-.toast-wrap { position:fixed; bottom:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
-.toast { background:var(--surface2); border:1px solid var(--border2); border-radius:10px; padding:12px 18px; font-size:13px; color:var(--text); box-shadow:var(--shadow); opacity:0; transform:translateY(10px); transition:all 0.25s; pointer-events:none; }
-.toast.show { opacity:1; transform:translateY(0); }
-.toast.success { border-color:var(--green); color:var(--green); }
-.toast.error { border-color:var(--red); color:var(--red); }
-.toast.info { border-color:var(--accent); color:var(--accent); }
+.sidebar-form{padding:16px;border-top:1px solid var(--border);margin-top:auto;}
+.sidebar-form-title{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:12px;}
+.f-row{margin-bottom:8px;}
+.f-row label{display:block;font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--dim);margin-bottom:4px;}
+.f-row input{
+  width:100%;background:var(--bg);border:1px solid var(--border2);
+  border-radius:6px;padding:7px 10px;
+  color:var(--text);font-family:var(--mono);font-size:10px;outline:none;
+  transition:border 0.15s;
+}
+.f-row input:focus{border-color:var(--blue);}
+.webhook-box{
+  margin-top:10px;background:var(--bg);border:1px solid var(--border);
+  border-radius:6px;padding:10px;
+}
+.webhook-box .wh-label{font-size:9px;color:var(--dim);margin-bottom:3px;}
+.webhook-box .wh-url{font-family:var(--mono);font-size:9px;color:var(--blue);word-break:break-all;line-height:1.5;}
 
-/* ── MODAL ── */
-.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:500; align-items:center; justify-content:center; }
-.modal-overlay.open { display:flex; }
-.modal { background:var(--surface); border:1px solid var(--border2); border-radius:16px; padding:28px; width:440px; max-width:90vw; box-shadow:var(--shadow); }
-.modal h2 { font-size:17px; font-weight:700; margin-bottom:8px; }
-.modal p { color:var(--text2); font-size:13px; margin-bottom:20px; line-height:1.5; }
-.modal-footer { display:flex; gap:10px; justify-content:flex-end; }
+/* ─── STATS ──────────────────────────── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.stat-card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:12px;padding:18px 20px;
+  position:relative;overflow:hidden;
+}
+.stat-card::before{
+  content:'';position:absolute;inset:0;border-radius:12px;
+  background:linear-gradient(135deg,rgba(255,255,255,0.02) 0%,transparent 100%);
+}
+.stat-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:10px;}
+.stat-val{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1;}
+.stat-val.c-blue{color:var(--blue);}
+.stat-val.c-green{color:var(--green);}
+.stat-val.c-amber{color:var(--amber);}
+.stat-val.c-text{color:var(--text);}
+.stat-sub{font-size:10px;color:var(--dim);margin-top:6px;}
 
-/* ── EMPTY ── */
-.empty { text-align:center; padding:48px 20px; }
-.empty-icon { font-size:32px; margin-bottom:12px; }
-.empty p { color:var(--text3); font-size:13px; }
+/* ─── TOOLBAR ────────────────────────── */
+.toolbar{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:16px;flex-wrap:wrap;
+}
+.search-wrap{flex:1;min-width:200px;position:relative;}
+.search-wrap input{
+  width:100%;background:var(--s1);border:1px solid var(--border2);
+  border-radius:var(--r);padding:8px 12px 8px 34px;
+  color:var(--text);font-size:12px;outline:none;transition:border 0.15s;
+}
+.search-wrap input::placeholder{color:var(--dim);}
+.search-wrap input:focus{border-color:var(--blue);}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:13px;pointer-events:none;}
+.chip{
+  background:transparent;border:1px solid var(--border2);
+  border-radius:20px;padding:5px 13px;
+  color:var(--muted);font-size:11px;font-weight:500;cursor:pointer;
+  transition:all 0.15s;font-family:var(--sans);
+}
+.chip:hover{border-color:var(--blue);color:var(--blue);}
+.chip.on{background:rgba(61,139,255,0.15);border-color:var(--blue);color:var(--blue);}
+.chip.on.green{background:rgba(24,217,122,0.12);border-color:var(--green);color:var(--green);}
+.chip.on.red{background:rgba(255,71,87,0.12);border-color:var(--red);color:var(--red);}
+.chip.on.purple{background:rgba(176,110,255,0.12);border-color:var(--purple);color:var(--purple);}
+select.ctrl{
+  background:var(--s1);border:1px solid var(--border2);
+  border-radius:var(--r);padding:8px 12px;
+  color:var(--text);font-size:12px;outline:none;cursor:pointer;
+  font-family:var(--sans);
+}
 
-/* ── RESPONSIVE ── */
+/* ─── ACTION BAR ─────────────────────── */
+.action-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.action-bar .spacer{flex:1;}
+.filter-info{font-family:var(--mono);font-size:10px;color:var(--dim);}
+
+/* ─── BULK BAR ───────────────────────── */
+.bulk-bar{
+  display:none;align-items:center;gap:10px;
+  background:rgba(61,139,255,0.08);border:1px solid rgba(61,139,255,0.25);
+  border-radius:var(--r);padding:10px 14px;margin-bottom:14px;
+}
+.bulk-bar.show{display:flex;}
+.bulk-count{font-family:var(--mono);font-size:11px;color:var(--blue);}
+
+/* ─── TABLE ──────────────────────────── */
+.tbl-wrap{
+  border:1px solid var(--border);border-radius:12px;overflow:hidden;
+  background:var(--s1);
+}
+table{width:100%;border-collapse:collapse;}
+thead{background:var(--s2);}
+th{
+  padding:10px 14px;text-align:left;
+  font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--dim);border-bottom:1px solid var(--border);
+  user-select:none;white-space:nowrap;
+}
+th.sortable{cursor:pointer;}
+th.sortable:hover{color:var(--blue);}
+th.sorted{color:var(--blue);}
+td{
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  font-size:12px;color:var(--muted);vertical-align:middle;
+}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,0.02);}
+.mono{font-family:var(--mono);font-size:10px;}
+
+/* ─── BADGES ─────────────────────────── */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 8px;border-radius:4px;
+  font-size:9px;font-weight:700;letter-spacing:0.5px;font-family:var(--mono);
+  text-transform:uppercase;
+}
+.badge-PURCHASE{background:rgba(24,217,122,0.12);color:var(--green);border:1px solid rgba(24,217,122,0.25);}
+.badge-TEST{background:rgba(176,110,255,0.12);color:var(--purple);border:1px solid rgba(176,110,255,0.25);}
+.badge-REFUND{background:rgba(255,71,87,0.12);color:var(--red);border:1px solid rgba(255,71,87,0.25);}
+
+/* ─── EMPTY STATE ────────────────────── */
+.empty{text-align:center;padding:56px 20px;}
+.empty-icon{font-size:28px;margin-bottom:10px;opacity:0.5;}
+.empty p{color:var(--dim);font-size:12px;line-height:1.6;}
+
+/* ─── PAGINATION ─────────────────────── */
+.pagination{display:flex;align-items:center;justify-content:space-between;margin-top:14px;}
+.page-info{font-family:var(--mono);font-size:10px;color:var(--dim);}
+.page-btns{display:flex;gap:6px;}
+
+/* ─── MODAL ──────────────────────────── */
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
+  z-index:500;align-items:center;justify-content:center;
+}
+.overlay.open{display:flex;}
+.modal{
+  background:var(--s1);border:1px solid var(--border2);
+  border-radius:16px;padding:28px;
+  width:420px;max-width:90vw;
+  box-shadow:0 32px 80px rgba(0,0,0,0.5);
+}
+.modal h2{font-size:16px;font-weight:600;margin-bottom:8px;}
+.modal p{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:24px;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;}
+
+/* ─── TOASTS ─────────────────────────── */
+.toast-stack{
+  position:fixed;bottom:20px;right:20px;
+  display:flex;flex-direction:column-reverse;gap:8px;
+  z-index:9999;pointer-events:none;
+}
+.toast{
+  background:var(--s2);border:1px solid var(--border2);
+  border-radius:10px;padding:12px 16px;
+  font-size:12px;color:var(--text);
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  opacity:0;transform:translateX(20px);
+  transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events:none;min-width:200px;
+}
+.toast.in{opacity:1;transform:translateX(0);}
+.toast.t-success{border-color:rgba(24,217,122,0.4);color:var(--green);}
+.toast.t-error{border-color:rgba(255,71,87,0.4);color:var(--red);}
+.toast.t-info{border-color:rgba(61,139,255,0.4);color:var(--blue);}
+.toast.t-warn{border-color:rgba(255,184,48,0.4);color:var(--amber);}
+
+/* ─── LOADING ────────────────────────── */
+.spinner{
+  display:inline-block;width:14px;height:14px;
+  border:2px solid var(--border2);border-top-color:var(--blue);
+  border-radius:50%;animation:spin 0.6s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ─── RESPONSIVE ─────────────────────── */
 @media(max-width:900px){
-  .layout { grid-template-columns:1fr; }
-  .sidebar { border-right:none; border-bottom:1px solid var(--border); }
-  .stats-row { grid-template-columns:repeat(2,1fr); }
+  .body{flex-direction:column;}
+  .sidebar{width:100%;height:auto;position:static;border-right:none;border-bottom:1px solid var(--border);}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
 }
-@media(max-width:500px){
-  .stats-row { grid-template-columns:1fr 1fr; }
-  .topbar-clock { display:none; }
+@media(max-width:480px){
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .clock,.topbar-sep,.topbar-app{display:none;}
 }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="loginWrap" class="login-wrap">
-  <div class="login-card">
-    <div class="brand">Nagoh Creative</div>
+<!-- ─── LOGIN ─── -->
+<div id="login">
+  <div class="login-box">
+    <div class="login-logo">Nagoh Creative</div>
     <h1>Sales Dashboard</h1>
-    <div class="field"><label>Username</label><input type="text" id="username" placeholder="admin" onkeydown="if(event.key==='Enter')login()"></div>
-    <div class="field"><label>Password</label><input type="password" id="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"></div>
-    <button class="btn btn-primary btn-full" onclick="login()">Sign In →</button>
-    <div id="loginErr" class="login-error">Invalid credentials</div>
+    <div class="inp-group">
+      <label>Username</label>
+      <input id="u" type="text" placeholder="admin" autocomplete="username">
+    </div>
+    <div class="inp-group">
+      <label>Password</label>
+      <input id="p" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary btn-full" id="loginBtn" onclick="login()">Sign In →</button>
+    <div class="login-err" id="loginErr">Invalid credentials. Try admin / admin.</div>
   </div>
 </div>
 
-<!-- SHELL -->
-<div id="shell" class="shell">
+<!-- ─── APP ─── -->
+<div id="app" style="display:none;flex-direction:column;">
+
   <div class="topbar">
-    <div class="topbar-brand">◈ Nagoh · Sales Monitor</div>
+    <div class="topbar-left">
+      <div class="topbar-brand">◈ Nagoh</div>
+      <div class="topbar-sep"></div>
+      <div class="topbar-app" id="topbarApp">Sales Monitor</div>
+    </div>
     <div class="topbar-right">
-      <span class="topbar-clock" id="clock"></span>
-      <button class="btn btn-ghost" onclick="refreshAll()">↻ Refresh</button>
-      <button class="btn btn-ghost" onclick="logout()">Sign out</button>
+      <span class="clock" id="clock"></span>
+      <button class="btn btn-ghost btn-sm" onclick="doRefresh()">↻ Refresh</button>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Sign out</button>
     </div>
   </div>
 
-  <div class="layout">
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-      <div class="section-hd">
-        <h2>Your Apps</h2>
-        <div class="actions">
-          <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="loadApps()">↻</button>
-        </div>
-      </div>
-      <div id="appsList"><div class="empty"><div class="empty-icon">📱</div><p>No apps yet.</p></div></div>
+  <div class="body">
 
-      <div class="add-form">
-        <div class="add-form-title">Register New App</div>
-        <div class="field-sm"><label>App Name</label><input type="text" id="appName" placeholder="My App"></div>
-        <div class="field-sm"><label>Bundle ID</label><input type="text" id="bundleId" placeholder="com.example.app"></div>
-        <div class="field-sm"><label>App Store URL</label><input type="url" id="appStoreUrl" placeholder="https://apps.apple.com/..."></div>
-        <button class="btn btn-primary btn-full" style="margin-top:8px;" onclick="addApp()">+ Register App</button>
-        <div class="webhook-info">
-          <div class="wh-label">Webhook URL for App Store Connect:</div>
+    <!-- ─ SIDEBAR ─ -->
+    <div class="sidebar">
+      <div class="sidebar-hd">Apps</div>
+      <div id="appList"></div>
+
+      <div class="sidebar-form">
+        <div class="sidebar-form-title">Register App</div>
+        <div class="f-row"><label>App Name</label><input id="fName" type="text" placeholder="My App"></div>
+        <div class="f-row"><label>Bundle ID</label><input id="fBundle" type="text" placeholder="com.example.app"></div>
+        <div class="f-row"><label>App Store URL</label><input id="fUrl" type="url" placeholder="https://apps.apple.com/..."></div>
+        <button class="btn btn-primary btn-full" style="margin-top:4px;" onclick="addApp()">+ Register</button>
+        <div class="webhook-box">
+          <div class="wh-label">Webhook endpoint:</div>
           <div class="wh-url">https://alerts.nagoh.xyz/api/app-store-webhook</div>
         </div>
       </div>
     </div>
 
-    <!-- MAIN -->
+    <!-- ─ MAIN ─ -->
     <div class="main">
+
       <!-- Stats -->
       <div class="stats-row">
         <div class="stat-card">
-          <div class="stat-label">Total Apps</div>
-          <div class="stat-val accent" id="statApps">—</div>
+          <div class="stat-label">Apps</div>
+          <div class="stat-val c-blue" id="sApps">—</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Today's Sales</div>
-          <div class="stat-val green" id="statToday">—</div>
+          <div class="stat-val c-green" id="sToday">—</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Total Sales</div>
-          <div class="stat-val" id="statTotal">—</div>
+          <div class="stat-label">All-time Sales</div>
+          <div class="stat-val c-text" id="sTotal">—</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Revenue (real)</div>
-          <div class="stat-val amber" id="statRevenue">—</div>
+          <div class="stat-val c-amber" id="sRevenue">—</div>
         </div>
       </div>
 
       <!-- Toolbar -->
       <div class="toolbar">
-        <div class="toolbar-search">
-          <span class="srch-icon">⌕</span>
-          <input type="text" id="searchInput" placeholder="Search by type, amount, details…" oninput="applyFilters()">
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input id="search" type="text" placeholder="Search type, amount, details…" oninput="applyFilters()">
         </div>
-
-        <button class="filter-chip on" data-filter="all" onclick="setTypeFilter(this,'all')">All</button>
-        <button class="filter-chip" data-filter="PURCHASE" onclick="setTypeFilter(this,'PURCHASE')">💰 Purchases</button>
-        <button class="filter-chip" data-filter="TEST" onclick="setTypeFilter(this,'TEST')">🧪 Test</button>
-        <button class="filter-chip" data-filter="REFUND" onclick="setTypeFilter(this,'REFUND')">↩ Refunds</button>
-
-        <select class="select-ctrl" id="sortField" onchange="applyFilters()">
-          <option value="timestamp-desc">Date ↓ newest</option>
-          <option value="timestamp-asc">Date ↑ oldest</option>
-          <option value="price-desc">Amount ↓ high</option>
-          <option value="price-asc">Amount ↑ low</option>
-          <option value="type-asc">Type A→Z</option>
+        <button class="chip on" data-f="all" onclick="setFilter(this,'all')">All</button>
+        <button class="chip" data-f="PURCHASE" onclick="setFilter(this,'PURCHASE')">💰 Sales</button>
+        <button class="chip" data-f="TEST" onclick="setFilter(this,'TEST')">🧪 Test</button>
+        <button class="chip" data-f="REFUND" onclick="setFilter(this,'REFUND')">↩ Refunds</button>
+        <select class="ctrl" id="sortCtrl" onchange="applyFilters()">
+          <option value="timestamp-desc">Newest first</option>
+          <option value="timestamp-asc">Oldest first</option>
+          <option value="price-desc">Amount ↓</option>
+          <option value="price-asc">Amount ↑</option>
         </select>
-
-        <select class="select-ctrl" id="pageSize" onchange="applyFilters()">
+        <select class="ctrl" id="psCtrl" onchange="applyFilters()">
           <option value="25">25 rows</option>
           <option value="50">50 rows</option>
           <option value="100">100 rows</option>
-          <option value="all">All rows</option>
+          <option value="9999">All rows</option>
         </select>
+      </div>
+
+      <!-- Action bar -->
+      <div class="action-bar">
+        <button class="btn btn-amber btn-sm" onclick="confirmPurgeTests()">🧹 Purge Test Data</button>
+        <button class="btn btn-green btn-sm" onclick="sendTest()">🧪 Send Test Sale</button>
+        <button class="btn btn-ghost btn-sm" onclick="doHardRefresh()">🔄 Reload from Server</button>
+        <div class="spacer"></div>
+        <span class="filter-info" id="filterInfo"></span>
       </div>
 
       <!-- Bulk bar -->
       <div class="bulk-bar" id="bulkBar">
         <span class="bulk-count" id="bulkCount">0 selected</span>
-        <button class="btn btn-danger" onclick="bulkDelete()">🗑 Delete Selected</button>
-        <button class="btn btn-amber" onclick="bulkDeleteType('TEST')">🧪 Delete All Test</button>
-        <button class="btn btn-ghost" onclick="clearSelection()">✕ Deselect</button>
-      </div>
-
-      <!-- Action row -->
-      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
-        <button class="btn btn-amber" onclick="confirmDeleteAllTests()">🧹 Purge All Test Data</button>
-        <button class="btn btn-green" onclick="sendTestSale()">🧪 Send Test Sale</button>
-        <button class="btn btn-primary" onclick="hardRefresh()" id="hardRefreshBtn">🔄 Hard Refresh (Reload from Server)</button>
-        <span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3);" id="filterSummary"></span>
+        <button class="btn btn-danger btn-sm" onclick="bulkDelete()">🗑 Delete Selected</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearSel()">✕ Clear</button>
       </div>
 
       <!-- Table -->
       <div class="tbl-wrap">
-        <table id="salesTable">
+        <table>
           <thead>
             <tr>
-              <th style="width:36px;"><input type="checkbox" id="selectAll" class="row-cb" onchange="toggleSelectAll()"></th>
-              <th onclick="sortBy('timestamp')" id="th-timestamp">Date & Time <span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('type')" id="th-type">Type <span class="sort-icon">↕</span></th>
-              <th onclick="sortBy('price')" id="th-price">Amount <span class="sort-icon">↕</span></th>
-              <th>Details <span style="font-size:9px;color:var(--text3);font-weight:400;">(click to edit)</span></th>
-              <th>Actions</th>
+              <th style="width:36px;padding-left:16px;">
+                <input type="checkbox" id="selAll" onchange="toggleAll()" style="cursor:pointer;accent-color:var(--blue);">
+              </th>
+              <th class="sortable sorted" id="th-timestamp" onclick="sortClick('timestamp')">
+                Date / Time <span id="si-timestamp">↓</span>
+              </th>
+              <th class="sortable" id="th-type" onclick="sortClick('type')">
+                Type <span id="si-type">↕</span>
+              </th>
+              <th class="sortable" id="th-price" onclick="sortClick('price')">
+                Amount <span id="si-price">↕</span>
+              </th>
+              <th>Details</th>
+              <th style="width:80px;"></th>
             </tr>
           </thead>
-          <tbody id="salesBody">
-            <tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div><p>Select an app to view sales.</p></div></td></tr>
+          <tbody id="tbody">
+            <tr><td colspan="6"><div class="empty"><div class="empty-icon">📱</div><p>Select an app from the sidebar.</p></div></td></tr>
           </tbody>
         </table>
       </div>
 
       <!-- Pagination -->
-      <div class="pagination" id="paginationRow" style="display:none;">
+      <div class="pagination" id="pageRow" style="display:none;">
         <span class="page-info" id="pageInfo"></span>
         <div class="page-btns">
-          <button class="page-btn" id="prevBtn" onclick="changePage(-1)">← Prev</button>
-          <button class="page-btn" id="nextBtn" onclick="changePage(1)">Next →</button>
+          <button class="btn btn-ghost btn-sm" id="prevBtn" onclick="flipPage(-1)">← Prev</button>
+          <button class="btn btn-ghost btn-sm" id="nextBtn" onclick="flipPage(1)">Next →</button>
         </div>
       </div>
-    </div>
-  </div>
-</div>
 
-<!-- CONFIRM MODAL -->
-<div class="modal-overlay" id="confirmModal">
+    </div><!-- /main -->
+  </div><!-- /body -->
+</div><!-- /app -->
+
+<!-- ─── MODAL ─── -->
+<div class="overlay" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <h2 id="modalTitle">Confirm Action</h2>
-    <p id="modalBody">Are you sure?</p>
-    <div class="modal-footer">
+    <h2 id="mTitle">Confirm</h2>
+    <p id="mBody"></p>
+    <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-danger" id="modalConfirmBtn">Confirm</button>
+      <button class="btn btn-danger" id="mConfirm">Confirm</button>
     </div>
   </div>
 </div>
 
-<!-- TOASTS -->
-<div class="toast-wrap" id="toastWrap"></div>
+<!-- ─── TOASTS ─── -->
+<div class="toast-stack" id="toasts"></div>
 
 <script>
+// ══ CONFIG ══════════════════════════════════════════════
 const WORKER = 'https://alerts.nagoh.xyz';
-let apps = [];
-let allSales = [];
-let filteredSales = [];
-let currentApp = null;
-let currentPage = 1;
-let pageSize = 25;
-let sortField = 'timestamp';
-let sortDir = 'desc';
-let typeFilter = 'all';
-let selectedIds = new Set();
-let editingCell = null;
-let modalCallback = null;
+const authB64 = btoa('admin:admin');
+const authHdr = () => ({ 'Authorization': 'Basic ' + authB64, 'Content-Type': 'application/json' });
 
-// ── AUTH ──
-const auth = () => 'Basic ' + btoa('admin:admin');
-function isLoggedIn(){ return sessionStorage.getItem('nagoh_auth')==='true'; }
-function logout(){ sessionStorage.removeItem('nagoh_auth'); location.reload(); }
+// ══ STATE ════════════════════════════════════════════════
+let apps         = [];
+let allSales     = [];
+let filtered     = [];
+let curApp       = null;
+let curPage      = 1;
+let pageSize     = 25;
+let sortField    = 'timestamp';
+let sortDir      = 'desc';
+let typeFilter   = 'all';
+let selected     = new Set();
+let modalCb      = null;
 
-function login(){
-  const u = document.getElementById('username').value;
-  const p = document.getElementById('password').value;
-  if(u==='admin'&&p==='admin'){
-    sessionStorage.setItem('nagoh_auth','true');
-    document.getElementById('loginWrap').style.display='none';
-    document.getElementById('shell').style.display='block';
-    init();
+// ══ AUTH ═════════════════════════════════════════════════
+function isLoggedIn(){ return sessionStorage.getItem('ng_ok') === '1'; }
+function logout(){ sessionStorage.removeItem('ng_ok'); location.reload(); }
+
+async function login(){
+  const u = document.getElementById('u').value;
+  const p = document.getElementById('p').value;
+  if(u === 'admin' && p === 'admin'){
+    sessionStorage.setItem('ng_ok','1');
+    showApp();
   } else {
-    document.getElementById('loginErr').style.display='block';
+    document.getElementById('loginErr').style.display = 'block';
   }
 }
 
-// ── INIT ──
-function init(){
+['u','p'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+});
+
+// ══ BOOT ═════════════════════════════════════════════════
+function showApp(){
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
   tickClock();
   setInterval(tickClock, 1000);
   loadApps();
 }
 
+if(isLoggedIn()) showApp();
+
 function tickClock(){
-  const now = new Date();
-  document.getElementById('clock').textContent = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
 
-if(isLoggedIn()){
-  document.getElementById('loginWrap').style.display='none';
-  document.getElementById('shell').style.display='block';
-  init();
-}
-
-// ── APPS ──
+// ══ APPS ═════════════════════════════════════════════════
 async function loadApps(){
   try {
-    const r = await fetch(`${WORKER}/api/apps`,{headers:{Authorization:auth()}});
+    const r = await fetch(`${WORKER}/api/apps`, { headers: authHdr() });
+    if(!r.ok) throw new Error(r.status);
     apps = await r.json();
-    document.getElementById('statApps').textContent = apps.length;
-    renderApps();
-    if(apps.length>0 && !currentApp) selectApp(apps[0].bundleId);
-  } catch(e){ toast('Failed to load apps','error'); }
+  } catch(e){
+    toast('Could not load apps — check WORKER URL', 'error');
+    apps = [];
+  }
+  document.getElementById('sApps').textContent = apps.length;
+  renderAppList();
+  if(apps.length && !curApp) selectApp(apps[0].bundleId);
 }
 
-function renderApps(){
-  const el = document.getElementById('appsList');
-  if(!apps.length){ el.innerHTML='<div class="empty"><div class="empty-icon">📱</div><p>No apps registered.</p></div>'; return; }
-  el.innerHTML = apps.map(a=>`
-    <div class="app-item ${currentApp===a.bundleId?'active':''}" onclick="selectApp('${a.bundleId}')">
-      <div class="app-item-name">${esc(a.appName)}</div>
-      <div class="app-item-bundle">${a.bundleId}</div>
-      <div class="app-item-footer">
-        <span class="app-badge">—</span>
-        <button class="btn btn-danger" style="padding:3px 10px;font-size:11px;" onclick="event.stopPropagation();confirmDeleteApp('${a.bundleId}')">Delete</button>
+function renderAppList(){
+  const el = document.getElementById('appList');
+  if(!apps.length){
+    el.innerHTML = '<div class="empty" style="padding:24px 16px;"><div class="empty-icon">📱</div><p>No apps yet.<br>Register one below.</p></div>';
+    return;
+  }
+  el.innerHTML = apps.map(a => `
+    <div class="app-item ${curApp===a.bundleId?'active':''}" onclick="selectApp('${esc(a.bundleId)}')">
+      <div class="app-item-info">
+        <div class="app-item-name">${esc(a.appName)}</div>
+        <div class="app-item-bundle">${esc(a.bundleId)}</div>
       </div>
+      <button class="delete-app-btn" title="Delete app" onclick="event.stopPropagation();confirmDeleteApp('${esc(a.bundleId)}','${esc(a.appName)}')">×</button>
     </div>`).join('');
 }
 
 async function selectApp(bundleId){
-  currentApp = bundleId;
-  renderApps();
+  curApp = bundleId;
+  const app = apps.find(a => a.bundleId === bundleId);
+  document.getElementById('topbarApp').textContent = app ? app.appName : bundleId;
+  renderAppList();
   await loadSales();
 }
 
 async function addApp(){
-  const name = document.getElementById('appName').value.trim();
-  const bundle = document.getElementById('bundleId').value.trim();
-  const url = document.getElementById('appStoreUrl').value.trim();
-  if(!name||!bundle||!url){ toast('Fill in all fields','error'); return; }
+  const name   = document.getElementById('fName').value.trim();
+  const bundle = document.getElementById('fBundle').value.trim();
+  const url    = document.getElementById('fUrl').value.trim();
+  if(!name || !bundle || !url){ toast('Fill in all three fields','error'); return; }
   try {
-    const r = await fetch(`${WORKER}/api/apps`,{method:'POST',headers:{Authorization:auth(),'Content-Type':'application/json'},body:JSON.stringify({appName:name,bundleId:bundle,appStoreUrl:url})});
-    if(r.ok){ toast('App registered ✓','success'); document.getElementById('appName').value=''; document.getElementById('bundleId').value=''; document.getElementById('appStoreUrl').value=''; await loadApps(); }
-    else { const e=await r.json(); toast(e.error||'Error','error'); }
+    const r = await fetch(`${WORKER}/api/apps`,{
+      method:'POST', headers: authHdr(),
+      body: JSON.stringify({ appName:name, bundleId:bundle, appStoreUrl:url })
+    });
+    const d = await r.json();
+    if(!r.ok){ toast(d.error || 'Registration failed','error'); return; }
+    toast(`${name} registered ✓`,'success');
+    document.getElementById('fName').value = '';
+    document.getElementById('fBundle').value = '';
+    document.getElementById('fUrl').value = '';
+    await loadApps();
+    selectApp(bundle);
   } catch(e){ toast('Network error','error'); }
 }
 
-function confirmDeleteApp(bundleId){
-  openModal('Delete App','This will permanently delete the app and ALL its sales data. This cannot be undone.', async()=>{
-    try {
-      const r = await fetch(`${WORKER}/api/apps/${encodeURIComponent(bundleId)}`,{method:'DELETE',headers:{Authorization:auth()}});
-      if(r.ok){ toast('App deleted','success'); if(currentApp===bundleId){currentApp=null;allSales=[];filteredSales=[];renderTable();} await loadApps(); }
-      else toast('Error deleting app','error');
-    } catch(e){ toast('Network error','error'); }
-  });
+function confirmDeleteApp(bundleId, name){
+  openModal(
+    'Delete App',
+    `Delete "${name}" and ALL its sales data permanently? This cannot be undone.`,
+    async () => {
+      try {
+        await fetch(`${WORKER}/api/apps/${encodeURIComponent(bundleId)}`,{ method:'DELETE', headers:authHdr() });
+        toast('App deleted','success');
+        if(curApp === bundleId){ curApp = null; allSales = []; renderTable(); }
+        await loadApps();
+      } catch(e){ toast('Error deleting app','error'); }
+    },
+    'Delete Forever'
+  );
 }
 
-// ── SALES ──
+// ══ SALES ════════════════════════════════════════════════
 async function loadSales(){
-  if(!currentApp) return;
+  if(!curApp) return;
   try {
-    const r = await fetch(`${WORKER}/api/sales?bundleId=${encodeURIComponent(currentApp)}`,{headers:{Authorization:auth()}});
+    const r = await fetch(`${WORKER}/api/sales?bundleId=${encodeURIComponent(curApp)}`, { headers: authHdr() });
+    if(!r.ok) throw new Error(r.status);
     allSales = await r.json();
-    updateStats();
-    applyFilters();
-  } catch(e){ toast('Failed to load sales','error'); }
+  } catch(e){
+    toast('Could not load sales','error');
+    allSales = [];
+  }
+  selected.clear();
+  updateStats();
+  applyFilters();
 }
 
 function updateStats(){
   const today = new Date().toDateString();
-  const real = allSales.filter(s=>s.type==='PURCHASE');
-  document.getElementById('statToday').textContent = allSales.filter(s=>new Date(s.timestamp).toDateString()===today&&s.type==='PURCHASE').length;
-  document.getElementById('statTotal').textContent = real.length;
-  document.getElementById('statRevenue').textContent = '$'+real.reduce((s,x)=>s+(x.price||0),0).toFixed(2);
+  const real  = allSales.filter(s => s.type === 'PURCHASE');
+  document.getElementById('sToday').textContent   = allSales.filter(s => s.type==='PURCHASE' && new Date(s.timestamp).toDateString()===today).length;
+  document.getElementById('sTotal').textContent   = real.length;
+  document.getElementById('sRevenue').textContent = '$' + real.reduce((t,s)=>t+(parseFloat(s.price)||0),0).toFixed(2);
 }
 
-async function refreshAll(){
+async function doRefresh(){
   await loadApps();
-  if(currentApp) await loadSales();
+  if(curApp) await loadSales();
   toast('Refreshed','info');
 }
 
-// Hard refresh - clears local cache and reloads from server
-async function hardRefresh(){
-  if(currentApp) {
-    toast('Hard refreshing from server...', 'info');
-    await loadSales();
-    selectedIds.clear();
-    toast('Data reloaded from server ✓', 'success');
-  } else {
-    toast('Select an app first', 'error');
-  }
+async function doHardRefresh(){
+  if(!curApp){ toast('Select an app first','error'); return; }
+  await loadSales();
+  toast('Reloaded from server ✓','success');
 }
 
-// ── FILTERS & SORT ──
-function setTypeFilter(btn, val){
+// ══ FILTERS & SORT ═══════════════════════════════════════
+function setFilter(btn, val){
   typeFilter = val;
-  document.querySelectorAll('.filter-chip').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.chip').forEach(b => b.classList.remove('on','green','red','purple'));
   btn.classList.add('on');
-  currentPage = 1;
+  if(val==='PURCHASE') btn.classList.add('green');
+  if(val==='REFUND') btn.classList.add('red');
+  if(val==='TEST') btn.classList.add('purple');
+  curPage = 1;
   applyFilters();
 }
 
-function sortBy(field){
-  if(sortField===field) sortDir = sortDir==='asc'?'desc':'asc';
-  else { sortField=field; sortDir='desc'; }
-  document.getElementById('sortField').value = `${sortField}-${sortDir}`;
+function sortClick(field){
+  if(sortField === field) sortDir = sortDir==='asc'?'desc':'asc';
+  else { sortField = field; sortDir = 'desc'; }
+  // sync dropdown
+  const opt = `${sortField}-${sortDir}`;
+  const ctrl = document.getElementById('sortCtrl');
+  for(let o of ctrl.options) if(o.value === opt){ ctrl.value = opt; break; }
   applyFilters();
 }
 
 function applyFilters(){
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const sortVal = document.getElementById('sortField').value;
-  const [sf, sd] = sortVal.split('-');
+  const q  = (document.getElementById('search').value || '').toLowerCase();
+  const sv = document.getElementById('sortCtrl').value;
+  const [sf,sd] = sv.split('-');
   sortField = sf; sortDir = sd;
-  const ps = document.getElementById('pageSize').value;
-  pageSize = ps==='all' ? 999999 : parseInt(ps);
+  pageSize  = parseInt(document.getElementById('psCtrl').value);
 
   let data = [...allSales];
+  if(typeFilter !== 'all') data = data.filter(s => s.type === typeFilter);
+  if(q) data = data.filter(s => `${s.type||''} ${s.price||''} ${s.details||''} ${new Date(s.timestamp).toLocaleString()}`.toLowerCase().includes(q));
 
-  // type filter
-  if(typeFilter!=='all') data = data.filter(s=>s.type===typeFilter);
-
-  // search
-  if(search) data = data.filter(s=>{
-    const row = `${s.type||''} ${s.price||''} ${s.details||''} ${new Date(s.timestamp).toLocaleString()}`.toLowerCase();
-    return row.includes(search);
-  });
-
-  // sort
   data.sort((a,b)=>{
     let av = a[sortField], bv = b[sortField];
     if(sortField==='timestamp'){ av=new Date(av); bv=new Date(bv); }
     if(sortField==='price'){ av=parseFloat(av)||0; bv=parseFloat(bv)||0; }
     if(typeof av==='string') av=av.toLowerCase();
     if(typeof bv==='string') bv=bv.toLowerCase();
-    return sortDir==='asc' ? (av>bv?1:-1) : (av<bv?1:-1);
+    return sortDir==='asc'?(av>bv?1:-1):(av<bv?1:-1);
   });
 
-  filteredSales = data;
-  currentPage = Math.min(currentPage, Math.ceil(data.length/pageSize)||1);
+  filtered = data;
+  curPage = Math.min(curPage, Math.ceil(data.length/pageSize)||1);
 
-  // update sort icons
-  ['timestamp','type','price'].forEach(f=>{
+  // update sort header icons
+  ['timestamp','type','price'].forEach(f => {
     const th = document.getElementById(`th-${f}`);
-    if(!th) return;
+    const si = document.getElementById(`si-${f}`);
+    if(!th||!si) return;
     th.classList.toggle('sorted', f===sortField);
-    const ico = th.querySelector('.sort-icon');
-    if(ico) ico.textContent = f===sortField ? (sortDir==='asc'?'↑':'↓') : '↕';
+    si.textContent = f===sortField ? (sortDir==='asc'?'↑':'↓') : '↕';
   });
 
-  document.getElementById('filterSummary').textContent = `${data.length} of ${allSales.length} records`;
+  document.getElementById('filterInfo').textContent = `${data.length} of ${allSales.length} records`;
   renderTable();
 }
 
-// ── RENDER TABLE ──
+// ══ RENDER TABLE ═════════════════════════════════════════
 function renderTable(){
-  const tbody = document.getElementById('salesBody');
+  const tbody = document.getElementById('tbody');
+
   if(!allSales.length){
-    tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div><p>No sales data. Select an app or register one.</p></div></td></tr>';
-    document.getElementById('paginationRow').style.display='none';
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div><p>No sales data yet.<br>Send a test sale or wait for a real one!</p></div></td></tr>`;
+    document.getElementById('pageRow').style.display = 'none';
+    updateBulkBar();
     return;
   }
-  if(!filteredSales.length){
-    tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">🔍</div><p>No records match your filters.</p></div></td></tr>';
-    document.getElementById('paginationRow').style.display='none';
+  if(!filtered.length){
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><div class="empty-icon">🔍</div><p>No records match your filters.</p></div></td></tr>`;
+    document.getElementById('pageRow').style.display = 'none';
+    updateBulkBar();
     return;
   }
 
-  const start = (currentPage-1)*pageSize;
-  const end = Math.min(start+pageSize, filteredSales.length);
-  const page = filteredSales.slice(start, end);
+  const start = (curPage-1)*pageSize;
+  const end   = Math.min(start+pageSize, filtered.length);
+  const page  = filtered.slice(start, end);
 
-  tbody.innerHTML = page.map(s=>{
-    const isTest = s.type==='TEST';
-    const badgeCls = s.type==='PURCHASE'?'badge-purchase':s.type==='REFUND'?'badge-refund':'badge-test';
-    const checked = selectedIds.has(s.id) ? 'checked' : '';
-    return `<tr class="${isTest?'test-row':''}" data-id="${s.id}">
-      <td><input type="checkbox" class="row-cb" ${checked} onchange="toggleSelect('${s.id}',this.checked)"></td>
-      <td class="mono">${new Date(s.timestamp).toLocaleString()}</td>
-      <td><span class="badge ${badgeCls}">${s.type}</span></td>
-      <td class="mono" ondblclick="editCell(this,'${s.id}','price',${s.price||0})">
-        <span class="editable-cell" title="Double-click to edit">$${(s.price||0).toFixed(2)}</span>
-      </td>
-      <td ondblclick="editCell(this,'${s.id}','details','${esc(s.details||'')}')">
-        <span class="editable-cell" title="Double-click to edit">${esc(s.details||'—')}</span>
+  tbody.innerHTML = page.map(s => {
+    const chk = selected.has(s.id) ? 'checked' : '';
+    const dt  = new Date(s.timestamp);
+    const dateStr = dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const timeStr = dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    return `<tr data-id="${s.id}">
+      <td style="padding-left:16px;">
+        <input type="checkbox" ${chk} style="cursor:pointer;accent-color:var(--blue);" onchange="toggleSel('${s.id}',this.checked)">
       </td>
       <td>
-        <div style="display:flex;gap:6px;">
-          <button class="btn btn-ghost" style="padding:3px 10px;font-size:11px;" onclick="editRow('${s.id}')">✎ Edit</button>
-          <button class="btn btn-danger" style="padding:3px 10px;font-size:11px;" onclick="confirmDeleteSale('${s.id}')">✕</button>
-        </div>
+        <div style="color:var(--text);font-size:12px;">${dateStr}</div>
+        <div class="mono" style="color:var(--dim);margin-top:2px;">${timeStr}</div>
       </td>
-    </table>`;
+      <td><span class="badge badge-${s.type}">${s.type}</span></td>
+      <td class="mono" style="color:var(--text);">$${(parseFloat(s.price)||0).toFixed(2)}</td>
+      <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(s.details||'')}">
+        ${esc(s.details || '—')}
+      </td>
+      <td>
+        <button class="btn btn-danger btn-xs" onclick="confirmDeleteSale('${s.id}')">Delete</button>
+      </td>
+    </tr>`;
   }).join('');
 
   // Pagination
-  const total = filteredSales.length;
-  const pages = Math.ceil(total/pageSize);
-  document.getElementById('paginationRow').style.display = pages>1?'flex':'none';
-  document.getElementById('pageInfo').textContent = `${start+1}–${end} of ${total}`;
-  document.getElementById('prevBtn').disabled = currentPage<=1;
-  document.getElementById('nextBtn').disabled = currentPage>=pages;
+  const pages = Math.ceil(filtered.length / pageSize);
+  document.getElementById('pageRow').style.display = pages > 1 ? 'flex' : 'none';
+  document.getElementById('pageInfo').textContent   = `${start+1}–${end} of ${filtered.length}`;
+  document.getElementById('prevBtn').disabled = curPage <= 1;
+  document.getElementById('nextBtn').disabled = curPage >= pages;
 
   updateBulkBar();
 }
 
-function changePage(dir){
-  currentPage += dir;
-  renderTable();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
+function flipPage(dir){ curPage += dir; renderTable(); window.scrollTo({top:0,behavior:'smooth'}); }
 
-// ── SELECTION ──
-function toggleSelect(id, checked){
-  if(checked) selectedIds.add(id); else selectedIds.delete(id);
-  updateBulkBar();
-}
+// ══ SELECTION ════════════════════════════════════════════
+function toggleSel(id, on){ on ? selected.add(id) : selected.delete(id); updateBulkBar(); }
 
-function toggleSelectAll(){
-  const all = document.getElementById('selectAll').checked;
-  const ps = filteredSales.slice((currentPage-1)*pageSize, currentPage*pageSize);
-  ps.forEach(s=>{ if(all) selectedIds.add(s.id); else selectedIds.delete(s.id); });
+function toggleAll(){
+  const on = document.getElementById('selAll').checked;
+  const page = filtered.slice((curPage-1)*pageSize, curPage*pageSize);
+  page.forEach(s => on ? selected.add(s.id) : selected.delete(s.id));
   renderTable();
 }
 
-function clearSelection(){ selectedIds.clear(); renderTable(); }
+function clearSel(){ selected.clear(); renderTable(); }
 
 function updateBulkBar(){
   const bar = document.getElementById('bulkBar');
-  if(selectedIds.size>0){
-    bar.classList.add('visible');
-    document.getElementById('bulkCount').textContent = `${selectedIds.size} selected`;
+  if(selected.size > 0){
+    bar.classList.add('show');
+    document.getElementById('bulkCount').textContent = `${selected.size} selected`;
   } else {
-    bar.classList.remove('visible');
+    bar.classList.remove('show');
   }
 }
 
-// ── INLINE EDIT ──
-function editCell(td, id, field, currentVal){
-  if(editingCell) cancelEdit();
-  editingCell = td;
-  const displayEl = td.querySelector('.editable-cell,span');
-  td.innerHTML = `<div class="edit-cell">
-    <input class="edit-input" id="inlineInput" type="${field==='price'?'number':'text'}" value="${currentVal}" step="0.01">
-    <button class="edit-save" onclick="saveCell('${id}','${field}')">✓</button>
-    <button class="edit-cancel" onclick="cancelEdit()">✕</button>
-  </div>`;
-  const inp = document.getElementById('inlineInput');
-  inp.focus(); inp.select();
-  inp.onkeydown = e=>{ if(e.key==='Enter') saveCell(id,field); if(e.key==='Escape') cancelEdit(); };
-}
-
-function cancelEdit(){ editingCell=null; applyFilters(); }
-
-async function saveCell(id, field){
-  const val = document.getElementById('inlineInput').value;
-  await patchSale(id, {[field]: field==='price'?parseFloat(val):val});
-}
-
-async function patchSale(id, updates){
-  try {
-    const r = await fetch(`${WORKER}/api/sales/${encodeURIComponent(id)}?bundleId=${encodeURIComponent(currentApp)}`, {
-      method:'PATCH',
-      headers:{Authorization:auth(),'Content-Type':'application/json'},
-      body:JSON.stringify(updates)
-    });
-    if(r.ok){
-      const idx = allSales.findIndex(s=>s.id===id);
-      if(idx>-1) allSales[idx] = {...allSales[idx],...updates};
-      toast('Saved','success');
-    } else {
-      // If PATCH not supported, update locally
-      const idx = allSales.findIndex(s=>s.id===id);
-      if(idx>-1){ allSales[idx]={...allSales[idx],...updates}; toast('Saved locally (PATCH not supported by worker)','info'); }
-    }
-  } catch(e){
-    const idx = allSales.findIndex(s=>s.id===id);
-    if(idx>-1){ allSales[idx]={...allSales[idx],...updates}; toast('Saved locally','info'); }
-  }
-  editingCell = null;
-  updateStats();
-  applyFilters();
-}
-
-function editRow(id){
-  const sale = allSales.find(s=>s.id===id);
-  if(!sale) return;
-  const td = document.querySelector(`tr[data-id="${id}"] td:nth-child(5)`);
-  if(td) editCell(td, id, 'details', sale.details||'');
-}
-
-// ── DELETE ──
-function saleDeleteUrl(id){ return `${WORKER}/api/sales/${encodeURIComponent(id)}?bundleId=${encodeURIComponent(currentApp)}`; }
+// ══ DELETE ═══════════════════════════════════════════════
+function saleUrl(id){ return `${WORKER}/api/sales/${encodeURIComponent(id)}?bundleId=${encodeURIComponent(curApp)}`; }
 
 function confirmDeleteSale(id){
-  openModal('Delete Sale','Permanently delete this sale record?', async()=>{
-    const url = saleDeleteUrl(id);
+  openModal('Delete Sale','Remove this sale record permanently?', async () => {
     try {
-      const r = await fetch(url, {method:'DELETE', headers:{Authorization:auth()}});
-      const body = await r.json();
-      if (!r.ok) {
-        toast(`Worker error ${r.status}: ${body.error || 'unknown'}`, 'error');
-        return;
-      }
-    } catch(e){
-      toast('Network error: ' + e.message, 'error');
-      return;
-    }
+      const r = await fetch(saleUrl(id),{ method:'DELETE', headers:authHdr() });
+      if(!r.ok){ const d=await r.json(); toast(d.error||`Server error ${r.status}`,'error'); return; }
+    } catch(e){ toast('Network error: '+e.message,'error'); return; }
     allSales = allSales.filter(s => String(s.id) !== String(id));
-    selectedIds.delete(id);
-    toast('Deleted ✓', 'success');
-    updateStats(); 
+    selected.delete(id);
+    updateStats();
     applyFilters();
+    toast('Deleted ✓','success');
   });
 }
 
-function bulkDelete(){
-  const ids = [...selectedIds];
+async function bulkDelete(){
+  const ids = [...selected];
   if(!ids.length) return;
-  openModal('Delete Selected',`Permanently delete ${ids.length} selected record(s)?`, async()=>{
+  openModal('Delete Selected',`Permanently delete ${ids.length} record(s)?`, async () => {
+    let ok=0, fail=0;
     for(const id of ids){
-      try { await fetch(saleDeleteUrl(id),{method:'DELETE',headers:{Authorization:auth()}}); } catch(e){}
-      allSales = allSales.filter(s=>s.id!==id);
-      selectedIds.delete(id);
+      try {
+        const r = await fetch(saleUrl(id),{ method:'DELETE', headers:authHdr() });
+        if(r.ok){ allSales = allSales.filter(s=>s.id!==id); selected.delete(id); ok++; }
+        else fail++;
+      } catch(e){ fail++; }
     }
-    toast(`Deleted ${ids.length} records`,'success');
-    updateStats(); 
-    applyFilters();
+    updateStats(); applyFilters();
+    toast(`Deleted ${ok}${fail?`, ${fail} failed`:''}`, fail?'warn':'success');
   });
 }
 
-function bulkDeleteType(type){
-  const ids = [...selectedIds].filter(id=>{ const s=allSales.find(x=>x.id===id); return s&&s.type===type; });
-  if(!ids.length){ toast(`No ${type} records selected`,'info'); return; }
-  openModal(`Delete ${type} Records`,`Delete ${ids.length} ${type} record(s) from selection?`, async()=>{
-    for(const id of ids){
-      try { await fetch(saleDeleteUrl(id),{method:'DELETE',headers:{Authorization:auth()}}); } catch(e){}
-      allSales = allSales.filter(s=>s.id!==id);
-      selectedIds.delete(id);
-    }
-    toast(`Deleted ${ids.length} ${type} records`,'success');
-    updateStats(); 
-    applyFilters();
-  });
-}
-
-// FIXED: Purge function that properly reloads data from server after purging
-async function confirmDeleteAllTests(){
-  if(!currentApp){ toast('No app selected', 'error'); return; }
-  
-  // Count current test records
+async function confirmPurgeTests(){
+  if(!curApp){ toast('No app selected','error'); return; }
   const tests = allSales.filter(s => s.type === 'TEST');
-  if(!tests.length){ toast('No test data found for this app', 'info'); return; }
-  
-  openModal('Purge All Test Data', `⚠️ Permanently delete ALL ${tests.length} TEST records for this app? This action cannot be undone.`, async() => {
-    const url = `${WORKER}/api/sales/purge-tests?bundleId=${encodeURIComponent(currentApp)}`;
-    
-    try {
-      const r = await fetch(url, { 
-        method: 'DELETE', 
-        headers: { Authorization: auth() } 
-      });
-      
-      const body = await r.json();
-      
-      if (!r.ok) {
-        toast(`Error: ${body.error || 'Unknown error'}`, 'error');
-        console.error('Purge failed:', body);
-        return;
-      }
-      
-      toast(`✓ Purged ${body.removed || tests.length} test records from server`, 'success');
-      
-      // IMPORTANT: Reload sales from server to sync local cache
-      await loadSales();
-      
-      // Clear selections
-      selectedIds.clear();
-      
-      // Force refresh the display
-      updateStats();
-      applyFilters();
-      
-      // Show success message with count
-      const remainingTests = allSales.filter(s => s.type === 'TEST').length;
-      if (remainingTests === 0) {
-        toast('All test data has been cleared! ✓', 'success');
-      } else {
-        toast(`Purged ${body.removed} records. ${remainingTests} test records remain.`, 'info');
-      }
-      
-    } catch(e) {
-      toast('Network error: ' + e.message, 'error');
-      console.error('Purge network error:', e);
-    }
-  });
+  if(!tests.length){ toast('No test records for this app','info'); return; }
+  openModal(
+    'Purge All Test Data',
+    `⚠️ Permanently delete ALL ${tests.length} TEST records for this app? This cannot be undone.`,
+    async () => {
+      try {
+        const r = await fetch(`${WORKER}/api/sales/purge-tests?bundleId=${encodeURIComponent(curApp)}`,{
+          method:'DELETE', headers:authHdr()
+        });
+        const d = await r.json();
+        if(!r.ok){ toast(d.error||`Error ${r.status}`,'error'); return; }
+        toast(`Purged ${d.removed} test record(s) ✓`,'success');
+        await loadSales();
+      } catch(e){ toast('Network error: '+e.message,'error'); }
+    },
+    'Purge All Tests'
+  );
 }
 
-// ── TEST SALE ──
-async function sendTestSale(){
-  if(!currentApp){ toast('Select an app first','error'); return; }
+// ══ TEST SALE ════════════════════════════════════════════
+async function sendTest(){
+  if(!curApp){ toast('Select an app first','error'); return; }
   try {
-    const r = await fetch(`${WORKER}/api/test-sale`,{method:'POST',headers:{Authorization:auth(),'Content-Type':'application/json'},body:JSON.stringify({bundleId:currentApp})});
-    if(r.ok){ 
-      toast('Test sale sent ✓','success'); 
-      await loadSales(); // Reload after adding test sale
-    }
-    else { const e=await r.json(); toast(e.error||'Error','error'); }
+    const r = await fetch(`${WORKER}/api/test-sale`,{
+      method:'POST', headers:authHdr(),
+      body: JSON.stringify({ bundleId: curApp })
+    });
+    if(r.ok){ toast('Test sale added ✓','success'); await loadSales(); }
+    else { const d=await r.json(); toast(d.error||'Failed','error'); }
   } catch(e){ toast('Network error','error'); }
 }
 
-// ── MODAL ──
-function openModal(title, body, onConfirm){
-  document.getElementById('modalTitle').textContent = title;
-  document.getElementById('modalBody').textContent = body;
-  document.getElementById('confirmModal').classList.add('open');
-  modalCallback = onConfirm;
+// ══ MODAL ════════════════════════════════════════════════
+function openModal(title, body, cb, confirmLabel='Confirm'){
+  document.getElementById('mTitle').textContent = title;
+  document.getElementById('mBody').textContent  = body;
+  document.getElementById('mConfirm').textContent = confirmLabel;
+  document.getElementById('modal').classList.add('open');
+  modalCb = cb;
 }
-document.getElementById('modalConfirmBtn').onclick = ()=>{ closeModal(); if(modalCallback) modalCallback(); };
-function closeModal(){ document.getElementById('confirmModal').classList.remove('open'); modalCallback=null; }
-document.getElementById('confirmModal').addEventListener('click', e=>{ if(e.target===document.getElementById('confirmModal')) closeModal(); });
+document.getElementById('mConfirm').onclick = () => { closeModal(); if(modalCb) modalCb(); };
+function closeModal(){ document.getElementById('modal').classList.remove('open'); modalCb=null; }
 
-// ── TOAST ──
+// ══ TOASTS ═══════════════════════════════════════════════
 function toast(msg, type='info'){
-  const wrap = document.getElementById('toastWrap');
-  const el = document.createElement('div');
-  el.className = `toast ${type}`;
+  const wrap = document.getElementById('toasts');
+  const el   = document.createElement('div');
+  el.className = `toast t-${type}`;
   el.textContent = msg;
   wrap.appendChild(el);
-  requestAnimationFrame(()=>{ requestAnimationFrame(()=>el.classList.add('show')); });
-  setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),300); }, 2800);
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>el.classList.add('in')); });
+  setTimeout(()=>{ el.classList.remove('in'); setTimeout(()=>el.remove(),300); }, 3000);
 }
 
-// ── UTILS ──
-function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+// ══ UTILS ════════════════════════════════════════════════
+function esc(s){
+  const d=document.createElement('div');
+  d.textContent = String(s||'');
+  return d.innerHTML;
+}
 </script>
 </body>
 </html>
