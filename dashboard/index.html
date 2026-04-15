@@ -1,607 +1,449 @@
-// Nagoh Stateless Relay v3 - WITH DASHBOARD API & CORS
-// Domain: alerts.nagoh.xyz
-
-// In-memory cache for recent sales (last 100 sales)
-let recentSales = [];
-
-export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
-    const pathParts = url.pathname.split('/');
-    
-    // Handle CORS preflight requests
-    if (request.method === 'OPTIONS') {
-      const origin = request.headers.get('Origin') || '*';
-      return new Response(null, {
-        status: 204,
-        headers: {
-          'Access-Control-Allow-Origin': origin,
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
-          'Access-Control-Max-Age': '86400',
-        }
-      });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nagoh Sales Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-
-    // ==================== DASHBOARD API ENDPOINTS ====================
-    
-    // GET /api/sales - returns all recent sales for dashboard
-    if (request.method === 'GET' && url.pathname === '/api/sales') {
-      const origin = request.headers.get('Origin') || '*';
-      return new Response(JSON.stringify({
-        success: true,
-        sales: recentSales,
-        count: recentSales.length,
-        timestamp: new Date().toISOString()
-      }), {
-        status: 200,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': origin,
-          'Access-Control-Allow-Methods': 'GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
-          'Cache-Control': 'no-cache'
-        }
-      });
+    body {
+      background: linear-gradient(135deg, #0a0c12 0%, #0f111a 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      color: #eef2ff;
+      padding: 20px;
     }
-
-    // GET /api/stats - returns sales statistics
-    if (request.method === 'GET' && url.pathname === '/api/stats') {
-      const origin = request.headers.get('Origin') || '*';
-      const today = new Date().toDateString();
-      let todayRevenue = 0;
-      for (const sale of recentSales) {
-        if (sale.revenue && new Date(sale.timestamp).toDateString() === today) {
-          todayRevenue += sale.revenue;
-        }
-      }
-      
-      return new Response(JSON.stringify({
-        success: true,
-        totalSales: recentSales.length,
-        todayRevenue: todayRevenue,
-        lastSale: recentSales[0] || null
-      }), {
-        status: 200,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': origin,
-          'Access-Control-Allow-Methods': 'GET, OPTIONS'
-        }
-      });
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
-
-    // Health check
-    if (request.method === 'GET' && url.pathname === '/') {
-      return new Response(JSON.stringify({
-        status: "active",
-        service: "Nagoh Relay v3",
-        domain: "alerts.nagoh.xyz",
-        salesInMemory: recentSales.length,
-        timestamp: new Date().toISOString()
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
+    .login-box {
+      background: rgba(18, 22, 35, 0.95);
+      border-radius: 24px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid rgba(100, 255, 218, 0.2);
     }
-
-    // Debug endpoint - shows what's in memory
-    if (request.method === 'GET' && url.pathname === '/debug') {
-      const origin = request.headers.get('Origin') || '*';
-      const prodValue = env.APNS_PRODUCTION || env['APNS_PRODUCTION'] || env['APNS​_​PRODUCTION'];
-      
-      return new Response(JSON.stringify({
-        hasEncryptionKey: !!env.ENCRYPTION_KEY,
-        encryptionKeyLength: env.ENCRYPTION_KEY ? env.ENCRYPTION_KEY.length : 0,
-        hasAPNSKeyID: !!env.APNS_KEY_ID,
-        apnsKeyID: env.APNS_KEY_ID || 'NOT SET',
-        hasAPNSTeamID: !!env.APNS_TEAM_ID,
-        apnsTeamID: env.APNS_TEAM_ID || 'NOT SET',
-        hasAPNSPrivateKey: !!env.APNS_PRIVATE_KEY,
-        apnsPrivateKeyLength: env.APNS_PRIVATE_KEY ? env.APNS_PRIVATE_KEY.length : 0,
-        apnsProduction: prodValue || 'not set',
-        nagohBundleID: env.NAGOH_BUNDLE_ID || 'com.nagohcreative.NAGOH (default)',
-        recentSalesCount: recentSales.length,
-        recentSales: recentSales.slice(0, 5),
-        autoTokenGeneration: !!(env.APNS_KEY_ID && env.APNS_TEAM_ID && env.APNS_PRIVATE_KEY)
-      }), {
-        status: 200,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': origin
-        }
-      });
+    .login-box h2 {
+      text-align: center;
+      background: linear-gradient(135deg, #fff, #64ffda);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 30px;
     }
-
-    // ==================== WEBHOOK HANDLERS ====================
-    
-    // Handle shortcode route: POST /v1/{shortcode}?p={encryptedPayload}
-    if (request.method === 'POST' && pathParts[1] === 'v1' && pathParts.length === 3) {
-      const shortcode = pathParts[2];
-      const encryptedPayloadRaw = url.searchParams.get('p');
-      
-      if (!encryptedPayloadRaw) {
-        return new Response(JSON.stringify({
-          error: "Missing payload parameter. Use: /v1/{route}?p={encryptedPayload}"
-        }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-      
-      const encryptedPayload = decodeURIComponent(encryptedPayloadRaw);
-      
-      let useProduction = false;
-      if (shortcode === 'prod' || shortcode === 'production') {
-        useProduction = true;
-      } else if (shortcode === 'dev' || shortcode === 'sandbox' || shortcode === 'test') {
-        useProduction = false;
-      } else {
-        const prodValue = env.APNS_PRODUCTION || env['APNS​_​PRODUCTION'];
-        useProduction = prodValue === 'true';
-      }
-      
-      try {
-        console.log("📨 Received webhook request (shortcode mode)");
-        
-        const decryptedData = await decryptPayload(encryptedPayload, env.ENCRYPTION_KEY);
-        const parts = decryptedData.split('|');
-        if (parts.length !== 3) {
-          throw new Error("Invalid payload format");
-        }
-        
-        const [profileID, bundleID, pushToken] = parts;
-        
-        if (pushToken === 'no-token-yet') {
-          return new Response(JSON.stringify({
-            error: "Device not registered for push notifications"
-          }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-
-        const appleBody = await request.json();
-        
-        if (!appleBody.signedPayload) {
-          throw new Error("Missing signedPayload");
-        }
-
-        const payloadParts = appleBody.signedPayload.split('.');
-        const decodedPayload = JSON.parse(atob(payloadParts[1]));
-        const notificationType = decodedPayload.notificationType || "UNKNOWN";
-        const subtype = decodedPayload.subtype || "";
-        
-        let revenue = 0;
-        let currency = "USD";
-        if (decodedPayload.data && decodedPayload.data.signedTransactionInfo) {
-          try {
-            const txInfo = JSON.parse(atob(decodedPayload.data.signedTransactionInfo.split('.')[1]));
-            if (txInfo.price && txInfo.currency) {
-              revenue = txInfo.price / 100.0;
-              currency = txInfo.currency;
-            }
-          } catch (e) {}
-        }
-        
-        let messageBody = `New ${notificationType} event!`;
-        if (subtype) {
-          messageBody = `${subtype}: ${notificationType}`;
-        }
-
-        const pushContent = {
-          aps: {
-            alert: {
-              title: "🎉 New Sale!",
-              body: messageBody,
-            },
-            sound: "default",
-            badge: 1,
-            "mutable-content": 1,
-            "content-available": 1
-          },
-          profileID: profileID,
-          bundleID: bundleID,
-          notificationType: notificationType,
-          subtype: subtype,
-          revenue: revenue,
-          currency: currency,
-          timestamp: Date.now(),
-          appleData: decodedPayload
-        };
-
-        await sendToAPNs(pushToken, bundleID, pushContent, env, useProduction);
-        
-        // Store in memory for dashboard
-        const saleRecord = {
-          id: `${Date.now()}_${Math.random().toString(36).substr(2, 8)}`,
-          notificationType: notificationType,
-          subtype: subtype,
-          revenue: revenue,
-          currency: currency,
-          bundleID: bundleID,
-          profileID: profileID,
-          timestamp: new Date().toISOString(),
-          receivedAt: new Date().toISOString()
-        };
-        
-        recentSales.unshift(saleRecord);
-        if (recentSales.length > 100) recentSales.pop();
-        
-        console.log(`✅ Sale recorded. Total in memory: ${recentSales.length}`);
-        
-        const origin = request.headers.get('Origin') || '*';
-        return new Response(JSON.stringify({
-          status: "success",
-          message: "Notification sent to device",
-          saleRecord: saleRecord
-        }), {
-          status: 200,
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': origin
-          }
-        });
-
-      } catch (e) {
-        console.error("❌ Relay Error:", e.message);
-        return new Response(JSON.stringify({
-          error: "Relay Error",
-          message: e.message,
-          timestamp: new Date().toISOString()
-        }), {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
+    .login-box input {
+      width: 100%;
+      padding: 12px 16px;
+      margin: 10px 0;
+      background: #1a1e30;
+      border: 1px solid #2a2f4b;
+      border-radius: 12px;
+      color: white;
+      font-size: 1rem;
     }
-    
-    // Handle regular push routes: POST /v1/push/...
-    const isProduction = pathParts[2] === 'push' && pathParts[3] === 'production';
-    const isSandbox = pathParts[2] === 'push' && pathParts[3] === 'sandbox';
-    const isLegacyPush = pathParts[2] === 'push' && !isProduction && !isSandbox;
-    const isTest = pathParts[2] === 'test';
-    
-    if (request.method === 'POST' && pathParts[1] === 'v1' && (isLegacyPush || isProduction || isSandbox || isTest)) {
-      const payloadStartIndex = (isProduction || isSandbox) ? 4 : 3;
-      const encryptedPayloadRaw = pathParts.slice(payloadStartIndex).join('/');
-      const encryptedPayload = decodeURIComponent(encryptedPayloadRaw);
-      
-      let useProduction;
-      if (isProduction) {
-        useProduction = true;
-      } else if (isSandbox || isTest) {
-        useProduction = false;
-      } else {
-        const prodValue = env.APNS_PRODUCTION || env['APNS​_​PRODUCTION'];
-        useProduction = prodValue === 'true';
-      }
-
-      if (!encryptedPayload) {
-        return new Response(JSON.stringify({
-          error: "Missing encrypted payload"
-        }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-
-      try {
-        console.log("📨 Received webhook request (standard mode)");
-        
-        const decryptedData = await decryptPayload(encryptedPayload, env.ENCRYPTION_KEY);
-        const parts = decryptedData.split('|');
-        if (parts.length !== 3) {
-          throw new Error("Invalid payload format");
-        }
-        
-        const [profileID, bundleID, pushToken] = parts;
-        
-        if (pushToken === 'no-token-yet') {
-          return new Response(JSON.stringify({
-            error: "Device not registered for push notifications"
-          }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-
-        const appleBody = await request.json();
-        
-        if (!appleBody.signedPayload) {
-          throw new Error("Missing signedPayload");
-        }
-
-        const payloadParts = appleBody.signedPayload.split('.');
-        const decodedPayload = JSON.parse(atob(payloadParts[1]));
-        const notificationType = decodedPayload.notificationType || "UNKNOWN";
-        const subtype = decodedPayload.subtype || "";
-        
-        let revenue = 0;
-        let currency = "USD";
-        if (decodedPayload.data && decodedPayload.data.signedTransactionInfo) {
-          try {
-            const txInfo = JSON.parse(atob(decodedPayload.data.signedTransactionInfo.split('.')[1]));
-            if (txInfo.price && txInfo.currency) {
-              revenue = txInfo.price / 100.0;
-              currency = txInfo.currency;
-            }
-          } catch (e) {}
-        }
-        
-        let messageBody = `New ${notificationType} event!`;
-        if (subtype) {
-          messageBody = `${subtype}: ${notificationType}`;
-        }
-
-        const pushContent = {
-          aps: {
-            alert: {
-              title: "🎉 New Sale!",
-              body: messageBody,
-            },
-            sound: "default",
-            badge: 1,
-            "mutable-content": 1,
-            "content-available": 1
-          },
-          profileID: profileID,
-          bundleID: bundleID,
-          notificationType: notificationType,
-          subtype: subtype,
-          revenue: revenue,
-          currency: currency,
-          timestamp: Date.now(),
-          appleData: decodedPayload
-        };
-
-        await sendToAPNs(pushToken, bundleID, pushContent, env, useProduction);
-        
-        // Store in memory for dashboard
-        const saleRecord = {
-          id: `${Date.now()}_${Math.random().toString(36).substr(2, 8)}`,
-          notificationType: notificationType,
-          subtype: subtype,
-          revenue: revenue,
-          currency: currency,
-          bundleID: bundleID,
-          profileID: profileID,
-          timestamp: new Date().toISOString(),
-          receivedAt: new Date().toISOString()
-        };
-        
-        recentSales.unshift(saleRecord);
-        if (recentSales.length > 100) recentSales.pop();
-        
-        console.log(`✅ Sale recorded. Total in memory: ${recentSales.length}`);
-        
-        const origin = request.headers.get('Origin') || '*';
-        return new Response(JSON.stringify({
-          status: "success",
-          message: "Notification sent to device",
-          saleRecord: saleRecord
-        }), {
-          status: 200,
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': origin
-          }
-        });
-
-      } catch (e) {
-        console.error("❌ Relay Error:", e.message);
-        return new Response(JSON.stringify({
-          error: "Relay Error",
-          message: e.message,
-          timestamp: new Date().toISOString()
-        }), {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background: linear-gradient(135deg, #64ffda, #a78bfa);
+      border: none;
+      border-radius: 12px;
+      color: #0a0c12;
+      font-weight: bold;
+      cursor: pointer;
     }
-    
-    return new Response(JSON.stringify({ error: "Not Found" }), {
-      status: 404,
-      headers: { 'Content-Type': 'application/json' }
+    .dashboard {
+      display: none;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .logout-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #2a2f4b;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      color: white;
+      cursor: pointer;
+    }
+    h1 {
+      font-size: 2rem;
+      background: linear-gradient(135deg, #fff, #64ffda);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 10px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+    }
+    .stat-card {
+      background: rgba(18, 22, 35, 0.9);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid rgba(100, 255, 218, 0.2);
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #8b92b0;
+      margin-bottom: 10px;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #64ffda;
+    }
+    .two-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      margin-bottom: 25px;
+    }
+    @media (max-width: 768px) {
+      .two-columns { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: #0e111b;
+      border-radius: 20px;
+      border: 1px solid #232736;
+      overflow: hidden;
+    }
+    .panel-header {
+      background: #13172a;
+      padding: 15px 20px;
+      border-bottom: 1px solid #232736;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .refresh-btn {
+      background: #1f253e;
+      border: none;
+      color: #eef2ff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+    .sales-feed, .activity-log {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .sale-item {
+      padding: 15px 20px;
+      border-bottom: 1px solid #1a1e30;
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .sale-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .event-type {
+      background: #2a2f4b;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .revenue {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #64ffda;
+    }
+    .timestamp {
+      font-size: 0.7rem;
+      color: #6b7280;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #6b7280;
+    }
+    .status-bar {
+      background: #0e111b;
+      border-radius: 20px;
+      padding: 15px 20px;
+      border: 1px solid #232736;
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .status-online {
+      color: #10b981;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .activity-entry {
+      padding: 12px 15px;
+      border-bottom: 1px solid #1a1e30;
+    }
+    .activity-time {
+      font-size: 0.7rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+<div id="loginScreen" class="login-container">
+  <div class="login-box">
+    <h2>🔐 Admin Access</h2>
+    <input type="text" id="username" placeholder="Username" autocomplete="off">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login to Dashboard</button>
+    <div id="loginError" class="error-msg"></div>
+  </div>
+</div>
+
+<div id="dashboard" class="dashboard">
+  <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+  
+  <h1>🍎 Nagoh Live Sales Dashboard</h1>
+  <div style="color:#8b92b0; margin-bottom:20px;">Real-time App Store notifications • Auto-refreshes every 3 seconds</div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Today's Revenue</div>
+      <div class="stat-value" id="todayRevenue">$0.00</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Sales</div>
+      <div class="stat-value" id="totalSales">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Last Sale</div>
+      <div class="stat-value" id="lastAmount">—</div>
+    </div>
+  </div>
+
+  <div class="two-columns">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="live-dot"></span>
+          🔔 Live Sales Feed
+        </div>
+        <button class="refresh-btn" onclick="fetchSales()">🔄 Refresh</button>
+      </div>
+      <div id="salesFeed" class="sales-feed">
+        <div class="empty-state">Loading sales data...</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          📋 Activity Log
+        </div>
+      </div>
+      <div id="activityLog" class="activity-log">
+        <div class="empty-state">Waiting for sales...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-online">
+      <span class="live-dot"></span>
+      <span id="connectionStatus">Checking connection...</span>
+    </div>
+    <div>
+      <span style="color:#8b92b0;">Worker API:</span>
+      <code id="workerUrl">https://alerts.nagoh.xyz</code>
+    </div>
+    <div>
+      <span id="lastUpdate">Last update: --</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// Authentication
+const VALID_USERNAME = 'admin';
+const VALID_PASSWORD = 'admin';
+let refreshInterval;
+
+function login() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  const errorDiv = document.getElementById('loginError');
+  
+  if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+    sessionStorage.setItem('dashboard_auth', 'true');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    startDashboard();
+  } else {
+    errorDiv.textContent = '❌ Invalid credentials. Use admin / admin';
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('dashboard_auth');
+  if (refreshInterval) clearInterval(refreshInterval);
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('dashboard').style.display = 'none';
+}
+
+// Check if already logged in
+if (sessionStorage.getItem('dashboard_auth') === 'true') {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  startDashboard();
+}
+
+// Fetch sales from worker
+async function fetchSales() {
+  try {
+    const response = await fetch('https://alerts.nagoh.xyz/api/sales', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
     });
-  }
-};
-
-// ==================== HELPER FUNCTIONS (keep these exactly as they are) ====================
-
-async function decryptPayload(encryptedBase64Url, base64Key) {
-  try {
-    if (!encryptedBase64Url) {
-      throw new Error("Encrypted payload is null or undefined");
-    }
     
-    if (!base64Key) {
-      throw new Error("Encryption key is not set");
-    }
-    
-    let base64 = encryptedBase64Url
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
-    
-    const remainder = base64.length % 4;
-    if (remainder > 0) {
-      base64 += '='.repeat(4 - remainder);
-    }
-    
-    const binaryString = atob(base64);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    
-    const nonceSize = 12;
-    const tagSize = 16;
-    
-    if (bytes.length < nonceSize + tagSize) {
-      throw new Error("Encrypted data too short");
-    }
-    
-    const nonce = bytes.slice(0, nonceSize);
-    const tag = bytes.slice(-tagSize);
-    const ciphertext = bytes.slice(nonceSize, -tagSize);
-    
-    const combined = new Uint8Array(ciphertext.length + tag.length);
-    combined.set(ciphertext);
-    combined.set(tag, ciphertext.length);
-    
-    const keyBase64 = base64Key.replace(/-/g, '+').replace(/_/g, '/');
-    const keyBinary = atob(keyBase64);
-    const keyBytes = new Uint8Array(keyBinary.length);
-    for (let i = 0; i < keyBinary.length; i++) {
-      keyBytes[i] = keyBinary.charCodeAt(i);
-    }
-    
-    const key = await crypto.subtle.importKey(
-      "raw",
-      keyBytes,
-      { name: "AES-GCM" },
-      false,
-      ["decrypt"]
-    );
-    
-    const decrypted = await crypto.subtle.decrypt(
-      {
-        name: "AES-GCM",
-        iv: nonce,
-        tagLength: 128
-      },
-      key,
-      combined
-    );
-    
-    return new TextDecoder().decode(decrypted);
-  } catch (e) {
-    console.error("❌ Decryption error:", e.message);
-    throw new Error("Decryption failed: " + e.message);
-  }
-}
-
-async function generateAPNsToken(env) {
-  try {
-    if (!env.APNS_KEY_ID || !env.APNS_TEAM_ID || !env.APNS_PRIVATE_KEY) {
-      throw new Error("Missing APNs credentials");
-    }
-
-    const header = {
-      alg: "ES256",
-      kid: env.APNS_KEY_ID
-    };
-
-    const payload = {
-      iss: env.APNS_TEAM_ID,
-      iat: Math.floor(Date.now() / 1000)
-    };
-
-    const encodedHeader = base64UrlEncode(JSON.stringify(header));
-    const encodedPayload = base64UrlEncode(JSON.stringify(payload));
-    const signingInput = `${encodedHeader}.${encodedPayload}`;
-
-    const privateKeyPem = env.APNS_PRIVATE_KEY;
-    const pemContents = privateKeyPem
-      .replace(/-----BEGIN PRIVATE KEY-----/g, '')
-      .replace(/-----END PRIVATE KEY-----/g, '')
-      .replace(/\s/g, '');
-    
-    const binaryKey = atob(pemContents);
-    const keyBytes = new Uint8Array(binaryKey.length);
-    for (let i = 0; i < binaryKey.length; i++) {
-      keyBytes[i] = binaryKey.charCodeAt(i);
-    }
-
-    const cryptoKey = await crypto.subtle.importKey(
-      "pkcs8",
-      keyBytes,
-      {
-        name: "ECDSA",
-        namedCurve: "P-256"
-      },
-      false,
-      ["sign"]
-    );
-
-    const signature = await crypto.subtle.sign(
-      {
-        name: "ECDSA",
-        hash: { name: "SHA-256" }
-      },
-      cryptoKey,
-      new TextEncoder().encode(signingInput)
-    );
-
-    const signatureBytes = new Uint8Array(signature);
-    let binary = '';
-    for (let i = 0; i < signatureBytes.length; i++) {
-      binary += String.fromCharCode(signatureBytes[i]);
-    }
-    const encodedSignature = base64UrlEncode(binary);
-
-    return `${signingInput}.${encodedSignature}`;
-  } catch (e) {
-    console.error("❌ Failed to generate APNs token:", e.message);
-    throw new Error("APNs token generation failed: " + e.message);
-  }
-}
-
-function base64UrlEncode(str) {
-  const base64 = btoa(str);
-  return base64
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
-}
-
-async function sendToAPNs(pushToken, trackedAppBundleID, pushContent, env, forceProduction = null) {
-  try {
-    const payload = JSON.stringify(pushContent);
-    const apnsToken = await generateAPNsToken(env);
-    const nagohBundleID = env.NAGOH_BUNDLE_ID || "com.nagohcreative.NAGOH";
-    
-    let isProduction;
-    if (forceProduction !== null) {
-      isProduction = forceProduction;
-    } else {
-      isProduction = (env.APNS_PRODUCTION || env['APNS​_​PRODUCTION']) === 'true';
-    }
-    
-    const apnsServer = isProduction
-      ? "https://api.push.apple.com"
-      : "https://api.development.push.apple.com";
-    
-    const response = await fetch(
-      `${apnsServer}/3/device/${pushToken}`,
-      {
-        method: "POST",
-        headers: {
-          "apns-topic": nagohBundleID,
-          "authorization": `Bearer ${apnsToken}`,
-          "apns-push-type": "alert",
-          "apns-priority": "10",
-          "content-type": "application/json"
-        },
-        body: payload,
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Fetched sales:', data);
+      
+      if (data.success && data.sales) {
+        displaySales(data.sales);
+        updateStats(data.sales);
+        document.getElementById('connectionStatus').innerHTML = '✅ Connected to worker';
+        document.getElementById('lastUpdate').innerHTML = `Last update: ${new Date().toLocaleTimeString()}`;
+      } else {
+        document.getElementById('connectionStatus').innerHTML = '⚠️ No sales data yet';
       }
-    );
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      let reason = "Unknown";
-      try {
-        const errorJson = JSON.parse(errorText);
-        reason = errorJson.reason || "Unknown";
-      } catch (e) {}
-      throw new Error(`APNs error (${response.status}): ${reason}`);
+    } else {
+      console.error('Response not OK:', response.status);
+      document.getElementById('connectionStatus').innerHTML = '⚠️ Connection issue';
+      document.getElementById('salesFeed').innerHTML = '<div class="empty-state">Error connecting to worker. Status: ' + response.status + '</div>';
     }
-    
-    console.log("✅ Push notification sent successfully");
-    return response;
-  } catch (e) {
-    console.error("❌ APNs send error:", e.message);
-    throw new Error("Failed to send to APNs: " + e.message);
+  } catch (error) {
+    console.error('Error fetching sales:', error);
+    document.getElementById('connectionStatus').innerHTML = '❌ Cannot connect to worker';
+    document.getElementById('salesFeed').innerHTML = '<div class="empty-state">❌ Cannot connect to worker at alerts.nagoh.xyz<br>Make sure the worker is deployed.</div>';
   }
 }
+
+function displaySales(sales) {
+  const container = document.getElementById('salesFeed');
+  if (!sales || sales.length === 0) {
+    container.innerHTML = '<div class="empty-state">✨ No sales yet. Waiting for App Store notifications...</div>';
+    return;
+  }
+  
+  container.innerHTML = sales.slice(0, 50).map(sale => `
+    <div class="sale-item">
+      <div class="sale-header">
+        <span class="event-type">${sale.notificationType || 'SALE'} ${sale.subtype ? `· ${sale.subtype}` : ''}</span>
+        <span class="revenue">${sale.revenue ? `$${sale.revenue.toFixed(2)} ${sale.currency || 'USD'}` : '—'}</span>
+      </div>
+      <div style="font-size:0.8rem; color:#9ca3af; margin-bottom:6px;">
+        ${sale.bundleID ? `📱 ${sale.bundleID.split('.').pop()}` : 'Unknown app'}
+        ${sale.profileID ? ` • 👤 ${sale.profileID.substring(0, 8)}...` : ''}
+      </div>
+      <div class="timestamp">${new Date(sale.timestamp).toLocaleString()}</div>
+    </div>
+  `).join('');
+  
+  // Update activity log
+  const logContainer = document.getElementById('activityLog');
+  logContainer.innerHTML = sales.slice(0, 30).map(sale => `
+    <div class="activity-entry">
+      <div style="color:#64ffda; font-weight:500;">💰 ${sale.notificationType || 'Sale'} ${sale.revenue ? `- $${sale.revenue.toFixed(2)}` : ''}</div>
+      <div class="activity-time">${new Date(sale.timestamp).toLocaleString()}</div>
+    </div>
+  `).join('');
+}
+
+function updateStats(sales) {
+  const today = new Date().toDateString();
+  let todayRevenue = 0;
+  let totalWithRevenue = 0;
+  
+  for (const sale of sales) {
+    if (sale.revenue && sale.revenue > 0) {
+      if (new Date(sale.timestamp).toDateString() === today) {
+        todayRevenue += sale.revenue;
+      }
+      totalWithRevenue++;
+    }
+  }
+  
+  document.getElementById('todayRevenue').innerText = `$${todayRevenue.toFixed(2)}`;
+  document.getElementById('totalSales').innerText = sales.length;
+  
+  if (sales.length > 0 && sales[0].revenue) {
+    document.getElementById('lastAmount').innerHTML = `$${sales[0].revenue.toFixed(2)}`;
+  } else if (sales.length > 0) {
+    document.getElementById('lastAmount').innerHTML = sales[0].notificationType || 'Event';
+  }
+}
+
+function startDashboard() {
+  // Initial fetch
+  fetchSales();
+  
+  // Set up auto-refresh every 3 seconds
+  if (refreshInterval) clearInterval(refreshInterval);
+  refreshInterval = setInterval(fetchSales, 3000);
+  
+  // Display worker URL
+  document.getElementById('workerUrl').innerHTML = 'https://alerts.nagoh.xyz';
+}
+
+// Manual refresh on page load
+window.addEventListener('load', () => {
+  if (sessionStorage.getItem('dashboard_auth') === 'true') {
+    fetchSales();
+  }
+});
+</script>
+</body>
+</html>
