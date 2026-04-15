@@ -62,19 +62,32 @@
     }
     .dashboard {
       display: none;
-      max-width: 1400px;
+      max-width: 1200px;
       margin: 0 auto;
     }
-    .logout-btn {
+    .logout-btn, .clear-btn {
       position: fixed;
       top: 20px;
-      right: 20px;
       background: #2a2f4b;
       border: none;
       padding: 8px 16px;
       border-radius: 20px;
       color: white;
       cursor: pointer;
+      z-index: 100;
+    }
+    .logout-btn {
+      right: 20px;
+    }
+    .clear-btn {
+      right: 100px;
+      background: #dc2626;
+    }
+    .clear-btn:hover {
+      background: #b91c1c;
+    }
+    .logout-btn:hover {
+      background: #f87171;
     }
     h1 {
       font-size: 2rem;
@@ -108,20 +121,12 @@
       font-weight: bold;
       color: #64ffda;
     }
-    .two-columns {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 25px;
-      margin-bottom: 25px;
-    }
-    @media (max-width: 768px) {
-      .two-columns { grid-template-columns: 1fr; }
-    }
     .panel {
       background: #0e111b;
       border-radius: 20px;
       border: 1px solid #232736;
       overflow: hidden;
+      margin-bottom: 20px;
     }
     .panel-header {
       background: #13172a;
@@ -131,16 +136,12 @@
       justify-content: space-between;
       align-items: center;
     }
-    .panel-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
     .live-dot {
       width: 8px;
       height: 8px;
       background: #10b981;
       border-radius: 50%;
+      display: inline-block;
       animation: pulse 1.5s infinite;
     }
     @keyframes pulse {
@@ -150,29 +151,22 @@
     .refresh-btn {
       background: #1f253e;
       border: none;
-      color: #eef2ff;
+      color: white;
       padding: 6px 12px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 0.75rem;
     }
-    .sales-feed, .activity-log {
+    .sales-list {
       max-height: 500px;
       overflow-y: auto;
     }
     .sale-item {
       padding: 15px 20px;
       border-bottom: 1px solid #1a1e30;
-      animation: slideIn 0.3s ease-out;
-    }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(-10px); }
-      to { opacity: 1; transform: translateX(0); }
     }
     .sale-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
       margin-bottom: 8px;
       flex-wrap: wrap;
       gap: 8px;
@@ -183,7 +177,6 @@
       border-radius: 20px;
       font-size: 0.7rem;
       font-weight: 600;
-      text-transform: uppercase;
     }
     .revenue {
       font-size: 1.2rem;
@@ -193,6 +186,7 @@
     .timestamp {
       font-size: 0.7rem;
       color: #6b7280;
+      margin-top: 5px;
     }
     .empty-state {
       text-align: center;
@@ -211,20 +205,10 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    .status-online {
-      color: #10b981;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .activity-entry {
-      padding: 12px 15px;
-      border-bottom: 1px solid #1a1e30;
-    }
-    .activity-time {
-      font-size: 0.7rem;
-      color: #6b7280;
-      margin-top: 4px;
+    .error-msg {
+      color: #f87171;
+      text-align: center;
+      margin-top: 15px;
     }
   </style>
 </head>
@@ -240,10 +224,11 @@
 </div>
 
 <div id="dashboard" class="dashboard">
+  <button class="clear-btn" onclick="clearTestData()">🗑️ Clear Test Data</button>
   <button class="logout-btn" onclick="logout()">🚪 Logout</button>
   
   <h1>🍎 Nagoh Live Sales Dashboard</h1>
-  <div style="color:#8b92b0; margin-bottom:20px;">Real-time App Store notifications • Auto-refreshes every 3 seconds</div>
+  <div style="color:#8b92b0; margin-bottom:20px;">Real-time App Store notifications • Auto-refreshes every 5 seconds</div>
 
   <div class="stats-grid">
     <div class="stat-card">
@@ -260,39 +245,22 @@
     </div>
   </div>
 
-  <div class="two-columns">
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">
-          <span class="live-dot"></span>
-          🔔 Live Sales Feed
-        </div>
-        <button class="refresh-btn" onclick="fetchSales()">🔄 Refresh</button>
-      </div>
-      <div id="salesFeed" class="sales-feed">
-        <div class="empty-state">Loading sales data...</div>
-      </div>
+  <div class="panel">
+    <div class="panel-header">
+      <span><span class="live-dot"></span> 🔔 Live Sales Feed</span>
+      <button class="refresh-btn" onclick="fetchSales()">🔄 Refresh Now</button>
     </div>
-
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">
-          📋 Activity Log
-        </div>
-      </div>
-      <div id="activityLog" class="activity-log">
-        <div class="empty-state">Waiting for sales...</div>
-      </div>
+    <div id="salesFeed" class="sales-list">
+      <div class="empty-state">Loading sales data...</div>
     </div>
   </div>
 
   <div class="status-bar">
-    <div class="status-online">
+    <div>
       <span class="live-dot"></span>
       <span id="connectionStatus">Checking connection...</span>
     </div>
     <div>
-      <span style="color:#8b92b0;">Worker API:</span>
       <code id="workerUrl">https://alerts.nagoh.xyz</code>
     </div>
     <div>
@@ -336,38 +304,77 @@ if (sessionStorage.getItem('dashboard_auth') === 'true') {
   startDashboard();
 }
 
-// Fetch sales from worker
-async function fetchSales() {
+// Clear test data
+async function clearTestData() {
+  if (!confirm('⚠️ WARNING: This will delete ALL sales data from the database. This cannot be undone. Are you sure?')) {
+    return;
+  }
+  
+  const statusDiv = document.getElementById('connectionStatus');
+  statusDiv.innerHTML = '🗑️ Clearing data...';
+  
   try {
     const response = await fetch('https://alerts.nagoh.xyz/api/sales', {
-      method: 'GET',
+      method: 'DELETE',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
       }
     });
     
     if (response.ok) {
       const data = await response.json();
-      console.log('Fetched sales:', data);
-      
-      if (data.success && data.sales) {
-        displaySales(data.sales);
-        updateStats(data.sales);
-        document.getElementById('connectionStatus').innerHTML = '✅ Connected to worker';
-        document.getElementById('lastUpdate').innerHTML = `Last update: ${new Date().toLocaleTimeString()}`;
-      } else {
-        document.getElementById('connectionStatus').innerHTML = '⚠️ No sales data yet';
-      }
+      console.log('Clear response:', data);
+      statusDiv.innerHTML = '✅ Data cleared successfully';
+      // Refresh the sales display
+      await fetchSales();
+      setTimeout(() => {
+        if (statusDiv.innerHTML === '✅ Data cleared successfully') {
+          statusDiv.innerHTML = '✅ Connected to worker';
+        }
+      }, 3000);
     } else {
-      console.error('Response not OK:', response.status);
-      document.getElementById('connectionStatus').innerHTML = '⚠️ Connection issue';
-      document.getElementById('salesFeed').innerHTML = '<div class="empty-state">Error connecting to worker. Status: ' + response.status + '</div>';
+      statusDiv.innerHTML = `❌ Failed to clear data: ${response.status}`;
     }
   } catch (error) {
-    console.error('Error fetching sales:', error);
-    document.getElementById('connectionStatus').innerHTML = '❌ Cannot connect to worker';
-    document.getElementById('salesFeed').innerHTML = '<div class="empty-state">❌ Cannot connect to worker at alerts.nagoh.xyz<br>Make sure the worker is deployed.</div>';
+    console.error('Error clearing data:', error);
+    statusDiv.innerHTML = '❌ Error clearing data';
+  }
+}
+
+// Fetch sales from worker
+async function fetchSales() {
+  const statusDiv = document.getElementById('connectionStatus');
+  const feedDiv = document.getElementById('salesFeed');
+  
+  try {
+    const response = await fetch('https://alerts.nagoh.xyz/api/sales', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Dashboard received data:', data);
+      
+      if (data.success && data.sales) {
+        statusDiv.innerHTML = '✅ Connected to worker';
+        document.getElementById('lastUpdate').innerHTML = `Last update: ${new Date().toLocaleTimeString()}`;
+        displaySales(data.sales);
+        updateStats(data.sales);
+      } else {
+        statusDiv.innerHTML = '⚠️ No sales data yet';
+        feedDiv.innerHTML = '<div class="empty-state">✨ No sales yet. Waiting for App Store notifications...</div>';
+      }
+    } else {
+      statusDiv.innerHTML = `⚠️ HTTP ${response.status}`;
+      feedDiv.innerHTML = `<div class="empty-state">Error: HTTP ${response.status}<br>Make sure worker is deployed.</div>`;
+    }
+  } catch (error) {
+    console.error('Fetch error:', error);
+    statusDiv.innerHTML = '❌ Cannot connect';
+    feedDiv.innerHTML = `<div class="empty-state">❌ Cannot connect to worker<br>${error.message}</div>`;
   }
 }
 
@@ -378,26 +385,16 @@ function displaySales(sales) {
     return;
   }
   
-  container.innerHTML = sales.slice(0, 50).map(sale => `
+  container.innerHTML = sales.map(sale => `
     <div class="sale-item">
       <div class="sale-header">
         <span class="event-type">${sale.notificationType || 'SALE'} ${sale.subtype ? `· ${sale.subtype}` : ''}</span>
-        <span class="revenue">${sale.revenue ? `$${sale.revenue.toFixed(2)} ${sale.currency || 'USD'}` : '—'}</span>
+        <span class="revenue">${sale.revenue ? `$${sale.revenue.toFixed(2)}` : '—'}</span>
       </div>
-      <div style="font-size:0.8rem; color:#9ca3af; margin-bottom:6px;">
+      <div style="font-size:0.8rem; color:#9ca3af;">
         ${sale.bundleID ? `📱 ${sale.bundleID.split('.').pop()}` : 'Unknown app'}
-        ${sale.profileID ? ` • 👤 ${sale.profileID.substring(0, 8)}...` : ''}
       </div>
       <div class="timestamp">${new Date(sale.timestamp).toLocaleString()}</div>
-    </div>
-  `).join('');
-  
-  // Update activity log
-  const logContainer = document.getElementById('activityLog');
-  logContainer.innerHTML = sales.slice(0, 30).map(sale => `
-    <div class="activity-entry">
-      <div style="color:#64ffda; font-weight:500;">💰 ${sale.notificationType || 'Sale'} ${sale.revenue ? `- $${sale.revenue.toFixed(2)}` : ''}</div>
-      <div class="activity-time">${new Date(sale.timestamp).toLocaleString()}</div>
     </div>
   `).join('');
 }
@@ -405,14 +402,10 @@ function displaySales(sales) {
 function updateStats(sales) {
   const today = new Date().toDateString();
   let todayRevenue = 0;
-  let totalWithRevenue = 0;
   
   for (const sale of sales) {
-    if (sale.revenue && sale.revenue > 0) {
-      if (new Date(sale.timestamp).toDateString() === today) {
-        todayRevenue += sale.revenue;
-      }
-      totalWithRevenue++;
+    if (sale.revenue && sale.revenue > 0 && new Date(sale.timestamp).toDateString() === today) {
+      todayRevenue += sale.revenue;
     }
   }
   
@@ -427,23 +420,16 @@ function updateStats(sales) {
 }
 
 function startDashboard() {
-  // Initial fetch
   fetchSales();
-  
-  // Set up auto-refresh every 3 seconds
   if (refreshInterval) clearInterval(refreshInterval);
-  refreshInterval = setInterval(fetchSales, 3000);
-  
-  // Display worker URL
+  refreshInterval = setInterval(fetchSales, 5000);
   document.getElementById('workerUrl').innerHTML = 'https://alerts.nagoh.xyz';
 }
 
-// Manual refresh on page load
-window.addEventListener('load', () => {
-  if (sessionStorage.getItem('dashboard_auth') === 'true') {
-    fetchSales();
-  }
-});
+// Initial fetch if already logged in
+if (document.getElementById('dashboard').style.display !== 'none') {
+  fetchSales();
+}
 </script>
 </body>
 </html>
