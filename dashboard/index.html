@@ -3,241 +3,615 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nagoh Sales Dashboard</title>
-
+<title>Nagoh · Sales Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0b0f17;
-  --card: rgba(20, 25, 40, 0.85);
-  --border: rgba(255,255,255,0.06);
-  --accent: #64ffda;
-  --accent2: #7c3aed;
-  --text: #e6e9f2;
-  --muted: #8b92b0;
+  --bg:          #060810;
+  --surface:     #0c1020;
+  --surface2:    #111828;
+  --border:      rgba(255,255,255,0.055);
+  --border-hi:   rgba(82,220,180,0.28);
+  --green:       #52dcb4;
+  --green-dim:   rgba(82,220,180,0.10);
+  --green-glow:  rgba(82,220,180,0.05);
+  --amber:       #f0b429;
+  --amber-dim:   rgba(240,180,41,0.12);
+  --red:         #f06464;
+  --red-dim:     rgba(240,100,100,0.12);
+  --blue:        #5ab4ff;
+  --blue-dim:    rgba(90,180,255,0.10);
+  --text:        #d8e0f5;
+  --muted:       #4e5872;
+  --muted2:      #2b3250;
+  --mono:        'DM Mono', monospace;
+  --display:     'Syne', sans-serif;
 }
 
-* { box-sizing: border-box; margin:0; padding:0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
 body {
-  font-family: Inter, system-ui, sans-serif;
-  background: radial-gradient(circle at top, #111827, #020617);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  background: var(--bg);
   color: var(--text);
-  padding: 24px;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-.dashboard {
-  max-width: 1300px;
-  margin: auto;
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.6;
+}
+body::after {
+  content: '';
+  position: fixed;
+  top: -260px; left: 50%; transform: translateX(-50%);
+  width: 900px; height: 600px; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(82,220,180,0.045) 0%, transparent 68%);
 }
 
-.header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+/* LOGIN */
+#loginScreen {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg);
+}
+.login-wrap {
+  position: relative; z-index: 1;
+  width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--border-hi);
+  border-radius: 20px;
+  padding: 40px 36px;
+  box-shadow: 0 0 60px rgba(82,220,180,0.07), 0 24px 60px rgba(0,0,0,0.5);
+  animation: fadeUp 0.4s ease both;
+}
+.login-logo {
+  font-family: var(--display);
+  font-size: 1.6rem; font-weight: 800; letter-spacing: -0.03em;
+  color: #fff; text-align: center; margin-bottom: 4px;
+}
+.login-logo span { color: var(--green); }
+.login-sub {
+  text-align: center; color: var(--muted);
+  font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
   margin-bottom: 30px;
 }
+.field { margin-bottom: 12px; }
+.field label {
+  display: block; font-size: 0.65rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 5px;
+}
+.field input {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text); font-family: var(--mono);
+  font-size: 0.85rem; padding: 10px 12px; transition: border-color 0.15s; outline: none;
+}
+.field input:focus { border-color: var(--border-hi); }
+.login-btn {
+  width: 100%; margin-top: 20px; padding: 11px;
+  background: var(--green-dim); border: 1px solid var(--border-hi);
+  border-radius: 10px; color: var(--green); font-family: var(--mono);
+  font-size: 0.72rem; font-weight: 500; letter-spacing: 0.1em;
+  text-transform: uppercase; cursor: pointer; transition: all 0.17s;
+}
+.login-btn:hover { background: rgba(82,220,180,0.18); box-shadow: 0 0 20px rgba(82,220,180,0.1); }
+#loginError { font-size: 0.7rem; color: var(--red); text-align: center; margin-top: 12px; min-height: 16px; }
 
-.title {
-  font-size: 2.2rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #fff, var(--accent));
-  -webkit-background-clip: text;
-  color: transparent;
+/* APP SHELL */
+#app {
+  display: none; position: relative; z-index: 1;
+  max-width: 1280px; margin: 0 auto; padding: 32px 28px 80px;
 }
 
-.actions button {
-  background: var(--card);
-  border:1px solid var(--border);
-  padding:10px 14px;
-  border-radius: 12px;
-  color: white;
-  cursor:pointer;
-  margin-left:10px;
-  transition: all .2s ease;
+/* TOPBAR */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 40px; padding-bottom: 18px; border-bottom: 1px solid var(--border);
+  gap: 16px; flex-wrap: wrap;
 }
-
-.actions button:hover {
-  border-color: var(--accent);
-  transform: translateY(-1px);
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-name { font-family: var(--display); font-size: 1.45rem; font-weight: 800; letter-spacing: -0.03em; color: #fff; }
+.brand-name span { color: var(--green); }
+.badge-live {
+  font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+  background: var(--green-dim); color: var(--green);
+  border: 1px solid rgba(82,220,180,0.2); padding: 3px 9px; border-radius: 4px;
 }
-
-.grid {
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
-  gap:20px;
-  margin-bottom: 30px;
+.topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+#liveClock { font-size: 0.68rem; color: var(--muted); font-style: italic; min-width: 130px; }
+.status-pill {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.68rem; color: var(--muted);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 30px; padding: 5px 12px;
 }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted2); flex-shrink: 0; }
+.dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); animation: blink 2s infinite; }
+.dot.amber { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+.dot.red   { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-.card {
-  background: var(--card);
-  border:1px solid var(--border);
-  border-radius: 18px;
-  padding:20px;
-  backdrop-filter: blur(12px);
-  transition: .25s;
+.btn {
+  font-family: var(--mono); font-size: 0.68rem; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--muted); padding: 7px 13px; border-radius: 8px;
+  cursor: pointer; transition: all 0.17s; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 5px;
 }
+.btn:hover { border-color: var(--border-hi); color: var(--green); background: var(--green-glow); }
+.btn.danger { border-color: rgba(240,100,100,0.25); color: var(--red); }
+.btn.danger:hover { background: var(--red-dim); border-color: rgba(240,100,100,0.4); }
+.btn svg { transition: transform 0.6s; }
+.btn.spinning svg { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-.card:hover {
-  border-color: rgba(100,255,218,0.4);
-  transform: translateY(-3px);
+/* KPI ROW */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px; margin-bottom: 28px;
 }
-
-.label {
-  font-size:.75rem;
-  color: var(--muted);
-  text-transform:uppercase;
-  letter-spacing:1px;
+.kpi {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 20px 22px; position: relative;
+  overflow: hidden; transition: border-color 0.2s, transform 0.2s;
+  animation: fadeUp 0.4s ease both;
 }
-
-.value {
-  font-size:2rem;
-  font-weight:700;
-  margin-top:8px;
-  color: var(--accent);
+.kpi:hover { border-color: var(--border-hi); transform: translateY(-2px); }
+.kpi::after {
+  content: ''; position: absolute; top: -10px; right: -10px;
+  width: 80px; height: 80px; border-radius: 50%;
+  background: var(--green-dim); filter: blur(24px); pointer-events: none;
 }
+.kpi:nth-child(1) { animation-delay:.05s } .kpi:nth-child(2) { animation-delay:.10s }
+.kpi:nth-child(3) { animation-delay:.15s } .kpi:nth-child(4) { animation-delay:.20s }
+.kpi-label { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.kpi-value { font-family: var(--display); font-size: 2rem; font-weight: 700; color: var(--green); line-height: 1; margin-bottom: 6px; }
+.kpi-sub { font-size: 0.65rem; color: var(--muted); }
 
+/* LAYOUT */
+.cols { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+@media (max-width: 960px) { .cols { grid-template-columns: 1fr; } }
+
+/* PANEL */
 .panel {
-  background: var(--card);
-  border:1px solid var(--border);
-  border-radius:18px;
-  overflow:hidden;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden; animation: fadeUp 0.5s ease both;
+}
+.panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--border); gap: 10px;
+}
+.panel-title {
+  font-family: var(--display); font-size: 0.8rem; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+}
+.count-badge {
+  font-family: var(--mono); font-size: 0.6rem;
+  background: var(--green-dim); color: var(--green);
+  border: 1px solid rgba(82,220,180,0.18); border-radius: 4px; padding: 2px 7px;
 }
 
-.panel-header {
-  padding:16px 20px;
-  border-bottom:1px solid var(--border);
-  display:flex;
-  justify-content:space-between;
+/* FEED */
+.feed { max-height: 560px; overflow-y: auto; }
+.feed::-webkit-scrollbar { width: 3px; }
+.feed::-webkit-scrollbar-thumb { background: var(--muted2); border-radius: 2px; }
+
+.sale-row {
+  display: grid; grid-template-columns: auto 1fr auto;
+  align-items: center; gap: 14px;
+  padding: 13px 20px; border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: background 0.12s; animation: slideIn 0.25s ease both;
+}
+.sale-row:hover { background: rgba(255,255,255,0.015); }
+.sale-row:last-child { border-bottom: none; }
+@keyframes slideIn { from { opacity:0; transform:translateX(-6px); } to { opacity:1; transform:translateX(0); } }
+
+.sale-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+.sale-icon.purchase { background: rgba(82,220,180,0.1); }
+.sale-icon.renewal  { background: rgba(90,180,255,0.1); }
+.sale-icon.cancel   { background: rgba(240,100,100,0.1); }
+.sale-icon.other    { background: rgba(240,180,41,0.1); }
+
+.sale-type { font-size: 0.72rem; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+.sale-type .sub { color: var(--muted); font-weight: 400; }
+.sale-meta { font-size: 0.62rem; color: var(--muted); }
+.sale-amount { font-family: var(--display); font-size: 1rem; font-weight: 700; color: var(--green); white-space: nowrap; text-align: right; }
+.sale-amount.zero { color: var(--muted); font-size: 0.7rem; }
+
+.empty-state {
+  padding: 48px 20px; text-align: center;
+  color: var(--muted); font-size: 0.75rem; line-height: 2;
+}
+.empty-state .big { font-size: 2rem; display: block; margin-bottom: 8px; }
+
+/* SIDEBAR */
+.sidebar { display: flex; flex-direction: column; gap: 16px; }
+.breakdown-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.03); gap: 10px;
+}
+.breakdown-row:last-child { border-bottom: none; }
+.breakdown-label { font-size: 0.7rem; color: var(--muted); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-wrap { flex: 2; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.bar { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.6s ease; }
+.bar.blue { background: var(--blue); }
+.breakdown-val { font-size: 0.68rem; color: var(--text); min-width: 28px; text-align: right; }
+
+/* STATUSBAR */
+.statusbar {
+  margin-top: 24px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px; font-size: 0.65rem; color: var(--muted);
+}
+.statusbar code {
+  font-family: var(--mono); font-size: 0.65rem; color: var(--muted);
+  background: var(--surface2); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border);
 }
 
-.sales {
-  max-height:500px;
-  overflow:auto;
+/* TOAST */
+.toast {
+  position: fixed; bottom: 28px; right: 28px;
+  background: var(--surface2); border: 1px solid var(--border-hi);
+  border-radius: 10px; padding: 11px 16px; font-size: 0.72rem;
+  color: var(--text); z-index: 999; box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  animation: fadeUp 0.3s ease; max-width: 280px;
 }
+.toast.error   { border-color: rgba(240,100,100,0.4); color: var(--red); }
+.toast.success { border-color: rgba(82,220,180,0.3);  color: var(--green); }
 
-.sale {
-  padding:16px 20px;
-  border-bottom:1px solid rgba(255,255,255,0.04);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.sale:hover {
-  background: rgba(255,255,255,0.02);
-}
-
-.badge {
-  font-size:.7rem;
-  background: rgba(124,58,237,0.2);
-  padding:4px 10px;
-  border-radius:20px;
-}
-
-.amount {
-  font-weight:700;
-  color: var(--accent);
-}
-
-.timestamp {
-  font-size:.7rem;
-  color: var(--muted);
-}
-
-.empty {
-  padding:40px;
-  text-align:center;
-  color: var(--muted);
-}
-
+@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 </style>
 </head>
-
 <body>
 
-<div class="dashboard">
-
-<div class="header">
-  <div class="title">Nagoh Dashboard</div>
-  <div class="actions">
-    <button onclick="fetchSales()">Refresh</button>
-    <button onclick="clearTestData()">Clear</button>
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-wrap">
+    <div class="login-logo">nagoh<span>.</span></div>
+    <div class="login-sub">Sales Intelligence</div>
+    <div class="field"><label>Username</label><input type="text" id="username" placeholder="admin" autocomplete="off"></div>
+    <div class="field"><label>Password</label><input type="password" id="password" placeholder="••••••" onkeydown="if(event.key==='Enter')login()"></div>
+    <button class="login-btn" onclick="login()">Enter Dashboard</button>
+    <div id="loginError"></div>
   </div>
 </div>
 
-<div class="grid">
-  <div class="card">
-    <div class="label">Today's Revenue</div>
-    <div class="value" id="todayRevenue">$0</div>
-  </div>
-  <div class="card">
-    <div class="label">Total Sales</div>
-    <div class="value" id="totalSales">0</div>
-  </div>
-  <div class="card">
-    <div class="label">Last Sale</div>
-    <div class="value" id="lastAmount">—</div>
-  </div>
-</div>
+<!-- APP -->
+<div id="app">
 
-<div class="panel">
-  <div class="panel-header">
-    <div>Live Sales</div>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-name">nagoh<span>.</span></div>
+      <div class="badge-live">Sales Intelligence</div>
+    </div>
+    <div class="topbar-right">
+      <div id="statusPill" class="status-pill">
+        <div id="statusDot" class="dot"></div>
+        <span id="statusLabel">Idle</span>
+      </div>
+      <div id="liveClock"></div>
+      <button class="btn" id="refreshBtn" onclick="fetchSales()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        Refresh
+      </button>
+      <button class="btn danger" onclick="clearData()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Clear All
+      </button>
+      <button class="btn" onclick="logout()" style="color:var(--muted)">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Logout
+      </button>
+    </div>
   </div>
-  <div id="salesFeed" class="sales"></div>
-</div>
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">Today's Revenue</div>
+      <div class="kpi-value" id="kpiToday">$0.00</div>
+      <div class="kpi-sub" id="kpiTodayCount">— events today</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">All-Time Revenue</div>
+      <div class="kpi-value" id="kpiTotal">$0.00</div>
+      <div class="kpi-sub" id="kpiTotalCount">— total events</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Most Recent Sale</div>
+      <div class="kpi-value" id="kpiLast">—</div>
+      <div class="kpi-sub" id="kpiLastTime">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Revenue Events</div>
+      <div class="kpi-value" id="kpiPaid">0</div>
+      <div class="kpi-sub" id="kpiAvg">avg — per transaction</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="cols">
+
+    <!-- Feed -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">
+          <div class="dot green"></div>
+          Live Sales Feed
+        </div>
+        <span class="count-badge" id="feedCount">0 events</span>
+      </div>
+      <div id="salesFeed" class="feed">
+        <div class="empty-state">
+          <span class="big">📡</span>
+          Click <strong>Refresh</strong> to load sales data
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Event Types</div></div>
+        <div id="breakdownList">
+          <div class="breakdown-row"><span class="breakdown-label" style="font-style:italic">Load data first</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">By App</div></div>
+        <div id="appList">
+          <div class="breakdown-row"><span class="breakdown-label" style="font-style:italic">Load data first</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Worker Health</div>
+          <button class="btn" onclick="fetchDebug()" style="font-size:0.6rem;padding:4px 9px">Ping</button>
+        </div>
+        <div id="debugPanel" style="padding:16px 20px;font-size:0.68rem;line-height:2;color:var(--muted)">
+          Click <strong>Ping</strong> to check worker status
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Nagoh Relay v3 · <code>alerts.nagoh.xyz</code></span>
+    <span id="lastRefresh">Never refreshed</span>
+    <span id="kvCount">KV: — records</span>
+  </div>
 
 </div>
 
 <script>
-async function fetchSales(){
-  const container = document.getElementById('salesFeed');
-  container.innerHTML = '<div class="empty">Loading...</div>';
+const CREDS = { user: 'admin', pass: 'admin' };
+const API   = 'https://alerts.nagoh.xyz';
 
-  try{
-    const res = await fetch('https://alerts.nagoh.xyz/api/sales');
-    const data = await res.json();
-
-    if(!data.sales || data.sales.length === 0){
-      container.innerHTML = '<div class="empty">No sales yet</div>';
-      return;
-    }
-
-    container.innerHTML = data.sales.map(s => `
-      <div class="sale">
-        <div>
-          <div class="badge">${s.notificationType || 'SALE'}</div>
-          <div class="timestamp">${new Date(s.timestamp).toLocaleString()}</div>
-        </div>
-        <div class="amount">${s.revenue ? '$'+s.revenue.toFixed(2) : '—'}</div>
-      </div>
-    `).join('');
-
-    updateStats(data.sales);
-
-  }catch(e){
-    container.innerHTML = '<div class="empty">Connection error</div>';
+// ── Auth ──────────────────────────────────────────────
+function login() {
+  const u = document.getElementById('username').value.trim();
+  const p = document.getElementById('password').value;
+  if (u === CREDS.user && p === CREDS.pass) {
+    sessionStorage.setItem('nagoh_auth', '1');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    fetchSales();
+  } else {
+    document.getElementById('loginError').textContent = '✗ Invalid credentials';
   }
 }
+function logout() { sessionStorage.removeItem('nagoh_auth'); location.reload(); }
+if (sessionStorage.getItem('nagoh_auth') === '1') {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  fetchSales();
+}
 
-function updateStats(sales){
-  let total = 0;
-  let today = new Date().toDateString();
-
-  sales.forEach(s=>{
-    if(s.revenue) total += s.revenue;
+// ── Clock ─────────────────────────────────────────────
+(function tick() {
+  document.getElementById('liveClock').textContent = new Date().toLocaleString('en-US', {
+    weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit'
   });
+  setTimeout(tick, 1000);
+})();
 
-  document.getElementById('totalSales').innerText = sales.length;
-  document.getElementById('todayRevenue').innerText = '$'+total.toFixed(2);
+// ── Status ────────────────────────────────────────────
+function setStatus(cls, label) {
+  document.getElementById('statusDot').className = 'dot ' + (cls||'');
+  document.getElementById('statusLabel').textContent = label;
+}
 
-  if(sales[0]){
-    document.getElementById('lastAmount').innerText = sales[0].revenue ? '$'+sales[0].revenue.toFixed(2) : 'Event';
+// ── Toast ─────────────────────────────────────────────
+function toast(msg, type='') {
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+// ── Fetch Sales ───────────────────────────────────────
+async function fetchSales() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  setStatus('amber', 'Loading…');
+  try {
+    const res  = await fetch(`${API}/api/sales`, { headers:{ Accept:'application/json' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'API error');
+
+    const sales = data.sales || [];
+    renderFeed(sales);
+    renderKPIs(sales);
+    renderBreakdown(sales);
+    renderApps(sales);
+    setStatus('green', 'Connected');
+    document.getElementById('lastRefresh').textContent = `Last refreshed: ${new Date().toLocaleTimeString()}`;
+    document.getElementById('kvCount').textContent = `KV: ${data.count ?? sales.length} records`;
+  } catch(e) {
+    setStatus('red', 'Error');
+    toast('Connection error: ' + e.message, 'error');
+    document.getElementById('salesFeed').innerHTML = `
+      <div class="empty-state">
+        <span class="big">⚠️</span>
+        Cannot reach <code style="background:var(--surface2);padding:2px 6px;border-radius:4px">alerts.nagoh.xyz</code><br>
+        <span style="color:var(--red);font-size:0.68rem">${e.message}</span>
+      </div>`;
+  } finally {
+    btn.classList.remove('spinning');
   }
 }
 
-fetchSales();
-</script>
+// ── Clear ─────────────────────────────────────────────
+async function clearData() {
+  if (!confirm('Delete ALL sales data from KV?\nThis cannot be undone.')) return;
+  setStatus('amber', 'Clearing…');
+  try {
+    const res  = await fetch(`${API}/api/sales`, { method:'DELETE', headers:{ Accept:'application/json' } });
+    const data = await res.json();
+    if (data.success) { toast('All data cleared', 'success'); fetchSales(); }
+    else throw new Error(data.error);
+  } catch(e) { toast('Clear failed: ' + e.message, 'error'); setStatus('red','Error'); }
+}
 
+// ── Debug ─────────────────────────────────────────────
+async function fetchDebug() {
+  const el = document.getElementById('debugPanel');
+  el.textContent = 'Pinging worker…';
+  try {
+    const d = await (await fetch(`${API}/debug`)).json();
+    const row = (k,v) => {
+      const c = String(v).startsWith('✓') ? 'var(--green)' : String(v).startsWith('✗') ? 'var(--red)' : 'var(--text)';
+      return `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--muted)">${k}</span><span style="color:${c}">${v}</span></div>`;
+    };
+    el.innerHTML =
+      row('APNs Key ID',      d.hasAPNSKeyID      ? '✓ Set' : '✗ Missing') +
+      row('APNs Team ID',     d.hasAPNSTeamID     ? '✓ Set' : '✗ Missing') +
+      row('APNs Private Key', d.hasAPNSPrivateKey ? '✓ Set' : '✗ Missing') +
+      row('Encryption Key',   d.hasEncryptionKey  ? '✓ Set' : '✗ Missing') +
+      row('Bundle ID',        d.nagohBundleID || '—') +
+      row('KV Records',       d.salesInKV ?? '—');
+  } catch(e) {
+    el.innerHTML = `<span style="color:var(--red)">✗ ${e.message}</span>`;
+  }
+}
+
+// ── Render Feed ───────────────────────────────────────
+const TYPE_MAP = {
+  'INITIAL_BUY':       { icon:'💳', cls:'purchase' },
+  'DID_RENEW':         { icon:'🔄', cls:'renewal'  },
+  'SUBSCRIBED':        { icon:'⭐', cls:'purchase' },
+  'CANCEL':            { icon:'❌', cls:'cancel'   },
+  'DID_FAIL_TO_RENEW': { icon:'⚠️', cls:'cancel'   },
+  'REFUND':            { icon:'↩️', cls:'cancel'   },
+  'ONE_TIME_CHARGE':   { icon:'💰', cls:'purchase' },
+  'RENEWAL':           { icon:'🔄', cls:'renewal'  },
+};
+
+function renderFeed(sales) {
+  const el = document.getElementById('salesFeed');
+  document.getElementById('feedCount').textContent = `${sales.length} event${sales.length!==1?'s':''}`;
+  if (!sales.length) {
+    el.innerHTML = `<div class="empty-state"><span class="big">✨</span>No sales yet.<br>Webhooks from Apple will appear here.</div>`;
+    return;
+  }
+  el.innerHTML = sales.map((s, i) => {
+    const { icon, cls } = TYPE_MAP[s.notificationType?.toUpperCase()] || { icon:'📦', cls:'other' };
+    const amt  = s.revenue > 0 ? `$${s.revenue.toFixed(2)}` : null;
+    const ts   = new Date(s.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const app  = s.bundleID ? s.bundleID.split('.').pop().toUpperCase() : '—';
+    const sub  = s.subtype  ? ` · ${s.subtype}` : '';
+    return `<div class="sale-row" style="animation-delay:${Math.min(i*0.025,0.3)}s">
+      <div class="sale-icon ${cls}">${icon}</div>
+      <div>
+        <div class="sale-type">${s.notificationType||'EVENT'}<span class="sub">${sub}</span></div>
+        <div class="sale-meta">${app} · ${ts}</div>
+      </div>
+      <div class="sale-amount ${amt?'':'zero'}">${amt||'n/a'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── KPIs ──────────────────────────────────────────────
+function renderKPIs(sales) {
+  const today = new Date().toDateString();
+  let totalRev=0, todayRev=0, todayCnt=0, paidCnt=0;
+  for (const s of sales) {
+    if (s.revenue>0) { totalRev+=s.revenue; paidCnt++; }
+    if (new Date(s.timestamp).toDateString()===today) { todayCnt++; if(s.revenue>0) todayRev+=s.revenue; }
+  }
+  const avg = paidCnt ? totalRev/paidCnt : 0;
+  document.getElementById('kpiToday').textContent      = `$${todayRev.toFixed(2)}`;
+  document.getElementById('kpiTodayCount').textContent = `${todayCnt} event${todayCnt!==1?'s':''} today`;
+  document.getElementById('kpiTotal').textContent      = `$${totalRev.toFixed(2)}`;
+  document.getElementById('kpiTotalCount').textContent = `${sales.length} total events`;
+  document.getElementById('kpiPaid').textContent       = paidCnt;
+  document.getElementById('kpiAvg').textContent        = `avg $${avg.toFixed(2)} per transaction`;
+  if (sales.length) {
+    const last = sales[0];
+    document.getElementById('kpiLast').textContent    = last.revenue>0 ? `$${last.revenue.toFixed(2)}` : last.notificationType||'—';
+    document.getElementById('kpiLastTime').textContent = timeAgo(new Date(last.timestamp));
+  }
+}
+
+// ── Breakdown ─────────────────────────────────────────
+function renderBreakdown(sales) {
+  const counts={};
+  for (const s of sales) { const k=s.notificationType||'UNKNOWN'; counts[k]=(counts[k]||0)+1; }
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const max=sorted[0]?.[1]||1;
+  document.getElementById('breakdownList').innerHTML = sorted.length
+    ? sorted.map(([k,v])=>`<div class="breakdown-row">
+        <span class="breakdown-label">${k}</span>
+        <div class="bar-wrap"><div class="bar" style="width:${Math.round(v/max*100)}%"></div></div>
+        <span class="breakdown-val">${v}</span></div>`).join('')
+    : `<div class="breakdown-row"><span class="breakdown-label" style="font-style:italic">No data</span></div>`;
+}
+
+function renderApps(sales) {
+  const map={};
+  for (const s of sales) {
+    const k = s.bundleID ? s.bundleID.split('.').pop().toUpperCase() : 'UNKNOWN';
+    if (!map[k]) map[k]={cnt:0,rev:0};
+    map[k].cnt++; if(s.revenue>0) map[k].rev+=s.revenue;
+  }
+  const sorted=Object.entries(map).sort((a,b)=>b[1].cnt-a[1].cnt);
+  const max=sorted[0]?.[1].cnt||1;
+  document.getElementById('appList').innerHTML = sorted.length
+    ? sorted.map(([k,v])=>`<div class="breakdown-row">
+        <span class="breakdown-label">${k}</span>
+        <div class="bar-wrap"><div class="bar blue" style="width:${Math.round(v.cnt/max*100)}%"></div></div>
+        <span class="breakdown-val">${v.cnt}</span></div>`).join('')
+    : `<div class="breakdown-row"><span class="breakdown-label" style="font-style:italic">No data</span></div>`;
+}
+
+// ── Helpers ───────────────────────────────────────────
+function timeAgo(d) {
+  const s=Math.round((Date.now()-d)/1000);
+  if(s<60)  return `${s}s ago`;
+  if(s<3600) return `${Math.round(s/60)}m ago`;
+  if(s<86400) return `${Math.round(s/3600)}h ago`;
+  return `${Math.round(s/86400)}d ago`;
+}
+</script>
 </body>
 </html>
