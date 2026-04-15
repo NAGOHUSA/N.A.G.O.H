@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nagoh Live Sales Dashboard | Real-Time Revenue</title>
+  <title>Nagoh Sales Dashboard | Admin</title>
   <style>
     * {
       margin: 0;
@@ -14,17 +14,106 @@
     body {
       background: linear-gradient(135deg, #0a0c12 0%, #0f111a 100%);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      padding: 20px;
       min-height: 100vh;
       color: #eef2ff;
     }
 
-    .dashboard {
-      max-width: 1400px;
-      margin: 0 auto;
+    /* Login Screen */
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0a0c12 0%, #0f111a 100%);
     }
 
-    /* Header */
+    .login-box {
+      background: rgba(18, 22, 35, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid rgba(100, 255, 218, 0.2);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .login-box h2 {
+      margin-bottom: 30px;
+      text-align: center;
+      background: linear-gradient(135deg, #fff, #64ffda);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 12px 16px;
+      margin: 10px 0;
+      background: #1a1e30;
+      border: 1px solid #2a2f4b;
+      border-radius: 12px;
+      color: white;
+      font-size: 1rem;
+    }
+
+    .login-box input:focus {
+      outline: none;
+      border-color: #64ffda;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background: linear-gradient(135deg, #64ffda, #a78bfa);
+      border: none;
+      border-radius: 12px;
+      color: #0a0c12;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .login-box button:hover {
+      transform: translateY(-2px);
+    }
+
+    .error-msg {
+      color: #f87171;
+      text-align: center;
+      margin-top: 15px;
+      font-size: 0.9rem;
+    }
+
+    /* Dashboard (hidden until login) */
+    .dashboard {
+      display: none;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .logout-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #2a2f4b;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      color: white;
+      cursor: pointer;
+      z-index: 100;
+      font-size: 0.8rem;
+    }
+
+    .logout-btn:hover {
+      background: #f87171;
+    }
+
     .header {
       margin-bottom: 30px;
     }
@@ -43,7 +132,6 @@
       font-size: 0.9rem;
     }
 
-    /* Stats Grid */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -57,12 +145,6 @@
       border-radius: 20px;
       padding: 20px;
       border: 1px solid rgba(100, 255, 218, 0.2);
-      transition: transform 0.2s;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(100, 255, 218, 0.5);
     }
 
     .stat-label {
@@ -79,13 +161,6 @@
       color: #64ffda;
     }
 
-    .stat-sub {
-      font-size: 0.7rem;
-      color: #6c7a9e;
-      margin-top: 8px;
-    }
-
-    /* Two column layout */
     .two-columns {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -99,7 +174,6 @@
       }
     }
 
-    /* Panel styles */
     .panel {
       background: #0e111b;
       border-radius: 20px;
@@ -144,15 +218,9 @@
       border-radius: 8px;
       cursor: pointer;
       font-size: 0.75rem;
-      transition: all 0.2s;
     }
 
-    .clear-btn:hover, .export-btn:hover {
-      background: #2a3150;
-    }
-
-    /* Sales feed */
-    .sales-feed {
+    .sales-feed, .db-log {
       max-height: 500px;
       overflow-y: auto;
     }
@@ -161,22 +229,11 @@
       padding: 15px 20px;
       border-bottom: 1px solid #1a1e30;
       animation: slideIn 0.3s ease-out;
-      transition: background 0.2s;
-    }
-
-    .sale-item:hover {
-      background: #14192c;
     }
 
     @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateX(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
     }
 
     .sale-header {
@@ -197,10 +254,9 @@
       text-transform: uppercase;
     }
 
-    .event-type.subscribe { background: #1e4a3a; color: #6ee7b7; }
-    .event-type.renew { background: #4a3a1e; color: #fbbf24; }
-    .event-type.cancel { background: #4a1e2a; color: #f87171; }
-    .event-type.refund { background: #4a2a1e; color: #fb923c; }
+    .event-type.subscribe { background: #1e4a3a; }
+    .event-type.renew { background: #4a3a1e; }
+    .event-type.cancel { background: #4a1e2a; }
 
     .revenue {
       font-size: 1.3rem;
@@ -211,56 +267,29 @@
       color: transparent;
     }
 
-    .sale-details {
-      font-size: 0.8rem;
-      color: #9ca3af;
-      margin-bottom: 6px;
-    }
-
     .timestamp {
       font-size: 0.7rem;
       color: #6b7280;
     }
 
-    /* Database log */
-    .db-log {
-      max-height: 500px;
-      overflow-y: auto;
-      font-family: 'SF Mono', monospace;
-      font-size: 0.75rem;
-    }
-
     .log-entry {
       padding: 12px 15px;
       border-bottom: 1px solid #1a1e30;
+      font-family: monospace;
+      font-size: 0.75rem;
     }
 
-    .log-time {
+    .empty-state {
+      text-align: center;
+      padding: 40px;
       color: #6b7280;
-      margin-bottom: 5px;
     }
 
-    .log-content {
-      color: #d1d5db;
-      word-break: break-word;
-    }
-
-    .log-badge {
-      background: #1f2937;
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      margin-right: 8px;
-    }
-
-    /* Webhook status */
     .webhook-status {
       background: #0e111b;
       border-radius: 20px;
       padding: 20px;
       border: 1px solid #232736;
-      margin-top: 25px;
     }
 
     .webhook-url {
@@ -274,33 +303,27 @@
       color: #64ffda;
     }
 
-    .empty-state {
-      text-align: center;
-      padding: 40px;
-      color: #6b7280;
-    }
-
     button {
       cursor: pointer;
-    }
-
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #0f1220;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #2c3353;
-      border-radius: 10px;
     }
   </style>
 </head>
 <body>
-<div class="dashboard">
+<!-- Login Screen -->
+<div id="loginScreen" class="login-container">
+  <div class="login-box">
+    <h2>🔐 Admin Access</h2>
+    <input type="text" id="username" placeholder="Username" autocomplete="off">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login to Dashboard</button>
+    <div id="loginError" class="error-msg"></div>
+  </div>
+</div>
+
+<!-- Dashboard (hidden until login) -->
+<div id="dashboard" class="dashboard">
+  <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+  
   <div class="header">
     <h1>🍎 Nagoh Live Sales Dashboard</h1>
     <div class="subtitle">Real-time App Store notifications • Persistent database logging</div>
@@ -310,46 +333,35 @@
     <div class="stat-card">
       <div class="stat-label">Today's Revenue</div>
       <div class="stat-value" id="todayRevenue">$0.00</div>
-      <div class="stat-sub">last 24 hours</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Total Events</div>
       <div class="stat-value" id="totalEvents">0</div>
-      <div class="stat-sub">since dashboard opened</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Last Sale</div>
       <div class="stat-value" id="lastAmount">—</div>
-      <div class="stat-sub" id="lastTime">waiting for data</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Active Apps</div>
       <div class="stat-value" id="activeApps">0</div>
-      <div class="stat-sub">unique bundle IDs</div>
     </div>
   </div>
 
   <div class="two-columns">
-    <!-- Live Sales Feed -->
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">
-          <span class="live-dot"></span>
-          🔔 Live Sales Feed
-        </div>
+        <div class="panel-title"><span class="live-dot"></span> 🔔 Live Sales Feed</div>
         <button class="clear-btn" id="clearFeedBtn">Clear feed</button>
       </div>
       <div id="salesFeed" class="sales-feed">
-        <div class="empty-state">✨ Waiting for incoming sales...<br>Send a test notification to see it appear</div>
+        <div class="empty-state">✨ Waiting for incoming sales...</div>
       </div>
     </div>
 
-    <!-- Database Log (Persistent) -->
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">
-          🗄️ Database Log (IndexedDB)
-        </div>
+        <div class="panel-title">🗄️ Database Log (IndexedDB)</div>
         <button class="export-btn" id="exportBtn">Export JSON</button>
       </div>
       <div id="dbLog" class="db-log">
@@ -358,356 +370,297 @@
     </div>
   </div>
 
-  <!-- Webhook Configuration -->
   <div class="webhook-status">
     <strong>🔌 Webhook Forwarding URL</strong>
-    <div class="webhook-url" id="webhookUrl">Setting up...</div>
+    <div class="webhook-url" id="webhookUrl">Loading...</div>
     <div style="margin-top: 12px; font-size: 0.8rem; color: #8b92b0;">
-      ⚙️ Set <code>DASHBOARD_WEBHOOK_URL</code> in your Cloudflare Worker environment variables to this URL
-      <button id="copyUrlBtn" style="margin-left: 10px; background: #1f253e; padding: 4px 12px; border-radius: 6px;">Copy URL</button>
+      ✅ DASHBOARD_URL configured in worker: <code id="configuredUrl">https://nagoh.xyz/dashboard/index.html</code>
     </div>
   </div>
 </div>
 
 <script>
-  // ==================== IndexedDB Setup ====================
-  const DB_NAME = 'NagohSalesDashboard';
-  const DB_VERSION = 2;
-  const STORE_NAME = 'sales_events';
+// ==================== AUTHENTICATION ====================
+const VALID_USERNAME = 'admin';
+const VALID_PASSWORD = 'admin';
 
-  let db = null;
-  let salesEvents = []; // in-memory cache for UI
-  let uniqueApps = new Set();
-
-  async function initDB() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        db = request.result;
-        resolve(db);
-      };
-      request.onupgradeneeded = (event) => {
-        const dbRef = event.target.result;
-        if (!dbRef.objectStoreNames.contains(STORE_NAME)) {
-          const store = dbRef.createObjectStore(STORE_NAME, { keyPath: 'id' });
-          store.createIndex('timestamp', 'timestamp', { unique: false });
-          store.createIndex('date', 'date', { unique: false });
-        }
-      };
-    });
+function login() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  const errorDiv = document.getElementById('loginError');
+  
+  if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+    sessionStorage.setItem('dashboard_auth', 'true');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    initDashboard();
+  } else {
+    errorDiv.textContent = '❌ Invalid credentials. Use admin / admin';
   }
+}
 
-  async function saveToDB(eventData) {
-    if (!db) await initDB();
-    const record = {
-      id: eventData.eventId || `${Date.now()}_${Math.random()}`,
-      ...eventData,
-      date: new Date(eventData.timestamp).toDateString(),
-      savedAt: new Date().toISOString()
+function logout() {
+  sessionStorage.removeItem('dashboard_auth');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('dashboard').style.display = 'none';
+}
+
+// Check if already logged in
+if (sessionStorage.getItem('dashboard_auth') === 'true') {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  initDashboard();
+}
+
+// ==================== IndexedDB Setup ====================
+const DB_NAME = 'NagohSalesDashboard';
+const DB_VERSION = 2;
+const STORE_NAME = 'sales_events';
+
+let db = null;
+let salesEvents = [];
+
+async function initDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      db = request.result;
+      resolve(db);
     };
-    
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([STORE_NAME], 'readwrite');
-      const store = transaction.objectStore(STORE_NAME);
-      const request = store.add(record);
-      request.onsuccess = () => resolve(record);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  async function getAllFromDB(limit = 200) {
-    if (!db) await initDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([STORE_NAME], 'readonly');
-      const store = transaction.objectStore(STORE_NAME);
-      const index = store.index('timestamp');
-      const request = index.openCursor(null, 'prev');
-      const results = [];
-      let count = 0;
-      request.onsuccess = (event) => {
-        const cursor = event.target.result;
-        if (cursor && count < limit) {
-          results.push(cursor.value);
-          count++;
-          cursor.continue();
-        } else {
-          resolve(results);
-        }
-      };
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  async function clearDB() {
-    if (!db) await initDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([STORE_NAME], 'readwrite');
-      const store = transaction.objectStore(STORE_NAME);
-      const request = store.clear();
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  // ==================== UI Update Functions ====================
-  function updateStats() {
-    // Calculate today's revenue
-    const today = new Date().toDateString();
-    let todayRevenue = 0;
-    for (const event of salesEvents) {
-      if (event.revenue && new Date(event.timestamp).toDateString() === today) {
-        todayRevenue += event.revenue;
-      }
-    }
-    
-    document.getElementById('todayRevenue').innerText = `$${todayRevenue.toFixed(2)}`;
-    document.getElementById('totalEvents').innerText = salesEvents.length;
-    
-    if (salesEvents.length > 0) {
-      const last = salesEvents[0];
-      document.getElementById('lastAmount').innerHTML = last.revenue ? `$${last.revenue.toFixed(2)}` : '—';
-      document.getElementById('lastTime').innerText = new Date(last.timestamp).toLocaleTimeString();
-    }
-    
-    // Count unique apps
-    const uniqueBundles = new Set(salesEvents.map(e => e.bundleID).filter(Boolean));
-    document.getElementById('activeApps').innerText = uniqueBundles.size;
-  }
-
-  function getEventClass(type) {
-    const t = (type || '').toLowerCase();
-    if (t.includes('subscribe') || t.includes('initial')) return 'subscribe';
-    if (t.includes('renew')) return 'renew';
-    if (t.includes('cancel')) return 'cancel';
-    if (t.includes('refund')) return 'refund';
-    return '';
-  }
-
-  function renderSalesFeed() {
-    const container = document.getElementById('salesFeed');
-    if (salesEvents.length === 0) {
-      container.innerHTML = '<div class="empty-state">✨ Waiting for incoming sales...<br>Send a test notification to see it appear</div>';
-      return;
-    }
-    
-    container.innerHTML = salesEvents.map(event => `
-      <div class="sale-item">
-        <div class="sale-header">
-          <span class="event-type ${getEventClass(event.notificationType)}">${event.notificationType || 'UNKNOWN'} ${event.subtype ? `· ${event.subtype}` : ''}</span>
-          ${event.revenue ? `<span class="revenue">$${event.revenue.toFixed(2)} ${event.currency || 'USD'}</span>` : '<span class="revenue">—</span>'}
-        </div>
-        <div class="sale-details">
-          ${event.bundleID ? `📱 ${event.bundleID.split('.').pop()}` : ''}
-          ${event.profileID ? ` • 👤 ${event.profileID.substring(0, 8)}...` : ''}
-        </div>
-        <div class="timestamp">${new Date(event.timestamp).toLocaleString()}</div>
-      </div>
-    `).join('');
-  }
-
-  async function renderDBLog() {
-    const records = await getAllFromDB(100);
-    const container = document.getElementById('dbLog');
-    if (records.length === 0) {
-      container.innerHTML = '<div class="empty-state">📀 No records in database yet</div>';
-      return;
-    }
-    
-    container.innerHTML = records.map(record => `
-      <div class="log-entry">
-        <div class="log-time">🕒 ${new Date(record.timestamp).toLocaleString()}</div>
-        <div class="log-content">
-          <span class="log-badge">${record.notificationType || 'SALE'}</span>
-          ${record.revenue ? `💰 $${record.revenue.toFixed(2)}` : '📦 event'}
-          <span style="color:#6b7280; font-size:0.7rem; margin-left:8px;">ID: ${record.id?.substring(0, 12)}...</span>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  // ==================== Process Incoming Webhook ====================
-  async function processWebhook(payload) {
-    console.log('📨 Received webhook:', payload);
-    
-    const event = {
-      eventId: payload.eventId || `${Date.now()}_${Math.random()}`,
-      notificationType: payload.notificationType || 'UNKNOWN',
-      subtype: payload.subtype || '',
-      revenue: payload.revenue || 0,
-      currency: payload.currency || 'USD',
-      bundleID: payload.bundleID || 'unknown',
-      profileID: payload.profileID || '',
-      timestamp: payload.timestamp || new Date().toISOString(),
-      rawData: payload
-    };
-    
-    // Add to memory (latest first)
-    salesEvents.unshift(event);
-    if (salesEvents.length > 100) salesEvents.pop();
-    
-    // Save to IndexedDB
-    await saveToDB(event);
-    
-    // Update UI
-    updateStats();
-    renderSalesFeed();
-    await renderDBLog();
-    
-    // Play notification sound (optional)
-    try {
-      const audio = new Audio('data:audio/wav;base64,U3RlYWx0aCBzb3VuZA==');
-      audio.play().catch(() => {});
-    } catch(e) {}
-    
-    return { success: true };
-  }
-
-  // ==================== Setup Webhook Listener ====================
-  function setupWebhookEndpoint() {
-    // Get the current page URL to use as webhook endpoint
-    const currentUrl = window.location.href;
-    const webhookUrl = currentUrl.split('#')[0].split('?')[0];
-    
-    document.getElementById('webhookUrl').innerText = webhookUrl;
-    
-    // Copy button
-    document.getElementById('copyUrlBtn').onclick = () => {
-      navigator.clipboard.writeText(webhookUrl);
-      alert('URL copied! Add this as DASHBOARD_WEBHOOK_URL in your Cloudflare Worker env vars');
-    };
-    
-    // Listen for POST requests to this page (for webhook forwarding)
-    // Since browsers don't let pages listen for POST directly, we'll use a service worker approach
-    // Alternative: set up a simple interval to check? No - better to use WebSocket or server-sent events
-    // For now, we'll provide a fetch interceptor if the page is loaded via HTTPS
-    
-    // Also expose a global function for manual testing
-    window.triggerTestSale = () => {
-      processWebhook({
-        notificationType: 'TEST_SALE',
-        subtype: 'MANUAL',
-        revenue: 9.99,
-        currency: 'USD',
-        bundleID: 'com.test.app',
-        profileID: 'test-profile-123',
-        timestamp: new Date().toISOString(),
-        eventId: `test_${Date.now()}`
-      });
-    };
-    
-    // Add test buttons to page
-    const testDiv = document.createElement('div');
-    testDiv.style.marginTop = '20px';
-    testDiv.style.padding = '15px';
-    testDiv.style.background = '#0e111b';
-    testDiv.style.borderRadius = '12px';
-    testDiv.style.border = '1px solid #2a2f4b';
-    testDiv.innerHTML = `
-      <strong>🧪 Test Controls</strong>
-      <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
-        <button id="testSaleBtn" style="background:#1e4a3a; padding: 8px 16px; border-radius: 8px;">💰 Test Sale ($9.99)</button>
-        <button id="testRenewBtn" style="background:#4a3a1e; padding: 8px 16px; border-radius: 8px;">🔄 Test Renewal</button>
-        <button id="testCancelBtn" style="background:#4a1e2a; padding: 8px 16px; border-radius: 8px;">❌ Test Cancellation</button>
-        <button id="clearDBBtn" style="background:#2a2f4b; padding: 8px 16px; border-radius: 8px;">🗑️ Clear Database</button>
-      </div>
-    `;
-    document.querySelector('.webhook-status').after(testDiv);
-    
-    document.getElementById('testSaleBtn').onclick = () => {
-      processWebhook({
-        notificationType: 'DID_RENEW',
-        subtype: 'INITIAL_BUY',
-        revenue: 9.99,
-        currency: 'USD',
-        bundleID: 'com.nagohcreative.The-Daily-Crumb',
-        profileID: 'profile_' + Math.random().toString(36).substr(2, 8),
-        timestamp: new Date().toISOString(),
-        eventId: `sale_${Date.now()}`
-      });
-    };
-    
-    document.getElementById('testRenewBtn').onclick = () => {
-      processWebhook({
-        notificationType: 'DID_RENEW',
-        subtype: 'RENEWAL',
-        revenue: 9.99,
-        currency: 'USD',
-        bundleID: 'com.nagohcreative.The-Daily-Crumb',
-        profileID: 'profile_renew_' + Math.random().toString(36).substr(2, 6),
-        timestamp: new Date().toISOString(),
-        eventId: `renew_${Date.now()}`
-      });
-    };
-    
-    document.getElementById('testCancelBtn').onclick = () => {
-      processWebhook({
-        notificationType: 'CANCEL',
-        subtype: 'VOLUNTARY',
-        revenue: 0,
-        currency: 'USD',
-        bundleID: 'com.nagohcreative.The-Daily-Crumb',
-        profileID: 'profile_cancel_' + Math.random().toString(36).substr(2, 6),
-        timestamp: new Date().toISOString(),
-        eventId: `cancel_${Date.now()}`
-      });
-    };
-    
-    document.getElementById('clearDBBtn').onclick = async () => {
-      if (confirm('⚠️ Clear ALL database records? This cannot be undone.')) {
-        await clearDB();
-        salesEvents = [];
-        updateStats();
-        renderSalesFeed();
-        await renderDBLog();
-        alert('Database cleared!');
+    request.onupgradeneeded = (event) => {
+      const dbRef = event.target.result;
+      if (!dbRef.objectStoreNames.contains(STORE_NAME)) {
+        dbRef.createObjectStore(STORE_NAME, { keyPath: 'id' });
       }
     };
+  });
+}
+
+async function saveToDB(eventData) {
+  if (!db) await initDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.add(eventData);
+    request.onsuccess = () => resolve(eventData);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function getAllFromDB(limit = 200) {
+  if (!db) await initDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.getAll();
+    request.onsuccess = () => {
+      let results = request.result || [];
+      results.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      resolve(results.slice(0, limit));
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function clearDB() {
+  if (!db) await initDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// ==================== UI Update Functions ====================
+function updateStats() {
+  const today = new Date().toDateString();
+  let todayRevenue = 0;
+  for (const event of salesEvents) {
+    if (event.revenue && new Date(event.timestamp).toDateString() === today) {
+      todayRevenue += event.revenue;
+    }
   }
   
-  // ==================== Clear Feed ====================
-  document.getElementById('clearFeedBtn').onclick = () => {
-    salesEvents = [];
-    updateStats();
-    renderSalesFeed();
+  document.getElementById('todayRevenue').innerText = `$${todayRevenue.toFixed(2)}`;
+  document.getElementById('totalEvents').innerText = salesEvents.length;
+  
+  if (salesEvents.length > 0) {
+    const last = salesEvents[0];
+    document.getElementById('lastAmount').innerHTML = last.revenue ? `$${last.revenue.toFixed(2)}` : '—';
+  }
+  
+  const uniqueBundles = new Set(salesEvents.map(e => e.bundleID).filter(Boolean));
+  document.getElementById('activeApps').innerText = uniqueBundles.size;
+}
+
+function getEventClass(type) {
+  const t = (type || '').toLowerCase();
+  if (t.includes('subscribe') || t.includes('initial')) return 'subscribe';
+  if (t.includes('renew')) return 'renew';
+  if (t.includes('cancel')) return 'cancel';
+  return '';
+}
+
+function renderSalesFeed() {
+  const container = document.getElementById('salesFeed');
+  if (salesEvents.length === 0) {
+    container.innerHTML = '<div class="empty-state">✨ Waiting for incoming sales...</div>';
+    return;
+  }
+  
+  container.innerHTML = salesEvents.map(event => `
+    <div class="sale-item">
+      <div class="sale-header">
+        <span class="event-type ${getEventClass(event.notificationType)}">${event.notificationType || 'UNKNOWN'} ${event.subtype ? `· ${event.subtype}` : ''}</span>
+        ${event.revenue ? `<span class="revenue">$${event.revenue.toFixed(2)} ${event.currency || 'USD'}</span>` : '<span class="revenue">—</span>'}
+      </div>
+      <div class="sale-details" style="font-size:0.8rem; color:#9ca3af; margin-bottom:6px;">
+        ${event.bundleID ? `📱 ${event.bundleID.split('.').pop()}` : ''}
+        ${event.profileID ? ` • 👤 ${event.profileID.substring(0, 8)}...` : ''}
+      </div>
+      <div class="timestamp">${new Date(event.timestamp).toLocaleString()}</div>
+    </div>
+  `).join('');
+}
+
+async function renderDBLog() {
+  const records = await getAllFromDB(100);
+  const container = document.getElementById('dbLog');
+  if (records.length === 0) {
+    container.innerHTML = '<div class="empty-state">📀 No records in database yet</div>';
+    return;
+  }
+  
+  container.innerHTML = records.map(record => `
+    <div class="log-entry">
+      <div style="color:#6b7280; margin-bottom:5px;">🕒 ${new Date(record.timestamp).toLocaleString()}</div>
+      <div>
+        <span style="background:#1f2937; display:inline-block; padding:2px 8px; border-radius:4px; font-size:0.7rem; margin-right:8px;">${record.notificationType || 'SALE'}</span>
+        ${record.revenue ? `💰 $${record.revenue.toFixed(2)}` : '📦 event'}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ==================== Process Incoming Webhook ====================
+async function processWebhook(payload) {
+  console.log('📨 Received webhook:', payload);
+  
+  const event = {
+    id: payload.eventId || `${Date.now()}_${Math.random()}`,
+    notificationType: payload.notificationType || 'UNKNOWN',
+    subtype: payload.subtype || '',
+    revenue: payload.revenue || 0,
+    currency: payload.currency || 'USD',
+    bundleID: payload.bundleID || 'unknown',
+    profileID: payload.profileID || '',
+    timestamp: payload.timestamp || new Date().toISOString(),
+    rawPayload: payload.rawPayload
   };
   
-  document.getElementById('exportBtn').onclick = async () => {
-    const records = await getAllFromDB(500);
-    const dataStr = JSON.stringify(records, null, 2);
-    const blob = new Blob([dataStr], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `nagoh_sales_${new Date().toISOString().slice(0,19)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  // Add to memory (latest first)
+  salesEvents.unshift(event);
+  if (salesEvents.length > 100) salesEvents.pop();
   
-  // ==================== Load existing data on startup ====================
-  async function loadExistingData() {
-    await initDB();
-    const records = await getAllFromDB(50);
-    salesEvents = records.map(record => ({
-      eventId: record.id,
-      notificationType: record.notificationType,
-      subtype: record.subtype,
-      revenue: record.revenue,
-      currency: record.currency,
-      bundleID: record.bundleID,
-      profileID: record.profileID,
-      timestamp: record.timestamp
-    }));
-    updateStats();
-    renderSalesFeed();
+  // Save to IndexedDB
+  await saveToDB(event);
+  
+  // Update UI
+  updateStats();
+  renderSalesFeed();
+  await renderDBLog();
+  
+  // Play notification sound (optional - just visual feedback)
+  console.log('✅ Sale logged successfully');
+  
+  return { success: true };
+}
+
+// ==================== Setup Webhook Listener ====================
+function setupWebhookListener() {
+  // Get the current page URL
+  const currentUrl = window.location.href;
+  document.getElementById('webhookUrl').innerHTML = currentUrl;
+  document.getElementById('configuredUrl').innerHTML = 'https://nagoh.xyz/dashboard/index.html';
+  
+  // Listen for POST requests to this page
+  // Since we can't directly listen for POST in static HTML, we'll check for POST data in the request
+  // For a proper implementation, you'd need a server endpoint
+  
+  // Instead, we'll set up a fetch interceptor for the page's own POST handling
+  // This works if the dashboard is served by a server that can handle POST
+  
+  // For now, we'll also expose a global function for the worker to call
+  window.receiveSale = processWebhook;
+  
+  // Also set up a message listener for cross-origin if needed
+  window.addEventListener('message', async (event) => {
+    if (event.data && event.data.type === 'NEW_SALE') {
+      await processWebhook(event.data.payload);
+    }
+  });
+  
+  // Auto-refresh database view every 5 seconds (for updates from other sources)
+  setInterval(async () => {
     await renderDBLog();
-  }
+  }, 5000);
+}
+
+// ==================== Clear Feed & Export ====================
+document.getElementById('clearFeedBtn').onclick = () => {
+  salesEvents = [];
+  updateStats();
+  renderSalesFeed();
+};
+
+document.getElementById('exportBtn').onclick = async () => {
+  const records = await getAllFromDB(500);
+  const dataStr = JSON.stringify(records, null, 2);
+  const blob = new Blob([dataStr], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `nagoh_sales_${new Date().toISOString().slice(0,19)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+// ==================== Initialize Dashboard ====================
+async function initDashboard() {
+  await initDB();
+  const records = await getAllFromDB(50);
   
-  // Initialize
-  loadExistingData();
-  setupWebhookEndpoint();
+  // Load existing records into memory
+  salesEvents = records.map(record => ({
+    id: record.id,
+    notificationType: record.notificationType,
+    subtype: record.subtype,
+    revenue: record.revenue,
+    currency: record.currency,
+    bundleID: record.bundleID,
+    profileID: record.profileID,
+    timestamp: record.timestamp
+  }));
   
-  console.log('✅ Dashboard ready! Set DASHBOARD_WEBHOOK_URL in your worker to:', window.location.href);
+  updateStats();
+  renderSalesFeed();
+  await renderDBLog();
+  setupWebhookListener();
+  
+  console.log('✅ Dashboard ready! Waiting for sales from worker...');
+  console.log('📍 Dashboard URL:', window.location.href);
+  console.log('⚙️ Make sure DASHBOARD_URL in worker is set to:', window.location.href);
+}
+
+// Handle incoming POST requests (if the page is served by a server)
+if (window.location.protocol === 'https:' || window.location.protocol === 'http:') {
+  // Check if there's POST data in the request (only works if server-side)
+  // For static hosting, we rely on the global function
+  console.log('📡 Dashboard running at:', window.location.href);
+}
 </script>
 </body>
 </html>
