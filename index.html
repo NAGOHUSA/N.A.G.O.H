@@ -1,1 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NAGOH — Real-Time App Store Sales Notifications for iOS Developers</title>
+  <meta name="description" content="Get instant iPhone notifications the moment your app sells on the App Store. NAGOH delivers real-time sales alerts with zero data collection — no cloud servers, complete privacy. Free for indie iOS developers." />
+  <meta name="keywords" content="app store sales notifications, real-time app sales alerts, iOS developer sales tracker, app store connect notifications, indie developer app, iPhone sales dashboard, app revenue tracker, app store sales monitor, privacy app store analytics, instant app sale notification, app store connect alternative, iOS app revenue alerts, app sales push notification, indie iOS developer tools" />
+  <meta name="author" content="Nagoh Creative" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://nagoh.xyz/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://nagoh.xyz/" />
+  <meta property="og:title" content="NAGOH — Know the Moment Your App Earns" />
+  <meta property="og:description" content="Instant App Store sales notifications on your iPhone. Real-time alerts, zero data collection, complete privacy." />
+  <meta property="og:image" content="https://nagoh.xyz/images/og-preview.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="NAGOH — Real-Time App Store Sales Notifications" />
+  <meta name="twitter:description" content="Instant App Store sales notifications on your iPhone. Zero data collection, complete privacy." />
+  <meta name="twitter:image" content="https://nagoh.xyz/images/og-preview.png" />
+  <meta name="apple-mobile-web-app-title" content="NAGOH" />
+  <link rel="icon" type="image/png" href="https://nagoh.xyz/images/favicon.png" />
+  <meta name="brotherstock-verify" content="7uurv2373p457r7nzhuxe">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"NAGOH","alternateName":"Notify App Gains On Hand","url":"https://nagoh.xyz","description":"Real-time App Store sales notifications for iOS developers. Get instant iPhone alerts when your app sells, with zero data collection and complete on-device privacy.","applicationCategory":"DeveloperApplication","operatingSystem":"iOS 17+","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Organization","name":"Nagoh Creative","url":"https://nagohcreative.com","email":"support@nagohcreative.com"},"featureList":["Real-time App Store sales notifications","On-device data storage — no cloud servers","iOS Keychain credential encryption","Multi-app portfolio dashboard","Developer business card sharing","Daily marketing tips","Apple official API integration","Zero data collection"]}
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #0A0A0B;
+      --ink-2:     #111114;
+      --ink-3:     #18181C;
+      --ink-4:     #222228;
+      --line:      rgba(255,255,255,0.07);
+      --line-2:    rgba(255,255,255,0.12);
+      --cream:     #F2EDE4;
+      --cream-dim: rgba(242,237,228,0.55);
+      --cream-faint: rgba(242,237,228,0.22);
+      --ember:     #E05C28;
+      --ember-glow:rgba(224,92,40,0.18);
+      --ember-line:rgba(224,92,40,0.35);
+      --jade:      #2FB8B0;
+      --jade-glow: rgba(47,184,176,0.12);
+      --amethyst:  #9C7FD4;
+      --gold:      #C9A84C;
+      --font-display: 'Cormorant Garamond', serif;
+      --font-body:    'Outfit', sans-serif;
+      --r-sm: 10px;
+      --r-md: 16px;
+      --r-lg: 24px;
+      --r-xl: 32px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--ink);
+      color: var(--cream);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.65;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── AMBIENT BACKGROUND ── */
+    .ambient {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      overflow: hidden;
+    }
+    .ambient-orb {
+      position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0;
+      animation: ambientFade 3s ease forwards;
+    }
+    .amb-1 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(224,92,40,0.12), transparent 70%); top: -200px; right: -150px; animation-delay: 0.2s; }
+    .amb-2 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(47,184,176,0.08), transparent 70%); bottom: -100px; left: -100px; animation-delay: 0.5s; }
+    .amb-3 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(156,127,212,0.06), transparent 70%); top: 50%; left: 40%; transform: translate(-50%,-50%); animation-delay: 0.8s; }
+    @keyframes ambientFade { to { opacity: 1; } }
+
+    /* ── GRAIN OVERLAY ── */
+    .grain {
+      position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 180px;
+    }
+
+    section, nav, footer { position: relative; z-index: 2; }
+
+    /* ── NAVIGATION ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 6%;
+      background: rgba(10,10,11,0.75);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 0.7rem; text-decoration: none;
+      opacity: 0; animation: fadeSlideDown 0.6s 0.1s ease forwards;
+    }
+    .nav-bell { width: 28px; height: 28px; }
+    .nav-wordmark {
+      font-family: var(--font-display); font-weight: 700; font-size: 1.3rem;
+      letter-spacing: 0.22em; color: var(--cream); text-transform: uppercase;
+    }
+    .nav-links {
+      display: flex; align-items: center; gap: 2.5rem; list-style: none;
+      opacity: 0; animation: fadeSlideDown 0.6s 0.2s ease forwards;
+    }
+    .nav-links a {
+      color: var(--cream-dim); text-decoration: none; font-size: 0.82rem;
+      font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--cream); }
+    .nav-cta-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--ember); color: #fff; font-family: var(--font-body);
+      font-weight: 600; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 0.55rem 1.3rem; border-radius: 999px; text-decoration: none;
+      transition: opacity 0.2s, transform 0.2s;
+      opacity: 0; animation: fadeSlideDown 0.6s 0.3s ease forwards;
+    }
+    .nav-cta-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .nav-mobile-cta { display: none; }
+
+    @keyframes fadeSlideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeSlideUp   { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn        { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ── HERO ── */
+    .hero {
+      display: grid; grid-template-columns: 1fr 1fr;
+      align-items: center; gap: 5rem;
+      padding: 8rem 8% 6rem; max-width: 1440px; margin: 0 auto;
+      min-height: 95vh;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      border: 1px solid var(--ember-line);
+      background: var(--ember-glow);
+      color: var(--ember); font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      padding: 0.4rem 1rem; border-radius: 999px;
+      margin-bottom: 2rem; width: fit-content;
+      opacity: 0; animation: fadeSlideUp 0.7s 0.4s ease forwards;
+    }
+    .hero-badge-dot {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--ember);
+      animation: pulseDot 2s infinite;
+    }
+    @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.3;transform:scale(0.6)} }
+
+    .hero-h1 {
+      font-family: var(--font-display); font-size: clamp(3rem, 5.5vw, 5.2rem);
+      font-weight: 600; line-height: 1.04; letter-spacing: -0.01em;
+      margin-bottom: 1.8rem;
+      opacity: 0; animation: fadeSlideUp 0.8s 0.5s ease forwards;
+    }
+    .hero-h1 em { font-style: italic; color: var(--ember); }
+    .hero-h1 .teal { color: var(--jade); }
+
+    .hero-desc {
+      font-size: 1rem; color: var(--cream-dim); line-height: 1.8;
+      max-width: 440px; margin-bottom: 2.8rem; font-weight: 300;
+      opacity: 0; animation: fadeSlideUp 0.8s 0.6s ease forwards;
+    }
+    .hero-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      opacity: 0; animation: fadeSlideUp 0.8s 0.7s ease forwards;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      background: var(--ember); color: #fff;
+      font-family: var(--font-body); font-weight: 600; font-size: 0.88rem;
+      letter-spacing: 0.02em; padding: 0.9rem 2rem; border-radius: var(--r-sm);
+      text-decoration: none; transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 6px 28px rgba(224,92,40,0.4);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(224,92,40,0.5); }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      border: 1px solid var(--line-2); color: var(--cream-dim);
+      font-family: var(--font-body); font-weight: 500; font-size: 0.88rem;
+      padding: 0.9rem 1.8rem; border-radius: var(--r-sm);
+      text-decoration: none; transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.25); color: var(--cream); background: rgba(255,255,255,0.04); }
+
+    /* Hero visual */
+    .hero-visual {
+      display: flex; justify-content: center; align-items: center;
+      position: relative;
+      opacity: 0; animation: fadeIn 1.2s 0.9s ease forwards;
+    }
+    .phone-stack { position: relative; width: 320px; height: 620px; }
+    .phone-frame {
+      position: absolute; width: 285px; border-radius: 44px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .phone-frame img { width: 100%; display: block; object-fit: cover; }
+    .phone-main {
+      top: 0; left: 16px; z-index: 3; height: 570px;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
+      animation: floatMain 7s ease-in-out infinite;
+    }
+    .phone-back {
+      top: 40px; left: -24px; height: 500px; z-index: 2; opacity: 0.5;
+      filter: blur(2px); animation: floatBack 7s ease-in-out infinite;
+    }
+    @keyframes floatMain { 0%,100%{transform:translateY(0) rotate(1.5deg)} 50%{transform:translateY(-14px) rotate(1.5deg)} }
+    @keyframes floatBack { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-9px) rotate(-3deg)} }
+
+    .hero-orb {
+      position: absolute; border-radius: 50%; pointer-events: none; filter: blur(70px);
+    }
+    .orb-a { width: 240px; height: 240px; background: rgba(224,92,40,0.22); top: -40px; right: -60px; }
+    .orb-b { width: 180px; height: 180px; background: rgba(47,184,176,0.16); bottom: 60px; left: -70px; }
+
+    /* ── DIVIDER ── */
+    .section-divider {
+      border: none; border-top: 1px solid var(--line); margin: 0;
+    }
+
+    /* ── TRUST STRIP ── */
+    .trust-strip {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0 3.5rem; padding: 1.6rem 6%; flex-wrap: wrap;
+      background: rgba(255,255,255,0.015);
+    }
+    .trust-pill {
+      display: flex; align-items: center; gap: 0.6rem;
+      color: var(--cream-dim); font-size: 0.78rem; font-weight: 500;
+      letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
+      padding: 0.5rem 0;
+    }
+    .trust-pill svg { color: var(--jade); flex-shrink: 0; }
+
+    /* ── CAROUSEL ── */
+    .carousel-section { padding: 6rem 0; text-align: center; overflow: hidden; }
+    .carousel-header { max-width: 700px; margin: 0 auto; padding: 0 6%; margin-bottom: 3.5rem; }
+
+    .eyebrow {
+      font-family: var(--font-body); font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--jade);
+      margin-bottom: 1rem; display: block;
+    }
+    .section-h2 {
+      font-family: var(--font-display); font-size: clamp(2rem, 3.8vw, 3.4rem);
+      font-weight: 600; line-height: 1.08; letter-spacing: -0.01em; margin-bottom: 1rem;
+    }
+    .section-sub {
+      color: var(--cream-dim); font-size: 0.95rem; font-weight: 300;
+      line-height: 1.75; max-width: 500px; margin: 0 auto;
+    }
+
+    .carousel-viewport {
+      overflow: hidden; position: relative;
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+    }
+    .carousel-track {
+      display: flex; align-items: center; gap: 1.5rem;
+      transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+      padding: 2rem 0 3rem; will-change: transform;
+    }
+    .c-slide {
+      flex: 0 0 auto; width: 200px;
+      opacity: 0.35; transform: scale(0.84);
+      transition: opacity 0.5s, transform 0.5s; cursor: pointer;
+    }
+    .c-slide.active  { opacity: 1; transform: scale(1); }
+    .c-slide.adj     { opacity: 0.6; transform: scale(0.92); }
+    .c-frame {
+      position: relative; padding-bottom: 216%;
+      border-radius: 28px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.07);
+      box-shadow: 0 16px 50px rgba(0,0,0,0.5);
+      background: var(--ink-3);
+      transition: border-color 0.4s, box-shadow 0.4s;
+    }
+    .c-slide.active .c-frame {
+      border-color: rgba(255,255,255,0.16);
+      box-shadow: 0 32px 80px rgba(0,0,0,0.7);
+    }
+    .c-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .c-label {
+      margin-top: 1rem; font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--cream-faint);
+      transition: color 0.3s;
+    }
+    .c-slide.active .c-label { color: var(--ember); }
+
+    .carousel-nav { display: flex; align-items: center; justify-content: center; gap: 1.5rem; margin-top: 2rem; }
+    .c-btn {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 1px solid var(--line-2); background: rgba(255,255,255,0.03);
+      color: var(--cream); cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    }
+    .c-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.22); transform: scale(1.08); }
+    .c-dots { display: flex; gap: 0.45rem; align-items: center; }
+    .c-dot {
+      width: 5px; height: 5px; border-radius: 3px;
+      background: rgba(255,255,255,0.18); border: none; cursor: pointer;
+      transition: background 0.3s, width 0.3s; padding: 0;
+    }
+    .c-dot.active { background: var(--ember); width: 20px; }
+
+    /* ── FEATURES ── */
+    .features-section { padding: 8rem 8%; max-width: 1400px; margin: 0 auto; }
+    .features-intro { max-width: 600px; margin-bottom: 4rem; }
+
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--line);
+      border: 1px solid var(--line); border-radius: var(--r-xl); overflow: hidden;
+    }
+    .feature-tile {
+      background: var(--ink-2); padding: 2.8rem 2.4rem;
+      transition: background 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .feature-tile::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.02), transparent 60%);
+      pointer-events: none;
+    }
+    .feature-tile:hover { background: var(--ink-3); }
+    .f-icon {
+      width: 44px; height: 44px; border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; margin-bottom: 1.5rem;
+    }
+    .f-icon-ember  { background: rgba(224,92,40,0.12); }
+    .f-icon-jade   { background: rgba(47,184,176,0.12); }
+    .f-icon-purple { background: rgba(156,127,212,0.12); }
+    .f-icon-gold   { background: rgba(201,168,76,0.12); }
+    .feature-tile h3 {
+      font-family: var(--font-display); font-size: 1.25rem; font-weight: 600;
+      letter-spacing: -0.01em; margin-bottom: 0.65rem;
+    }
+    .feature-tile p { color: var(--cream-dim); font-size: 0.875rem; line-height: 1.75; font-weight: 300; }
+
+    /* ── PRIVACY ── */
+    .privacy-section {
+      padding: 8rem 8%;
+      background: linear-gradient(180deg, transparent, rgba(47,184,176,0.03) 50%, transparent);
+      border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    }
+    .privacy-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: start; }
+
+    .privacy-pillars { margin-top: 3rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .pillar {
+      display: flex; gap: 1.2rem; align-items: flex-start;
+      padding: 1.4rem 1.4rem;
+      border: 1px solid var(--line); border-radius: var(--r-md);
+      background: rgba(255,255,255,0.02);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .pillar:hover { border-color: rgba(47,184,176,0.25); background: rgba(47,184,176,0.03); }
+    .pillar-em { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+    .pillar h4 { font-family: var(--font-display); font-weight: 600; font-size: 1rem; margin-bottom: 0.3rem; }
+    .pillar p  { color: var(--cream-dim); font-size: 0.84rem; line-height: 1.7; font-weight: 300; }
+
+    .privacy-card {
+      background: var(--ink-3); border: 1px solid var(--line);
+      border-radius: var(--r-xl); padding: 2.8rem;
+      position: relative; overflow: hidden;
+    }
+    .privacy-card::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(47,184,176,0.06), transparent 70%);
+    }
+    .shield-glyph {
+      font-size: 3.8rem; display: block; margin-bottom: 1.2rem;
+      position: relative; z-index: 1;
+    }
+    .privacy-card h3 {
+      font-family: var(--font-display); font-size: 1.6rem; font-weight: 600;
+      letter-spacing: -0.01em; margin-bottom: 0.6rem; position: relative; z-index: 1;
+    }
+    .privacy-card > p {
+      color: var(--cream-dim); font-size: 0.875rem; line-height: 1.7;
+      font-weight: 300; margin-bottom: 2rem; position: relative; z-index: 1;
+    }
+    .data-rows { display: flex; flex-direction: column; gap: 0.5rem; position: relative; z-index: 1; }
+    .data-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.7rem 1rem; border-radius: var(--r-sm); font-size: 0.8rem; font-weight: 500;
+    }
+    .row-safe    { background: rgba(47,184,176,0.07); border: 1px solid rgba(47,184,176,0.18); color: var(--jade); }
+    .row-blocked { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); color: rgba(242,237,228,0.3); }
+    .chip {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+      padding: 0.22rem 0.6rem; border-radius: 999px;
+    }
+    .chip-safe    { background: rgba(47,184,176,0.18); color: var(--jade); }
+    .chip-blocked { background: rgba(255,255,255,0.05); color: rgba(242,237,228,0.3); text-decoration: line-through; }
+
+    /* ── HOW IT WORKS ── */
+    .how-section { padding: 8rem 8%; max-width: 1200px; margin: 0 auto; }
+    .steps-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 2.5rem; margin-top: 5rem; position: relative; }
+    .steps-row::before {
+      content: '';
+      position: absolute; top: 44px; left: 16%; right: 16%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--line-2) 20%, var(--line-2) 80%, transparent);
+    }
+    .step { text-align: center; }
+    .step-num {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: var(--ink-3); border: 1px solid var(--line-2);
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;
+      position: relative; z-index: 1;
+    }
+    .step-num span {
+      font-family: var(--font-display); font-size: 2rem; font-weight: 600;
+      color: var(--ember); line-height: 1;
+    }
+    .step h3 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; margin-bottom: 0.65rem; }
+    .step p  { color: var(--cream-dim); font-size: 0.875rem; line-height: 1.75; font-weight: 300; max-width: 240px; margin: 0 auto; }
+
+    /* ── COMPARISON ── */
+    .comparison-section { padding: 8rem 8%; background: rgba(255,255,255,0.01); border-top: 1px solid var(--line); }
+    .comparison-inner { max-width: 920px; margin: 0 auto; }
+    .comp-table { margin-top: 3.5rem; border: 1px solid var(--line); border-radius: var(--r-xl); overflow: hidden; }
+    .comp-head {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      padding: 1.2rem 1.8rem; background: var(--ink-3); border-bottom: 1px solid var(--line);
+    }
+    .comp-head span {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--cream-dim); text-align: center; line-height: 1.4;
+    }
+    .comp-head span:first-child { text-align: left; }
+    .comp-head .col-nagoh { color: var(--ember); }
+    .comp-row {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      padding: 1rem 1.8rem; border-bottom: 1px solid var(--line); align-items: center;
+    }
+    .comp-row:last-child { border-bottom: none; }
+    .comp-row:nth-child(even) { background: rgba(255,255,255,0.015); }
+    .comp-row .clabel { font-size: 0.85rem; color: var(--cream); }
+    .comp-row .ccheck { text-align: center; font-size: 0.95rem; }
+    .cyes  { color: var(--jade); }
+    .cno   { color: rgba(255,255,255,0.2); }
+    .cpart { color: var(--gold); }
+    .comp-note { color: var(--cream-faint); font-size: 0.74rem; margin-top: 1.2rem; text-align: center; }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 8rem 8%; text-align: center;
+      max-width: 860px; margin: 0 auto;
+    }
+    .cta-section h2 {
+      font-family: var(--font-display); font-size: clamp(2.4rem, 5vw, 4.2rem);
+      font-weight: 600; letter-spacing: -0.02em; line-height: 1.06;
+      margin-bottom: 1.4rem;
+    }
+    .cta-section h2 em { font-style: italic; color: var(--ember); }
+    .cta-section p  { color: var(--cream-dim); font-size: 1rem; font-weight: 300; margin-bottom: 2.8rem; line-height: 1.75; max-width: 520px; margin-left: auto; margin-right: auto; }
+    .appstore-btn {
+      display: inline-flex; align-items: center; gap: 0.9rem;
+      background: var(--cream); color: var(--ink);
+      text-decoration: none; padding: 1rem 2.2rem; border-radius: var(--r-md);
+      font-weight: 700; font-size: 0.95rem; letter-spacing: 0.01em;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 6px 30px rgba(0,0,0,0.4);
+    }
+    .appstore-btn svg { width: 22px; height: 22px; }
+    .appstore-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+    .cta-meta { margin-top: 1.2rem; color: rgba(242,237,228,0.25); font-size: 0.78rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 2.5rem 8%;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1.5rem; flex-wrap: wrap;
+      background: rgba(255,255,255,0.01);
+    }
+    .footer-logo { display: flex; align-items: center; gap: 0.6rem; }
+    .footer-logo span {
+      font-family: var(--font-display); font-weight: 700; font-size: 1rem;
+      letter-spacing: 0.2em; color: var(--cream-dim); text-transform: uppercase;
+    }
+    .footer-links { display: flex; gap: 1.8rem; list-style: none; flex-wrap: wrap; }
+    .footer-links a { color: var(--cream-dim); text-decoration: none; font-size: 0.8rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--cream); }
+    .footer-copy { color: rgba(242,237,228,0.25); font-size: 0.75rem; line-height: 1.6; }
+    .footer-copy a { color: rgba(242,237,228,0.38); text-decoration: none; transition: color 0.2s; }
+    .footer-copy a:hover { color: var(--cream-dim); }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.65s ease, transform 0.65s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal:nth-child(2) { transition-delay: 0.08s; }
+    .reveal:nth-child(3) { transition-delay: 0.16s; }
+    .reveal:nth-child(4) { transition-delay: 0.24s; }
+    .reveal:nth-child(5) { transition-delay: 0.32s; }
+    .reveal:nth-child(6) { transition-delay: 0.40s; }
+
+    /* ══════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════ */
+    @media (max-width: 980px) {
+      .nav-links { display: none; }
+      .nav-cta-btn { display: none; }
+      .nav-mobile-cta {
+        display: inline-flex; align-items: center;
+        background: var(--ember); color: #fff;
+        font-family: var(--font-body); font-weight: 600;
+        font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase;
+        padding: 0.52rem 1.2rem; border-radius: 999px; text-decoration: none;
+        opacity: 0; animation: fadeSlideDown 0.6s 0.3s ease forwards;
+      }
+      .hero { grid-template-columns: 1fr; text-align: center; padding: 5rem 7% 3rem; gap: 3.5rem; min-height: auto; }
+      .hero-badge, .hero-desc { margin-left: auto; margin-right: auto; }
+      .hero-actions { justify-content: center; }
+      .hero-visual { order: -1; }
+      .phone-stack { width: 240px; height: 480px; }
+      .phone-frame { width: 225px; }
+      .phone-main { height: 450px; left: 8px; }
+      .phone-back  { height: 390px; left: -18px; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .privacy-inner { grid-template-columns: 1fr; gap: 3.5rem; }
+      .steps-row { grid-template-columns: 1fr; gap: 2rem; }
+      .steps-row::before { display: none; }
+      .step p { max-width: 320px; }
+      .comp-head, .comp-row { grid-template-columns: 1.6fr 1fr 1fr 1fr; padding: 0.9rem 1.2rem; }
+    }
+
+    @media (max-width: 640px) {
+      .trust-strip { gap: 0.8rem 1.5rem; padding: 1.2rem 5%; }
+      .features-grid { grid-template-columns: 1fr; }
+      .feature-tile { padding: 2rem 1.8rem; }
+      .comp-head { grid-template-columns: 2fr 1fr 1fr; }
+      .comp-row { grid-template-columns: 2fr 1fr 1fr; }
+      .comp-head span:nth-child(3), .comp-row .ccheck:nth-child(3) { display: none; }
+      .btn-primary, .btn-ghost { width: 100%; justify-content: center; }
+      .hero-actions { flex-direction: column; }
+      footer { flex-direction: column; align-items: flex-start; padding: 2rem 5%; }
+      .privacy-card { padding: 1.8rem; }
+      .cta-section { padding: 5rem 6%; }
+      .hero { padding: 3.5rem 5% 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="ambient">
+  <div class="ambient-orb amb-1"></div>
+  <div class="ambient-orb amb-2"></div>
+  <div class="ambient-orb amb-3"></div>
+</div>
+<div class="grain"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <svg class="nav-bell" viewBox="0 0 32 32" fill="none">
+      <path d="M16 4C12.134 4 9 7.134 9 11V20H7a1 1 0 000 2h18a1 1 0 000-2h-2v-9c0-3.866-3.134-7-7-7z" fill="#E05C28"/>
+      <path d="M13 22c0 1.657 1.343 3 3 3s3-1.343 3-3H13z" fill="#E05C28"/>
+      <circle cx="22" cy="8" r="4" fill="#2FB8B0"/>
+    </svg>
+    <span class="nav-wordmark">NAGOH</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#privacy">Privacy</a></li>
+    <li><a href="#how-it-works">How It Works</a></li>
+  </ul>
+  <a href="mailto:support@nagohcreative.com" class="nav-cta-btn">Support</a>
+  <a href="mailto:support@nagohcreative.com" class="nav-mobile-cta">Support</a>
+</nav>
+
+<!-- HERO -->
+<section>
+  <div class="hero">
+    <div class="hero-text">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        iOS App for Indie Developers
+      </div>
+      <h1 class="hero-h1">
+        Know the moment<br>
+        your app <em>earns.</em><br>
+        <span class="teal">Privately.</span>
+      </h1>
+      <p class="hero-desc">
+        NAGOH delivers instant App Store sales notifications directly to your iPhone.
+        No cloud servers. No data mining. Your revenue data stays exactly where it belongs — on your device.
+      </p>
+      <div class="hero-actions">
+        <a href="https://apps.apple.com/us/app/nagoh/id6761028089" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Download Free
+        </a>
+        <a href="#features" class="btn-ghost">Explore Features →</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-orb orb-a"></div>
+      <div class="hero-orb orb-b"></div>
+      <div class="phone-stack">
+        <div class="phone-frame phone-back">
+          <img src="https://nagoh.xyz/images/01.png" alt="NAGOH live dashboard" />
+        </div>
+        <div class="phone-frame phone-main">
+          <img src="https://nagoh.xyz/images/03.png" alt="NAGOH app" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- TRUST STRIP -->
+<div class="trust-strip">
+  <div class="trust-pill">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Zero data collection
+  </div>
+  <div class="trust-pill">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    Keychain-encrypted
+  </div>
+  <div class="trust-pill">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+    Real-time alerts
+  </div>
+  <div class="trust-pill">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    Apple's official API
+  </div>
+  <div class="trust-pill">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+    Built for indie devs
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- CAROUSEL -->
+<section id="screenshots">
+  <div class="carousel-section">
+    <div class="carousel-header">
+      <span class="eyebrow">See It In Action</span>
+      <h2 class="section-h2">Designed for clarity.<br>Built for speed.</h2>
+      <p class="section-sub">Every screen crafted to surface exactly what you need — instantly.</p>
+    </div>
+    <div class="carousel-viewport">
+      <div class="carousel-track" id="carouselTrack">
+        <div class="c-slide" data-index="0"><div class="c-frame"><img src="https://nagoh.xyz/images/02.png" alt="Daily Tip" loading="lazy"/></div><p class="c-label">Daily Tip</p></div>
+        <div class="c-slide" data-index="1"><div class="c-frame"><img src="https://nagoh.xyz/images/03.png" alt="Live Dashboard" loading="lazy"/></div><p class="c-label">Live Dashboard</p></div>
+        <div class="c-slide" data-index="2"><div class="c-frame"><img src="https://nagoh.xyz/images/04.png" alt="Recent Activity" loading="lazy"/></div><p class="c-label">Recent Activity</p></div>
+        <div class="c-slide" data-index="3"><div class="c-frame"><img src="https://nagoh.xyz/images/05.png" alt="App Management" loading="lazy"/></div><p class="c-label">App Management</p></div>
+        <div class="c-slide" data-index="4"><div class="c-frame"><img src="https://nagoh.xyz/images/06.png" alt="Business Card" loading="lazy"/></div><p class="c-label">Business Card</p></div>
+      </div>
+    </div>
+    <div class="carousel-nav">
+      <button class="c-btn" id="cPrev" aria-label="Previous">&#8592;</button>
+      <div class="c-dots" id="cDots"></div>
+      <button class="c-btn" id="cNext" aria-label="Next">&#8594;</button>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="features-section">
+    <div class="features-intro">
+      <span class="eyebrow">Features</span>
+      <h2 class="section-h2">Everything you need.<br>Nothing you don't.</h2>
+      <p class="section-sub">Purpose-built for indie iOS developers who want real-time insight into their sales — without surrendering privacy.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-tile reveal">
+        <div class="f-icon f-icon-ember">⚡</div>
+        <h3>Instant Sale Alerts</h3>
+        <p>The moment someone buys your app, you know. No more refreshing App Store Connect. No more hours of delay. Pure, immediate signal.</p>
+      </div>
+      <div class="feature-tile reveal">
+        <div class="f-icon f-icon-jade">🔒</div>
+        <h3>Privacy First</h3>
+        <p>Your sales data is your business. Every piece of data is encrypted locally on your device. No cloud storage, no data mining, no compromises.</p>
+      </div>
+      <div class="feature-tile reveal">
+        <div class="f-icon f-icon-purple">📊</div>
+        <h3>Live Dashboard</h3>
+        <p>Today's sales, total revenue, recent activity — your complete financial picture at a glance. Beautiful, fast, always current.</p>
+      </div>
+      <div class="feature-tile reveal">
+        <div class="f-icon f-icon-gold">🗂️</div>
+        <h3>Multi-App Management</h3>
+        <p>Track every app you've built from one place. Add, organize, and scale your portfolio without complexity.</p>
+      </div>
+      <div class="feature-tile reveal">
+        <div class="f-icon f-icon-ember">💼</div>
+        <h3>Developer Business Card</h3>
+        <p>Share your developer identity professionally. Export as vCard, image, or plain text. Connect with clients and collaborators effortlessly.</p>
+      </div>
+      <div class="feature-tile reveal">
+        <div class="f-icon f-icon-jade">💡</div>
+        <h3>Daily Marketing Tips</h3>
+        <p>Hand-picked growth strategies delivered each day. Turn your sales data into action with expert indie marketing guidance, right in the app.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRIVACY -->
+<section id="privacy">
+  <div class="privacy-section">
+    <div class="privacy-inner">
+      <div>
+        <span class="eyebrow">Privacy Architecture</span>
+        <h2 class="section-h2">Your data never<br>leaves your phone.</h2>
+        <p class="section-sub" style="margin-bottom:0; max-width:480px;">We built NAGOH with a simple principle: you shouldn't have to trust us with your data. So we engineered it so you never have to.</p>
+        <div class="privacy-pillars">
+          <div class="pillar reveal">
+            <span class="pillar-em">🔑</span>
+            <div>
+              <h4>Privacy Protected<h4>
+              <p>Your App Store Data is yours and yours alone, we store none of it.</p>
+            </div>
+          </div>
+          <div class="pillar reveal">
+            <span class="pillar-em">📱</span>
+            <div>
+              <h4>On-Device Storage Only</h4>
+              <p>Sales data, app names, revenue figures — everything is stored locally using SwiftData. Nothing is transmitted to any server we operate.</p>
+            </div>
+          </div>
+          <div class="pillar reveal">
+            <span class="pillar-em">🍎</span>
+            <div>
+              <h4>Simple, Secure Setup</h4>
+              <p>Add your App Bundle ID to NAGOH. NAGOH creates a unique device-specific push notification URL you add to App Store Connect. That's it.</p>
+            </div>
+          </div>
+          <div class="pillar reveal">
+            <span class="pillar-em">🚫</span>
+            <div>
+              <h4>No Analytics. No Tracking.</h4>
+              <p>Zero analytics about how you use the app. No crash reporters that phone home. No behavioral tracking. Your usage is yours alone.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="privacy-card reveal">
+          <span class="shield-glyph">🛡️</span>
+          <h3>What we know about your sales data</h3>
+          <p>Absolutely nothing. By design.</p>
+          <div class="data-rows">
+            <div class="data-row row-safe"><span>Your device ↔ Apple's servers</span><span class="chip chip-safe">SECURE</span></div>
+            <div class="data-row row-safe"><span>Sales data stored locally</span><span class="chip chip-safe">ON DEVICE</span></div>
+            <div class="data-row row-safe"><span>Credentials in iOS Keychain</span><span class="chip chip-safe">ENCRYPTED</span></div>
+            <div class="data-row row-blocked"><span>NAGOH cloud servers</span><span class="chip chip-blocked">DON'T EXIST</span></div>
+            <div class="data-row row-blocked"><span>Data sold to advertisers</span><span class="chip chip-blocked">NEVER</span></div>
+            <div class="data-row row-blocked"><span>Analytics &amp; tracking SDKs</span><span class="chip chip-blocked">NONE</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="how-section">
+    <span class="eyebrow">Setup</span>
+    <h2 class="section-h2">Up and running<br>in three steps.</h2>
+    <p class="section-sub">No complex configuration. No new accounts. Just connect and go.</p>
+    <div class="steps-row">
+      <div class="step reveal">
+        <div class="step-num"><span>1</span></div>
+        <h3>Secure Setup</h3>
+        <p>Create an App profile and add the unique BUNDLE-ID address that is assigned to your app via Apple Connect. A unique and encrypted device specific URL is generated, add this to your App Connect settings for that app.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num"><span>2</span></div>
+        <h3>Smart Monitoring</h3>
+        <p>NAGOH checks for new sales using Apple's official Push Notification servers. Efficient, accurate, and battery-friendly background processing.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num"><span>3</span></div>
+        <h3>Instant Alerts</h3>
+        <p>The moment a sale happens, your iPhone notifies you. Track trends, celebrate milestones, stay in sync with your business.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section>
+  <div class="comparison-section">
+    <div class="comparison-inner">
+      <span class="eyebrow">Why NAGOH</span>
+      <h2 class="section-h2">Better than the<br>alternatives.</h2>
+      <div class="comp-table">
+        <div class="comp-head">
+          <span>Feature</span>
+          <span class="col-nagoh">NAGOH</span>
+          <span>App Store<br>Connect</span>
+          <span>3rd Party<br>Analytics</span>
+        </div>
+        <div class="comp-row"><span class="clabel">Real-time notifications</span><span class="ccheck cyes">✓</span><span class="ccheck cno">✗</span><span class="ccheck cpart">~</span></div>
+        <div class="comp-row"><span class="clabel">Zero data collection</span><span class="ccheck cyes">✓</span><span class="ccheck cyes">✓</span><span class="ccheck cno">✗</span></div>
+        <div class="comp-row"><span class="clabel">On-device storage only</span><span class="ccheck cyes">✓</span><span class="ccheck cno">✗</span><span class="ccheck cno">✗</span></div>
+        <div class="comp-row"><span class="clabel">Multi-app portfolio view</span><span class="ccheck cyes">✓</span><span class="ccheck cpart">~</span><span class="ccheck cyes">✓</span></div>
+        <div class="comp-row"><span class="clabel">Works without login each time</span><span class="ccheck cyes">✓</span><span class="ccheck cno">✗</span><span class="ccheck cpart">~</span></div>
+        <div class="comp-row"><span class="clabel">Business card &amp; contact sharing</span><span class="ccheck cyes">✓</span><span class="ccheck cno">✗</span><span class="ccheck cno">✗</span></div>
+      </div>
+      <p class="comp-note">✓ Full support &nbsp;·&nbsp; ~ Partial / delayed &nbsp;·&nbsp; ✗ Not available</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section>
+  <div class="cta-section">
+    <h2>Start knowing<br>when you <em>earn.</em></h2>
+    <p>Download NAGOH free. No account creation, no strings attached. Just instant, private App Store sales intelligence — built for iOS developers.</p>
+    <a href="https://apps.apple.com/us/app/nagoh/id6761028089" class="appstore-btn">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+      Download on the App Store
+    </a>
+    <p class="cta-meta">Free to download · iOS 18+ · iPhone</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+      <path d="M16 4C12.134 4 9 7.134 9 11V20H7a1 1 0 000 2h18a1 1 0 000-2h-2v-9c0-3.866-3.134-7-7-7z" fill="#E05C28" opacity="0.7"/>
+      <path d="M13 22c0 1.657 1.343 3 3 3s3-1.343 3-3H13z" fill="#E05C28" opacity="0.7"/>
+      <circle cx="22" cy="8" r="4" fill="#2FB8B0" opacity="0.7"/>
+    </svg>
+    <span>NAGOH</span>
+  </div>
+  <ul class="footer-links">
+    <li><a href="#privacy">Privacy Policy</a></li>
+    <li><a href="mailto:support@nagohcreative.com">Support</a></li>
+    <li><a href="https://nagohcreative.com" target="_blank" rel="noopener">nagohcreative.com</a></li>
+  </ul>
+  <p class="footer-copy">
+    © 2026 NAGOH · <a href="https://nagoh.xyz">nagoh.xyz</a> · Designed by <a href="https://nagohcreative.com" target="_blank" rel="noopener">Nagoh Creative</a><br>
+    Questions? <a href="mailto:support@nagohcreative.com">support@nagohcreative.com</a>
+  </p>
+</footer>
+
+<script>
+  // ── CAROUSEL ──
+  (function () {
+    var track  = document.getElementById('carouselTrack');
+    var slides = Array.from(track.querySelectorAll('.c-slide'));
+    var dotsW  = document.getElementById('cDots');
+    var prev   = document.getElementById('cPrev');
+    var next   = document.getElementById('cNext');
+    var total  = slides.length;
+    var current = 0;
+    var timer;
+
+    slides.forEach(function (_, i) {
+      var d = document.createElement('button');
+      d.className = 'c-dot' + (i === 0 ? ' active' : '');
+      d.setAttribute('aria-label', 'Slide ' + (i + 1));
+      d.addEventListener('click', function () { goTo(i); });
+      dotsW.appendChild(d);
+    });
+
+    function render() {
+      var sw  = slides[0].offsetWidth;
+      var gap = 24;
+      var vw  = track.parentElement.offsetWidth;
+      var off = (vw - sw) / 2 - current * (sw + gap);
+      track.style.transform = 'translateX(' + off + 'px)';
+      slides.forEach(function (s, i) {
+        s.classList.remove('active', 'adj');
+        if (i === current) s.classList.add('active');
+        else if (Math.abs(i - current) === 1) s.classList.add('adj');
+      });
+      Array.from(dotsW.children).forEach(function (d, i) {
+        d.classList.toggle('active', i === current);
+      });
+    }
+
+    function goTo(i) {
+      current = (i + total) % total;
+      render();
+      clearInterval(timer);
+      timer = setInterval(function () { goTo(current + 1); }, 4200);
+    }
+
+    prev.addEventListener('click', function () { goTo(current - 1); });
+    next.addEventListener('click', function () { goTo(current + 1); });
+
+    var tx = 0;
+    track.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener('touchend',   function (e) {
+      var d = tx - e.changedTouches[0].clientX;
+      if (Math.abs(d) > 40) goTo(current + (d > 0 ? 1 : -1));
+    });
+
+    window.addEventListener('resize', render);
+    goTo(0);
+  })();
+
+  // ── SCROLL REVEAL ──
+  (function () {
+    var els = document.querySelectorAll('.reveal');
+    var io  = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    els.forEach(function (el) { io.observe(el); });
+  })();
+</script>
+</body>
+</html>
 
