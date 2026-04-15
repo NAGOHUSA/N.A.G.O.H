@@ -65,30 +65,27 @@
       max-width: 1200px;
       margin: 0 auto;
     }
-    .logout-btn, .clear-btn {
+    .button-bar {
       position: fixed;
       top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+    .clear-btn, .logout-btn, .refresh-btn {
       background: #2a2f4b;
       border: none;
       padding: 8px 16px;
       border-radius: 20px;
       color: white;
       cursor: pointer;
-      z-index: 100;
     }
-    .logout-btn {
-      right: 20px;
-    }
-    .clear-btn {
-      right: 100px;
-      background: #dc2626;
-    }
-    .clear-btn:hover {
-      background: #b91c1c;
-    }
-    .logout-btn:hover {
-      background: #f87171;
-    }
+    .clear-btn { background: #dc2626; }
+    .clear-btn:hover { background: #b91c1c; }
+    .refresh-btn { background: #3b82f6; }
+    .refresh-btn:hover { background: #2563eb; }
+    .logout-btn:hover { background: #f87171; }
     h1 {
       font-size: 2rem;
       background: linear-gradient(135deg, #fff, #64ffda);
@@ -148,14 +145,6 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.3; }
     }
-    .refresh-btn {
-      background: #1f253e;
-      border: none;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
     .sales-list {
       max-height: 500px;
       overflow-y: auto;
@@ -205,11 +194,6 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    .error-msg {
-      color: #f87171;
-      text-align: center;
-      margin-top: 15px;
-    }
   </style>
 </head>
 <body>
@@ -219,16 +203,19 @@
     <input type="text" id="username" placeholder="Username" autocomplete="off">
     <input type="password" id="password" placeholder="Password">
     <button onclick="login()">Login to Dashboard</button>
-    <div id="loginError" class="error-msg"></div>
+    <div id="loginError" style="color:#f87171; text-align:center; margin-top:15px;"></div>
   </div>
 </div>
 
 <div id="dashboard" class="dashboard">
-  <button class="clear-btn" onclick="clearTestData()">🗑️ Clear Test Data</button>
-  <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+  <div class="button-bar">
+    <button class="refresh-btn" onclick="fetchSales()">🔄 Refresh</button>
+    <button class="clear-btn" onclick="clearTestData()">🗑️ Clear All Data</button>
+    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+  </div>
   
   <h1>🍎 Nagoh Live Sales Dashboard</h1>
-  <div style="color:#8b92b0; margin-bottom:20px;">Real-time App Store notifications • Auto-refreshes every 5 seconds</div>
+  <div style="color:#8b92b0; margin-bottom:20px;">Manual refresh only - click Refresh button to see new sales</div>
 
   <div class="stats-grid">
     <div class="stat-card">
@@ -248,7 +235,6 @@
   <div class="panel">
     <div class="panel-header">
       <span><span class="live-dot"></span> 🔔 Live Sales Feed</span>
-      <button class="refresh-btn" onclick="fetchSales()">🔄 Refresh Now</button>
     </div>
     <div id="salesFeed" class="sales-list">
       <div class="empty-state">Loading sales data...</div>
@@ -256,57 +242,44 @@
   </div>
 
   <div class="status-bar">
-    <div>
-      <span class="live-dot"></span>
-      <span id="connectionStatus">Checking connection...</span>
-    </div>
-    <div>
-      <code id="workerUrl">https://alerts.nagoh.xyz</code>
-    </div>
-    <div>
-      <span id="lastUpdate">Last update: --</span>
-    </div>
+    <div><span class="live-dot"></span> <span id="connectionStatus">Checking...</span></div>
+    <div><code>https://alerts.nagoh.xyz</code></div>
+    <div><span id="lastUpdate">Last update: --</span></div>
   </div>
 </div>
 
 <script>
-// Authentication
 const VALID_USERNAME = 'admin';
 const VALID_PASSWORD = 'admin';
-let refreshInterval;
 
 function login() {
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
-  const errorDiv = document.getElementById('loginError');
   
   if (username === VALID_USERNAME && password === VALID_PASSWORD) {
     sessionStorage.setItem('dashboard_auth', 'true');
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
-    startDashboard();
+    fetchSales(); // Load sales once when dashboard opens
   } else {
-    errorDiv.textContent = '❌ Invalid credentials. Use admin / admin';
+    document.getElementById('loginError').innerText = '❌ Invalid credentials. Use admin / admin';
   }
 }
 
 function logout() {
   sessionStorage.removeItem('dashboard_auth');
-  if (refreshInterval) clearInterval(refreshInterval);
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('dashboard').style.display = 'none';
 }
 
-// Check if already logged in
 if (sessionStorage.getItem('dashboard_auth') === 'true') {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
-  startDashboard();
+  fetchSales();
 }
 
-// Clear test data
 async function clearTestData() {
-  if (!confirm('⚠️ WARNING: This will delete ALL sales data from the database. This cannot be undone. Are you sure?')) {
+  if (!confirm('⚠️ WARNING: This will delete ALL sales data. This cannot be undone. Are you sure?')) {
     return;
   }
   
@@ -316,84 +289,74 @@ async function clearTestData() {
   try {
     const response = await fetch('https://alerts.nagoh.xyz/api/sales', {
       method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-      }
+      headers: { 'Accept': 'application/json' }
     });
     
-    if (response.ok) {
-      const data = await response.json();
-      console.log('Clear response:', data);
-      statusDiv.innerHTML = '✅ Data cleared successfully';
-      // Refresh the sales display
-      await fetchSales();
+    const data = await response.json();
+    
+    if (data.success) {
+      statusDiv.innerHTML = '✅ Data cleared!';
+      await fetchSales(); // Refresh the display
       setTimeout(() => {
-        if (statusDiv.innerHTML === '✅ Data cleared successfully') {
-          statusDiv.innerHTML = '✅ Connected to worker';
+        if (statusDiv.innerHTML === '✅ Data cleared!') {
+          statusDiv.innerHTML = '✅ Connected';
         }
-      }, 3000);
+      }, 2000);
     } else {
-      statusDiv.innerHTML = `❌ Failed to clear data: ${response.status}`;
+      statusDiv.innerHTML = '❌ Failed to clear data';
+      alert('Error clearing data: ' + (data.error || 'Unknown error'));
     }
   } catch (error) {
-    console.error('Error clearing data:', error);
+    console.error('Clear error:', error);
     statusDiv.innerHTML = '❌ Error clearing data';
+    alert('Error: ' + error.message);
   }
 }
 
-// Fetch sales from worker
 async function fetchSales() {
   const statusDiv = document.getElementById('connectionStatus');
-  const feedDiv = document.getElementById('salesFeed');
+  statusDiv.innerHTML = '⏳ Loading...';
   
   try {
     const response = await fetch('https://alerts.nagoh.xyz/api/sales', {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-      }
+      headers: { 'Accept': 'application/json' }
     });
     
     if (response.ok) {
       const data = await response.json();
-      console.log('Dashboard received data:', data);
+      console.log('Sales loaded:', data.count, 'records');
+      
+      statusDiv.innerHTML = '✅ Connected';
+      document.getElementById('lastUpdate').innerHTML = `Last update: ${new Date().toLocaleTimeString()}`;
       
       if (data.success && data.sales) {
-        statusDiv.innerHTML = '✅ Connected to worker';
-        document.getElementById('lastUpdate').innerHTML = `Last update: ${new Date().toLocaleTimeString()}`;
         displaySales(data.sales);
         updateStats(data.sales);
-      } else {
-        statusDiv.innerHTML = '⚠️ No sales data yet';
-        feedDiv.innerHTML = '<div class="empty-state">✨ No sales yet. Waiting for App Store notifications...</div>';
       }
     } else {
       statusDiv.innerHTML = `⚠️ HTTP ${response.status}`;
-      feedDiv.innerHTML = `<div class="empty-state">Error: HTTP ${response.status}<br>Make sure worker is deployed.</div>`;
     }
   } catch (error) {
     console.error('Fetch error:', error);
     statusDiv.innerHTML = '❌ Cannot connect';
-    feedDiv.innerHTML = `<div class="empty-state">❌ Cannot connect to worker<br>${error.message}</div>`;
+    document.getElementById('salesFeed').innerHTML = '<div class="empty-state">❌ Cannot connect to worker</div>';
   }
 }
 
 function displaySales(sales) {
   const container = document.getElementById('salesFeed');
   if (!sales || sales.length === 0) {
-    container.innerHTML = '<div class="empty-state">✨ No sales yet. Waiting for App Store notifications...</div>';
+    container.innerHTML = '<div class="empty-state">✨ No sales yet. Click Refresh to check for new sales.</div>';
     return;
   }
   
   container.innerHTML = sales.map(sale => `
     <div class="sale-item">
       <div class="sale-header">
-        <span class="event-type">${sale.notificationType || 'SALE'} ${sale.subtype ? `· ${sale.subtype}` : ''}</span>
+        <span class="event-type">${sale.notificationType || 'SALE'} ${sale.subtype || ''}</span>
         <span class="revenue">${sale.revenue ? `$${sale.revenue.toFixed(2)}` : '—'}</span>
       </div>
-      <div style="font-size:0.8rem; color:#9ca3af;">
-        ${sale.bundleID ? `📱 ${sale.bundleID.split('.').pop()}` : 'Unknown app'}
-      </div>
+      <div style="font-size:0.8rem; color:#9ca3af;">📱 ${sale.bundleID ? sale.bundleID.split('.').pop() : 'Unknown'}</div>
       <div class="timestamp">${new Date(sale.timestamp).toLocaleString()}</div>
     </div>
   `).join('');
@@ -417,18 +380,6 @@ function updateStats(sales) {
   } else if (sales.length > 0) {
     document.getElementById('lastAmount').innerHTML = sales[0].notificationType || 'Event';
   }
-}
-
-function startDashboard() {
-  fetchSales();
-  if (refreshInterval) clearInterval(refreshInterval);
-  refreshInterval = setInterval(fetchSales, 5000);
-  document.getElementById('workerUrl').innerHTML = 'https://alerts.nagoh.xyz';
-}
-
-// Initial fetch if already logged in
-if (document.getElementById('dashboard').style.display !== 'none') {
-  fetchSales();
 }
 </script>
 </body>
