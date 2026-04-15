@@ -18,7 +18,6 @@
       color: #eef2ff;
     }
 
-    /* Login Screen */
     .login-container {
       display: flex;
       justify-content: center;
@@ -88,7 +87,6 @@
       font-size: 0.9rem;
     }
 
-    /* Dashboard (hidden until login) */
     .dashboard {
       display: none;
       max-width: 1400px;
@@ -210,7 +208,7 @@
       50% { opacity: 0.3; }
     }
 
-    .clear-btn, .export-btn {
+    .clear-btn, .export-btn, .refresh-btn {
       background: #1f253e;
       border: none;
       color: #eef2ff;
@@ -218,6 +216,7 @@
       border-radius: 8px;
       cursor: pointer;
       font-size: 0.75rem;
+      margin-left: 8px;
     }
 
     .sales-feed, .db-log {
@@ -285,22 +284,24 @@
       color: #6b7280;
     }
 
-    .webhook-status {
+    .status-bar {
       background: #0e111b;
       border-radius: 20px;
-      padding: 20px;
+      padding: 15px 20px;
       border: 1px solid #232736;
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
-    .webhook-url {
-      background: #03050a;
-      padding: 10px;
-      border-radius: 10px;
-      font-family: monospace;
-      font-size: 0.8rem;
-      margin-top: 10px;
-      word-break: break-all;
-      color: #64ffda;
+    .status-online {
+      color: #10b981;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     button {
@@ -309,7 +310,6 @@
   </style>
 </head>
 <body>
-<!-- Login Screen -->
 <div id="loginScreen" class="login-container">
   <div class="login-box">
     <h2>🔐 Admin Access</h2>
@@ -320,13 +320,12 @@
   </div>
 </div>
 
-<!-- Dashboard (hidden until login) -->
 <div id="dashboard" class="dashboard">
   <button class="logout-btn" onclick="logout()">🚪 Logout</button>
   
   <div class="header">
     <h1>🍎 Nagoh Live Sales Dashboard</h1>
-    <div class="subtitle">Real-time App Store notifications • Persistent database logging</div>
+    <div class="subtitle">Real-time App Store notifications • Auto-refreshing every 5 seconds</div>
   </div>
 
   <div class="stats-grid">
@@ -352,35 +351,42 @@
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title"><span class="live-dot"></span> 🔔 Live Sales Feed</div>
-        <button class="clear-btn" id="clearFeedBtn">Clear feed</button>
+        <button class="refresh-btn" id="refreshBtn">🔄 Refresh</button>
       </div>
       <div id="salesFeed" class="sales-feed">
-        <div class="empty-state">✨ Waiting for incoming sales...</div>
+        <div class="empty-state">Loading sales data...</div>
       </div>
     </div>
 
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">🗄️ Database Log (IndexedDB)</div>
-        <button class="export-btn" id="exportBtn">Export JSON</button>
+        <div class="panel-title">🗄️ Local Database</div>
+        <button class="clear-btn" id="clearFeedBtn">Clear</button>
+        <button class="export-btn" id="exportBtn">Export</button>
       </div>
       <div id="dbLog" class="db-log">
-        <div class="empty-state">📀 No records in database yet</div>
+        <div class="empty-state">Loading...</div>
       </div>
     </div>
   </div>
 
-  <div class="webhook-status">
-    <strong>🔌 Webhook Forwarding URL</strong>
-    <div class="webhook-url" id="webhookUrl">Loading...</div>
-    <div style="margin-top: 12px; font-size: 0.8rem; color: #8b92b0;">
-      ✅ DASHBOARD_URL configured in worker: <code id="configuredUrl">https://nagoh.xyz/dashboard/index.html</code>
+  <div class="status-bar">
+    <div class="status-online">
+      <span class="live-dot"></span>
+      <span id="connectionStatus">Connected to worker</span>
+    </div>
+    <div>
+      <span style="color:#8b92b0;">Worker API:</span>
+      <code id="workerUrl">https://alerts.nagoh.xyz</code>
+    </div>
+    <div>
+      <span id="lastUpdate">Last update: --</span>
     </div>
   </div>
 </div>
 
 <script>
-// ==================== AUTHENTICATION ====================
+// Authentication
 const VALID_USERNAME = 'admin';
 const VALID_PASSWORD = 'admin';
 
@@ -405,18 +411,16 @@ function logout() {
   document.getElementById('dashboard').style.display = 'none';
 }
 
-// Check if already logged in
 if (sessionStorage.getItem('dashboard_auth') === 'true') {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   initDashboard();
 }
 
-// ==================== IndexedDB Setup ====================
+// IndexedDB Setup
 const DB_NAME = 'NagohSalesDashboard';
 const DB_VERSION = 2;
 const STORE_NAME = 'sales_events';
-
 let db = null;
 let salesEvents = [];
 
@@ -474,7 +478,28 @@ async function clearDB() {
   });
 }
 
-// ==================== UI Update Functions ====================
+// Fetch sales from worker
+async function fetchSalesFromWorker() {
+  try {
+    const response = await fetch('https://alerts.nagoh.xyz/dashboard/sales', {
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Fetched sales:', data.count);
+      return data.sales || [];
+    }
+    return [];
+  } catch (error) {
+    console.error('Failed to fetch sales:', error);
+    return [];
+  }
+}
+
+// UI Updates
 function updateStats() {
   const today = new Date().toDateString();
   let todayRevenue = 0;
@@ -494,6 +519,8 @@ function updateStats() {
   
   const uniqueBundles = new Set(salesEvents.map(e => e.bundleID).filter(Boolean));
   document.getElementById('activeApps').innerText = uniqueBundles.size;
+  
+  document.getElementById('lastUpdate').innerHTML = `Last update: ${new Date().toLocaleTimeString()}`;
 }
 
 function getEventClass(type) {
@@ -507,11 +534,11 @@ function getEventClass(type) {
 function renderSalesFeed() {
   const container = document.getElementById('salesFeed');
   if (salesEvents.length === 0) {
-    container.innerHTML = '<div class="empty-state">✨ Waiting for incoming sales...</div>';
+    container.innerHTML = '<div class="empty-state">✨ No sales yet. Waiting for App Store notifications...</div>';
     return;
   }
   
-  container.innerHTML = salesEvents.map(event => `
+  container.innerHTML = salesEvents.slice(0, 50).map(event => `
     <div class="sale-item">
       <div class="sale-header">
         <span class="event-type ${getEventClass(event.notificationType)}">${event.notificationType || 'UNKNOWN'} ${event.subtype ? `· ${event.subtype}` : ''}</span>
@@ -545,75 +572,69 @@ async function renderDBLog() {
   `).join('');
 }
 
-// ==================== Process Incoming Webhook ====================
-async function processWebhook(payload) {
-  console.log('📨 Received webhook:', payload);
+// Sync sales from worker to local DB
+async function syncSales() {
+  const workerSales = await fetchSalesFromWorker();
   
-  const event = {
-    id: payload.eventId || `${Date.now()}_${Math.random()}`,
-    notificationType: payload.notificationType || 'UNKNOWN',
-    subtype: payload.subtype || '',
-    revenue: payload.revenue || 0,
-    currency: payload.currency || 'USD',
-    bundleID: payload.bundleID || 'unknown',
-    profileID: payload.profileID || '',
-    timestamp: payload.timestamp || new Date().toISOString(),
-    rawPayload: payload.rawPayload
-  };
-  
-  // Add to memory (latest first)
-  salesEvents.unshift(event);
-  if (salesEvents.length > 100) salesEvents.pop();
-  
-  // Save to IndexedDB
-  await saveToDB(event);
-  
-  // Update UI
-  updateStats();
-  renderSalesFeed();
-  await renderDBLog();
-  
-  // Play notification sound (optional - just visual feedback)
-  console.log('✅ Sale logged successfully');
-  
-  return { success: true };
+  if (workerSales.length > 0) {
+    // Get existing IDs from local DB
+    const localRecords = await getAllFromDB(1000);
+    const existingIds = new Set(localRecords.map(r => r.id));
+    
+    // Add new sales
+    let newCount = 0;
+    for (const sale of workerSales) {
+      if (!existingIds.has(sale.id)) {
+        await saveToDB(sale);
+        newCount++;
+      }
+    }
+    
+    if (newCount > 0) {
+      console.log(`Added ${newCount} new sales to local DB`);
+    }
+    
+    // Refresh local data
+    const updatedRecords = await getAllFromDB(100);
+    salesEvents = updatedRecords;
+    updateStats();
+    renderSalesFeed();
+    await renderDBLog();
+  }
 }
 
-// ==================== Setup Webhook Listener ====================
-function setupWebhookListener() {
-  // Get the current page URL
-  const currentUrl = window.location.href;
-  document.getElementById('webhookUrl').innerHTML = currentUrl;
-  document.getElementById('configuredUrl').innerHTML = 'https://nagoh.xyz/dashboard/index.html';
-  
-  // Listen for POST requests to this page
-  // Since we can't directly listen for POST in static HTML, we'll check for POST data in the request
-  // For a proper implementation, you'd need a server endpoint
-  
-  // Instead, we'll set up a fetch interceptor for the page's own POST handling
-  // This works if the dashboard is served by a server that can handle POST
-  
-  // For now, we'll also expose a global function for the worker to call
-  window.receiveSale = processWebhook;
-  
-  // Also set up a message listener for cross-origin if needed
-  window.addEventListener('message', async (event) => {
-    if (event.data && event.data.type === 'NEW_SALE') {
-      await processWebhook(event.data.payload);
-    }
-  });
-  
-  // Auto-refresh database view every 5 seconds (for updates from other sources)
-  setInterval(async () => {
-    await renderDBLog();
+// Auto-refresh every 5 seconds
+let refreshInterval;
+
+function startAutoRefresh() {
+  if (refreshInterval) clearInterval(refreshInterval);
+  refreshInterval = setInterval(() => {
+    syncSales();
   }, 5000);
 }
 
-// ==================== Clear Feed & Export ====================
-document.getElementById('clearFeedBtn').onclick = () => {
-  salesEvents = [];
-  updateStats();
-  renderSalesFeed();
+// Initialize dashboard
+async function initDashboard() {
+  await initDB();
+  await syncSales();
+  startAutoRefresh();
+  
+  document.getElementById('workerUrl').innerHTML = 'https://alerts.nagoh.xyz';
+  document.getElementById('connectionStatus').innerHTML = '✅ Connected to worker';
+  
+  console.log('✅ Dashboard ready! Auto-refreshing every 5 seconds');
+}
+
+// Button handlers
+document.getElementById('refreshBtn').onclick = () => syncSales();
+document.getElementById('clearFeedBtn').onclick = async () => {
+  if (confirm('Clear local database? This will not affect the worker data.')) {
+    await clearDB();
+    salesEvents = [];
+    updateStats();
+    renderSalesFeed();
+    await renderDBLog();
+  }
 };
 
 document.getElementById('exportBtn').onclick = async () => {
@@ -627,40 +648,6 @@ document.getElementById('exportBtn').onclick = async () => {
   a.click();
   URL.revokeObjectURL(url);
 };
-
-// ==================== Initialize Dashboard ====================
-async function initDashboard() {
-  await initDB();
-  const records = await getAllFromDB(50);
-  
-  // Load existing records into memory
-  salesEvents = records.map(record => ({
-    id: record.id,
-    notificationType: record.notificationType,
-    subtype: record.subtype,
-    revenue: record.revenue,
-    currency: record.currency,
-    bundleID: record.bundleID,
-    profileID: record.profileID,
-    timestamp: record.timestamp
-  }));
-  
-  updateStats();
-  renderSalesFeed();
-  await renderDBLog();
-  setupWebhookListener();
-  
-  console.log('✅ Dashboard ready! Waiting for sales from worker...');
-  console.log('📍 Dashboard URL:', window.location.href);
-  console.log('⚙️ Make sure DASHBOARD_URL in worker is set to:', window.location.href);
-}
-
-// Handle incoming POST requests (if the page is served by a server)
-if (window.location.protocol === 'https:' || window.location.protocol === 'http:') {
-  // Check if there's POST data in the request (only works if server-side)
-  // For static hosting, we rely on the global function
-  console.log('📡 Dashboard running at:', window.location.href);
-}
 </script>
 </body>
 </html>
