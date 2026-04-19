@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Listing • AppCodeMarket</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <main class="container">
+    <a href="index.html">← Back to marketplace</a>
+    <h1>Create a listing</h1>
+    <p>Pay the listing fee, then submit your app details.</p>
+
+    <section class="card">
+      <h2>Step 1: Pay listing fee</h2>
+      <button id="startCheckout" class="btn">Pay listing fee</button>
+      <p class="muted">After payment, Stripe will redirect back here with your session token.</p>
+    </section>
+
+    <section class="card">
+      <h2>Step 2: Submit listing</h2>
+      <form id="createForm">
+        <label>Project name<input required name="title" /></label>
+        <label>Short description<textarea required name="description"></textarea></label>
+        <label>Platform
+          <select name="platform" required>
+            <option value="iOS">iOS</option>
+            <option value="Android">Android</option>
+            <option value="iOS + Android">iOS + Android</option>
+          </select>
+        </label>
+        <label>GitHub repository URL<input required name="repoUrl" type="url" /></label>
+        <label>Seller purchase/payment link<input required name="sellerPaymentLink" type="url" /></label>
+        <label>Listing price (USD)<input required name="priceUsd" type="number" min="1" step="1" /></label>
+        <label>Tech stack<input name="techStack" placeholder="SwiftUI, Kotlin, Firebase" /></label>
+        <label>Icon URL (optional)<input name="iconUrl" type="url" /></label>
+        <label>Contact email<input required name="contactEmail" type="email" /></label>
+        <label>Expires in days<input required name="expiresInDays" type="number" min="1" max="90" value="30" /></label>
+        <button class="btn" type="submit">Create listing</button>
+      </form>
+      <pre id="createStatus" class="status"></pre>
+    </section>
+  </main>
+  <script src="assets/js/create.js"></script>
+</body>
+</html>
