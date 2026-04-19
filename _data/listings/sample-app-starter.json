@@ -1,0 +1,14 @@
+{
+  "id": "sample-app-starter",
+  "title": "FinTrack Starter",
+  "description": "Unfinished finance tracker app with onboarding, auth, and dashboard starter flows.",
+  "platform": "iOS + Android",
+  "repoUrl": "https://github.com/example/fintrack-starter",
+  "sellerPaymentLink": "https://buy.stripe.com/test_example",
+  "priceUsd": 450,
+  "techStack": "Flutter, Firebase, Stripe",
+  "iconUrl": "assets/icons/placeholder.png",
+  "contactEmail": "seller@example.com",
+  "createdAt": "2026-01-10T12:00:00.000Z",
+  "expiresAt": "2027-01-10T12:00:00.000Z"
+}
