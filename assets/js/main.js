@@ -72,9 +72,12 @@
     }
 
     try {
-      const response = await fetch(`${baseApi}/${encodeURIComponent(id)}.json`, { headers: { Accept: 'application/vnd.github.raw+json' } });
-      if (!response.ok) throw new Error('Listing not found.');
-      const listing = await response.json();
+      const metaResponse = await fetch(`${baseApi}/${encodeURIComponent(id)}.json`, { headers: { Accept: 'application/vnd.github+json' } });
+      if (!metaResponse.ok) throw new Error('Listing not found.');
+      const meta = await metaResponse.json();
+      const listingResponse = await fetch(meta.download_url);
+      if (!listingResponse.ok) throw new Error('Listing not found.');
+      const listing = await listingResponse.json();
       detail.innerHTML = detailHtml(listing);
     } catch (error) {
       detail.innerHTML = `<p>Failed to load listing: ${error.message}</p>`;

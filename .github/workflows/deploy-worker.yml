@@ -1,0 +1,34 @@
+name: Deploy Cloudflare Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare-worker/**'
+      - '.github/workflows/deploy-worker.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+          workingDirectory: cloudflare-worker
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          GITHUB_TOKEN: ${{ secrets.APP_CODE_MARKET_GITHUB_TOKEN }}
+          GITHUB_OWNER: ${{ vars.GITHUB_OWNER || 'NAGOHUSA' }}
+          GITHUB_REPO: ${{ vars.GITHUB_REPO || 'N.A.G.O.H' }}
+          GITHUB_BRANCH: ${{ vars.GITHUB_BRANCH || 'main' }}
+          SITE_BASE_URL: ${{ vars.SITE_BASE_URL || 'https://nagoh.xyz' }}
+          LISTING_FEE_CENTS: ${{ vars.LISTING_FEE_CENTS || '500' }}
+          CURRENCY: ${{ vars.CURRENCY || 'usd' }}
