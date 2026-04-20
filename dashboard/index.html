@@ -753,7 +753,10 @@ function renderListingsTable(listings) {
                    onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
                   Edit
                 </a>
-                <button onclick="adminDeleteListing('${(l.id||'').replace(/'/g,"\\'")}', '${(l.title||'').replace(/'/g,"\\'")}', this)"
+                <button
+                  data-listing-id="${escAttr(l.id||'')}"
+                  data-listing-title="${escAttr(l.title||'Untitled')}"
+                  class="listing-delete-btn"
                   style="display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:0.6rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(240,100,100,0.2);color:var(--red);padding:5px 9px;border-radius:6px;cursor:pointer;transition:all 0.15s"
                   onmouseover="this.style.background='var(--red-dim)';this.style.borderColor='rgba(240,100,100,0.4)'"
                   onmouseout="this.style.background='transparent';this.style.borderColor='rgba(240,100,100,0.2)'">
@@ -767,11 +770,26 @@ function renderListingsTable(listings) {
     </table>`;
 }
 
-function adminDeleteListing(id, title, btn) {
+function escAttr(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function adminDeleteListing(id, title) {
   if (!confirm(`Delete listing "${title}"?\n\nThis requires the listing secret. Use the Edit page to delete with the seller's secret, or remove the file directly from the repository.`)) return;
-  // Redirect to edit page for deletion (requires seller secret)
   window.open(`../edit-listing.html?id=${encodeURIComponent(id)}`, '_blank');
 }
+
+// Delegated click handler for delete buttons rendered inside the table
+document.getElementById('listingsTable').addEventListener('click', function(e) {
+  const btn = e.target.closest('.listing-delete-btn');
+  if (!btn) return;
+  adminDeleteListing(btn.dataset.listingId || '', btn.dataset.listingTitle || 'Untitled');
+});
 
 // Style active filter buttons
 const filterStyle = document.createElement('style');
