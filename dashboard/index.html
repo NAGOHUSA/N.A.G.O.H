@@ -1,890 +1,708 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nagoh · Sales Intelligence</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg:          #06060e;
-  --surface:     #0d0d1a;
-  --surface2:    #131325;
-  --surface3:    #1a1a30;
-  --border:      rgba(255,255,255,0.06);
-  --border-hi:   rgba(138,120,255,0.35);
-  --accent:      #8a78ff;
-  --accent-dim:  rgba(138,120,255,0.10);
-  --accent-glow: rgba(138,120,255,0.06);
-  --green:       #52dcb4;
-  --green-dim:   rgba(82,220,180,0.10);
-  --green-glow:  rgba(82,220,180,0.05);
-  --amber:       #f0b429;
-  --amber-dim:   rgba(240,180,41,0.12);
-  --red:         #f06464;
-  --red-dim:     rgba(240,100,100,0.12);
-  --blue:        #5ab4ff;
-  --blue-dim:    rgba(90,180,255,0.10);
-  --rose:        #f472b6;
-  --text:        #e0e4f0;
-  --muted:       #6b7094;
-  --muted2:      #2b3250;
-  --mono:        'DM Mono', monospace;
-  --display:     'Syne', sans-serif;
-  --gradient-text: linear-gradient(135deg, #8a78ff 0%, #52dcb4 50%, #f472b6 100%);
-  --gradient-card: linear-gradient(145deg, rgba(138,120,255,0.06) 0%, rgba(82,220,180,0.03) 100%);
-  --gradient-btn:  linear-gradient(135deg, #8a78ff 0%, #6c63ff 100%);
-  --shadow-card: 0 4px 24px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.04);
-  --shadow-glow: 0 0 40px rgba(138,120,255,0.08), 0 0 80px rgba(82,220,180,0.04);
-  --radius: 14px;
-  --radius-lg: 20px;
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>N.A.G.O.H · Listing Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+    :root {
+      --bg: #05050f;
+      --surface: #0c0c18;
+      --surface2: #12122a;
+      --border: rgba(255,255,255,0.06);
+      --border-hi: rgba(138,120,255,0.35);
+      --accent: #8a78ff;
+      --accent-dim: rgba(138,120,255,0.12);
+      --green: #52dcb4;
+      --green-dim: rgba(82,220,180,0.1);
+      --red: #f06464;
+      --red-dim: rgba(240,100,100,0.1);
+      --amber: #f0b429;
+      --text: #eaeeff;
+      --muted: #6b7094;
+      --display: 'Syne', sans-serif;
+      --mono: 'DM Mono', monospace;
+      --radius: 14px;
+      --radius-lg: 20px;
+    }
 
-body {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.5;
+    }
 
-body::before {
-  content: '';
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity: 0.3;
-}
-body::after {
-  content: '';
-  position: fixed;
-  top: -300px; left: 50%; transform: translateX(-50%);
-  width: 1200px; height: 800px; z-index: 0; pointer-events: none;
-  background: radial-gradient(ellipse at 40% 30%, rgba(138,120,255,0.06) 0%, transparent 55%),
-              radial-gradient(ellipse at 60% 50%, rgba(82,220,180,0.03) 0%, transparent 50%),
-              radial-gradient(ellipse at 50% 40%, rgba(244,114,182,0.03) 0%, transparent 45%);
-}
+    .container { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
 
-/* LOGIN */
-#loginScreen {
-  position: fixed; inset: 0; z-index: 100;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--bg);
-}
-#loginScreen::before {
-  content: '';
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  width: 800px; height: 800px; pointer-events: none;
-  background: radial-gradient(ellipse at center, rgba(138,120,255,0.1) 0%, transparent 55%),
-              radial-gradient(ellipse at 40% 60%, rgba(82,220,180,0.06) 0%, transparent 50%);
-}
-.login-wrap {
-  position: relative; z-index: 1;
-  width: 380px;
-  background: var(--surface);
-  background-image: var(--gradient-card);
-  border: 1px solid var(--border-hi);
-  border-radius: var(--radius-lg);
-  padding: 44px 38px;
-  box-shadow: var(--shadow-card), var(--shadow-glow);
-  animation: fadeUp 0.5s ease both;
-}
-.login-wrap::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: var(--gradient-text); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-}
-.login-logo {
-  font-family: var(--display);
-  font-size: 1.7rem; font-weight: 800; letter-spacing: -0.03em;
-  text-align: center; margin-bottom: 4px;
-  background: var(--gradient-text);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.login-sub {
-  text-align: center; color: var(--muted);
-  font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
-  margin-bottom: 32px;
-}
-.field { margin-bottom: 14px; }
-.field label {
-  display: block; font-size: 0.65rem; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
-}
-.field input {
-  width: 100%; background: var(--bg); border: 1px solid var(--border);
-  border-radius: var(--radius); color: var(--text); font-family: var(--mono);
-  font-size: 0.85rem; padding: 11px 14px; transition: border-color 0.2s, box-shadow 0.2s; outline: none;
-}
-.field input:focus {
-  border-color: var(--border-hi);
-  box-shadow: 0 0 0 3px rgba(138,120,255,0.08);
-}
-.login-btn {
-  width: 100%; margin-top: 22px; padding: 12px;
-  background: var(--gradient-btn); border: none;
-  border-radius: var(--radius); color: #fff; font-family: var(--mono);
-  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em;
-  text-transform: uppercase; cursor: pointer; transition: all 0.22s;
-  box-shadow: 0 4px 16px rgba(138,120,255,0.25);
-}
-.login-btn:hover {
-  box-shadow: 0 6px 28px rgba(138,120,255,0.4);
-  transform: translateY(-1px);
-}
-#loginError { font-size: 0.7rem; color: var(--red); text-align: center; margin-top: 14px; min-height: 16px; }
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .logo {
+      font-family: var(--display);
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #8a78ff, #52dcb4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .logo span { color: #52dcb4; background: none; -webkit-text-fill-color: #52dcb4; }
+    .badge {
+      font-size: 0.65rem;
+      padding: 0.25rem 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2rem;
+      color: var(--muted);
+    }
+    .header-actions { display: flex; gap: 0.75rem; align-items: center; }
+    .btn {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn:hover {
+      border-color: var(--border-hi);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #8a78ff, #52dcb4);
+      border: none;
+      color: #05050f;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(138,120,255,0.3);
+      color: #05050f;
+    }
+    .btn-danger {
+      border-color: rgba(240,100,100,0.3);
+      color: var(--red);
+    }
+    .btn-danger:hover {
+      background: var(--red-dim);
+      border-color: var(--red);
+    }
 
-/* APP SHELL */
-#app {
-  display: none; position: relative; z-index: 1;
-  max-width: 1320px; margin: 0 auto; padding: 36px 32px 80px;
-}
+    /* Stats row */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: var(--border-hi); }
+    .stat-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .stat-value {
+      font-family: var(--display);
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, #8a78ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-sub { font-size: 0.65rem; color: var(--muted); margin-top: 0.25rem; }
 
-/* TOPBAR */
-.topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 36px; padding-bottom: 20px;
-  border-bottom: 1px solid var(--border); position: relative;
-  gap: 16px; flex-wrap: wrap;
-}
-.topbar::after {
-  content: '';
-  position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(138,120,255,0.2), rgba(82,220,180,0.12), transparent);
-}
-.brand { display: flex; align-items: center; gap: 12px; }
-.brand-name {
-  font-family: var(--display); font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em;
-  background: var(--gradient-text);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.badge-live {
-  font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase;
-  background: linear-gradient(135deg, rgba(138,120,255,0.12) 0%, rgba(82,220,180,0.08) 100%);
-  color: var(--accent);
-  border: 1px solid rgba(138,120,255,0.18); padding: 4px 10px; border-radius: 999px;
-}
-.topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-#liveClock { font-size: 0.68rem; color: var(--muted); font-style: italic; min-width: 130px; }
-.status-pill {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 0.68rem; color: var(--muted);
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 30px; padding: 6px 14px;
-}
-.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted2); flex-shrink: 0; }
-.dot.green { background: var(--green); box-shadow: 0 0 8px var(--green); animation: blink 2s infinite; }
-.dot.amber { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
-.dot.red   { background: var(--red);   box-shadow: 0 0 8px var(--red); }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+    /* Filter bar */
+    .filter-bar {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding: 0.75rem 0;
+    }
+    .filter-btn {
+      font-size: 0.65rem;
+      padding: 0.35rem 0.9rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--muted);
+    }
+    .filter-btn.active {
+      border-color: var(--border-hi);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .search-input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2rem;
+      padding: 0.4rem 1rem;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      width: 200px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: var(--border-hi); }
 
-.btn {
-  font-family: var(--mono); font-size: 0.68rem; font-weight: 500;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  background: transparent; border: 1px solid var(--border);
-  color: var(--muted); padding: 7px 14px; border-radius: var(--radius);
-  cursor: pointer; transition: all 0.22s; white-space: nowrap;
-  display: inline-flex; align-items: center; gap: 5px;
-}
-.btn:hover {
-  border-color: var(--border-hi); color: var(--accent);
-  background: var(--accent-glow); transform: translateY(-1px);
-}
-.btn.danger { border-color: rgba(240,100,100,0.25); color: var(--red); }
-.btn.danger:hover { background: var(--red-dim); border-color: rgba(240,100,100,0.4); }
-.btn svg { transition: transform 0.6s; }
-.btn.spinning svg { animation: spin 0.8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+    /* Listings table */
+    .listings-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .panel-title {
+      font-family: var(--display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .count-badge {
+      background: var(--surface2);
+      padding: 0.2rem 0.6rem;
+      border-radius: 2rem;
+      font-size: 0.65rem;
+      color: var(--muted);
+    }
+    .table-container { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+    th {
+      text-align: left;
+      padding: 1rem 1rem;
+      color: var(--muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 1rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      vertical-align: middle;
+    }
+    tr:hover { background: rgba(138,120,255,0.03); }
+    .listing-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+    .listing-desc {
+      font-size: 0.65rem;
+      color: var(--muted);
+      max-width: 280px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .platform-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 2rem;
+      font-size: 0.6rem;
+      font-weight: 500;
+    }
+    .platform-ios { background: rgba(90,180,255,0.15); color: #5ab4ff; }
+    .platform-android { background: rgba(82,220,180,0.15); color: #52dcb4; }
+    .platform-both { background: rgba(138,120,255,0.15); color: #8a78ff; }
+    .price {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .status-active { color: var(--green); }
+    .status-expired { color: var(--red); }
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .action-btn {
+      font-size: 0.6rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 1rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+    .action-btn:hover { border-color: var(--border-hi); color: var(--accent); }
+    .delete-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
 
-/* KPI ROW */
-.kpi-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 18px; margin-bottom: 30px;
-}
-.kpi {
-  background: var(--surface);
-  background-image: var(--gradient-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 24px 24px; position: relative;
-  overflow: hidden; transition: border-color 0.25s, transform 0.25s, box-shadow 0.3s;
-  box-shadow: var(--shadow-card);
-  animation: fadeUp 0.4s ease both;
-}
-.kpi:hover {
-  border-color: var(--border-hi);
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-card), var(--shadow-glow);
-}
-.kpi::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: var(--gradient-text); opacity: 0;
-  transition: opacity 0.3s;
-}
-.kpi:hover::before { opacity: 1; }
-.kpi::after {
-  content: ''; position: absolute; top: -15px; right: -15px;
-  width: 90px; height: 90px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(138,120,255,0.08), transparent 70%);
-  pointer-events: none;
-}
-.kpi:nth-child(1) { animation-delay:.05s } .kpi:nth-child(2) { animation-delay:.10s }
-.kpi:nth-child(3) { animation-delay:.15s } .kpi:nth-child(4) { animation-delay:.20s }
-.kpi-label { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
-.kpi-value {
-  font-family: var(--display); font-size: 2.2rem; font-weight: 700; line-height: 1; margin-bottom: 6px;
-  background: var(--gradient-text);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.kpi-sub { font-size: 0.65rem; color: var(--muted); }
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--muted);
+    }
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--muted);
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-/* LAYOUT */
-.cols { display: grid; grid-template-columns: 1fr 360px; gap: 20px; align-items: start; }
-@media (max-width: 960px) { .cols { grid-template-columns: 1fr; } }
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--surface2);
+      border: 1px solid var(--border-hi);
+      border-radius: var(--radius);
+      padding: 0.75rem 1.25rem;
+      font-size: 0.7rem;
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+      max-width: 320px;
+    }
+    .toast.success { border-left: 3px solid var(--green); }
+    .toast.error { border-left: 3px solid var(--red); }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(100%); }
+      to { opacity: 1; transform: translateX(0); }
+    }
 
-/* PANEL */
-.panel {
-  background: var(--surface);
-  background-image: var(--gradient-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg); overflow: hidden;
-  box-shadow: var(--shadow-card);
-  animation: fadeUp 0.5s ease both;
-  transition: border-color 0.25s, box-shadow 0.3s;
-}
-.panel:hover {
-  border-color: rgba(138,120,255,0.15);
-}
-.panel-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 22px; border-bottom: 1px solid var(--border); gap: 10px;
-}
-.panel-title {
-  font-family: var(--display); font-size: 0.8rem; font-weight: 700;
-  letter-spacing: 0.04em; text-transform: uppercase; color: var(--text);
-  display: flex; align-items: center; gap: 8px;
-}
-.count-badge {
-  font-family: var(--mono); font-size: 0.58rem;
-  background: linear-gradient(135deg, rgba(138,120,255,0.12) 0%, rgba(82,220,180,0.08) 100%);
-  color: var(--accent);
-  border: 1px solid rgba(138,120,255,0.18); border-radius: 999px; padding: 3px 9px;
-}
-
-/* FEED */
-.feed { max-height: 560px; overflow-y: auto; }
-.feed::-webkit-scrollbar { width: 3px; }
-.feed::-webkit-scrollbar-thumb { background: var(--muted2); border-radius: 2px; }
-
-.sale-row {
-  display: grid; grid-template-columns: auto 1fr auto;
-  align-items: center; gap: 14px;
-  padding: 14px 22px; border-bottom: 1px solid rgba(255,255,255,0.03);
-  transition: background 0.15s; animation: slideIn 0.25s ease both;
-}
-.sale-row:hover { background: rgba(138,120,255,0.03); }
-.sale-row:last-child { border-bottom: none; }
-@keyframes slideIn { from { opacity:0; transform:translateX(-6px); } to { opacity:1; transform:translateX(0); } }
-
-.sale-icon {
-  width: 38px; height: 38px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; flex-shrink: 0;
-}
-.sale-icon.purchase { background: rgba(82,220,180,0.1); }
-.sale-icon.renewal  { background: rgba(90,180,255,0.1); }
-.sale-icon.cancel   { background: rgba(240,100,100,0.1); }
-.sale-icon.other    { background: rgba(240,180,41,0.1); }
-
-.sale-type { font-size: 0.72rem; font-weight: 500; color: var(--text); margin-bottom: 3px; }
-.sale-type .sub { color: var(--muted); font-weight: 400; }
-.sale-meta { font-size: 0.62rem; color: var(--muted); }
-.sale-amount {
-  font-family: var(--display); font-size: 1rem; font-weight: 700; white-space: nowrap; text-align: right;
-  background: var(--gradient-text);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.sale-amount.zero { color: var(--muted); font-size: 0.7rem; background: none; -webkit-text-fill-color: var(--muted); }
-
-.empty-state {
-  padding: 50px 20px; text-align: center;
-  color: var(--muted); font-size: 0.75rem; line-height: 2;
-}
-.empty-state .big { font-size: 2rem; display: block; margin-bottom: 8px; }
-
-/* SIDEBAR */
-.sidebar { display: flex; flex-direction: column; gap: 18px; }
-.breakdown-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 11px 22px; border-bottom: 1px solid rgba(255,255,255,0.03); gap: 10px;
-}
-.breakdown-row:last-child { border-bottom: none; }
-.breakdown-label { font-size: 0.7rem; color: var(--muted); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bar-wrap { flex: 2; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-.bar {
-  height: 100%; border-radius: 3px; transition: width 0.6s ease;
-  background: linear-gradient(90deg, var(--accent), var(--green));
-}
-.bar.blue {
-  background: linear-gradient(90deg, var(--blue), var(--accent));
-}
-.breakdown-val { font-size: 0.68rem; color: var(--text); min-width: 28px; text-align: right; }
-
-/* STATUSBAR */
-.statusbar {
-  margin-top: 28px; background: var(--surface);
-  background-image: var(--gradient-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 14px 22px;
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 10px; font-size: 0.65rem; color: var(--muted);
-  box-shadow: var(--shadow-card);
-}
-.statusbar code {
-  font-family: var(--mono); font-size: 0.65rem; color: var(--muted);
-  background: var(--surface2); padding: 2px 9px; border-radius: 6px; border: 1px solid var(--border);
-}
-
-/* TOAST */
-.toast {
-  position: fixed; bottom: 28px; right: 28px;
-  background: var(--surface2); border: 1px solid var(--border-hi);
-  border-radius: var(--radius); padding: 12px 18px; font-size: 0.72rem;
-  color: var(--text); z-index: 999;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.4), 0 0 40px rgba(138,120,255,0.08);
-  animation: fadeUp 0.3s ease; max-width: 300px;
-}
-.toast.error   { border-color: rgba(240,100,100,0.4); color: var(--red); }
-.toast.success { border-color: rgba(82,220,180,0.3);  color: var(--green); }
-
-@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-</style>
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(4px);
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border-hi);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      max-width: 400px;
+      width: 90%;
+    }
+    .modal h3 { margin-bottom: 1rem; font-family: var(--display); }
+    .modal input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.6rem 1rem;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      margin: 0.5rem 0 1rem;
+    }
+    .modal-buttons { display: flex; gap: 0.75rem; justify-content: flex-end; }
+  </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="loginScreen">
-  <div class="login-wrap">
-    <div class="login-logo">nagoh<span>.</span></div>
-    <div class="login-sub">Sales Intelligence</div>
-    <div class="field"><label>Username</label><input type="text" id="username" placeholder="admin" autocomplete="off"></div>
-    <div class="field"><label>Password</label><input type="password" id="password" placeholder="••••••" onkeydown="if(event.key==='Enter')login()"></div>
-    <button class="login-btn" onclick="login()">Enter Dashboard</button>
-    <div id="loginError"></div>
+<div class="container">
+  <div class="header">
+    <div>
+      <div class="logo">N.A.G.O.H<span>.</span></div>
+      <div class="badge" style="margin-top: 0.5rem;">Listing Management · Live KV Storage</div>
+    </div>
+    <div class="header-actions">
+      <a href="create-listing.html" class="btn btn-primary">+ New Listing</a>
+      <button class="btn" onclick="refreshListings()">⟳ Refresh</button>
+      <button class="btn" onclick="showAdminModal()">🔑 Admin</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats" id="statsContainer">
+    <div class="stat-card"><div class="stat-label">Total Listings</div><div class="stat-value" id="totalListings">—</div><div class="stat-sub">active marketplace items</div></div>
+    <div class="stat-card"><div class="stat-label">iOS Apps</div><div class="stat-value" id="iosCount">—</div><div class="stat-sub">platform breakdown</div></div>
+    <div class="stat-card"><div class="stat-label">Android Apps</div><div class="stat-value" id="androidCount">—</div><div class="stat-sub">including cross-platform</div></div>
+    <div class="stat-card"><div class="stat-label">Avg. Price</div><div class="stat-value" id="avgPrice">—</div><div class="stat-sub">USD per listing</div></div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All</button>
+    <button class="filter-btn" data-filter="iOS" onclick="setFilter('iOS')">iOS</button>
+    <button class="filter-btn" data-filter="Android" onclick="setFilter('Android')">Android</button>
+    <button class="filter-btn" data-filter="iOS + Android" onclick="setFilter('iOS + Android')">Both</button>
+    <div style="flex:1"></div>
+    <input type="text" class="search-input" id="searchInput" placeholder="Search title, tech, description..." oninput="searchListings()">
+  </div>
+
+  <!-- Listings table -->
+  <div class="listings-panel">
+    <div class="panel-header">
+      <div class="panel-title">
+        📋 Marketplace Listings
+        <span class="count-badge" id="listingsCount">0</span>
+      </div>
+      <div style="font-size:0.65rem; color:var(--muted)" id="kvStatus">KV: connected</div>
+    </div>
+    <div class="table-container" id="listingsTable">
+      <div class="loading"><div class="spinner"></div> Loading listings from KV...</div>
+    </div>
   </div>
 </div>
 
-<!-- APP -->
-<div id="app">
-
-  <div class="topbar">
-    <div class="brand">
-      <div class="brand-name">nagoh<span>.</span></div>
-      <div class="badge-live">Sales Intelligence</div>
-    </div>
-    <div class="topbar-right">
-      <div id="statusPill" class="status-pill">
-        <div id="statusDot" class="dot"></div>
-        <span id="statusLabel">Idle</span>
-      </div>
-      <div id="liveClock"></div>
-      <button class="btn" id="refreshBtn" onclick="fetchSales()">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-        Refresh
-      </button>
-      <button class="btn danger" onclick="clearData()">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-        Clear All
-      </button>
-      <button class="btn" onclick="logout()" style="color:var(--muted)">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-        Logout
-      </button>
+<!-- Admin modal -->
+<div id="adminModal" style="display:none" class="modal-overlay">
+  <div class="modal">
+    <h3>Admin Authentication</h3>
+    <p style="font-size:0.7rem; color:var(--muted); margin-bottom:0.5rem">Enter admin key to delete listings</p>
+    <input type="password" id="adminKeyInput" placeholder="Admin API Key" autocomplete="off">
+    <div class="modal-buttons">
+      <button class="btn" onclick="closeAdminModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="authenticateAdmin()">Confirm</button>
     </div>
   </div>
-
-  <!-- KPIs -->
-  <div class="kpi-row">
-    <div class="kpi">
-      <div class="kpi-label">Today's Revenue</div>
-      <div class="kpi-value" id="kpiToday">$0.00</div>
-      <div class="kpi-sub" id="kpiTodayCount">— events today</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">All-Time Revenue</div>
-      <div class="kpi-value" id="kpiTotal">$0.00</div>
-      <div class="kpi-sub" id="kpiTotalCount">— total events</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">Most Recent Sale</div>
-      <div class="kpi-value" id="kpiLast">—</div>
-      <div class="kpi-sub" id="kpiLastTime">—</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">Revenue Events</div>
-      <div class="kpi-value" id="kpiPaid">0</div>
-      <div class="kpi-sub" id="kpiAvg">avg — per transaction</div>
-    </div>
-  </div>
-
-  <!-- Content -->
-  <div class="cols">
-
-    <!-- Feed -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">
-          <div class="dot green"></div>
-          Live Sales Feed
-        </div>
-        <span class="count-badge" id="feedCount">0 events</span>
-      </div>
-      <div id="salesFeed" class="feed">
-        <div class="empty-state">
-          <span class="big">📡</span>
-          Click <strong>Refresh</strong> to load sales data
-        </div>
-      </div>
-    </div>
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-
-      <div class="panel">
-        <div class="panel-head"><div class="panel-title">Event Types</div></div>
-        <div id="breakdownList">
-          <div class="breakdown-row"><span class="breakdown-label" style="font-style:italic">Load data first</span></div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-head"><div class="panel-title">By App</div></div>
-        <div id="appList">
-          <div class="breakdown-row"><span class="breakdown-label" style="font-style:italic">Load data first</span></div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-head">
-          <div class="panel-title">Worker Health</div>
-          <button class="btn" onclick="fetchDebug()" style="font-size:0.6rem;padding:4px 9px">Ping</button>
-        </div>
-        <div id="debugPanel" style="padding:16px 20px;font-size:0.68rem;line-height:2;color:var(--muted)">
-          Click <strong>Ping</strong> to check worker status
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="statusbar">
-    <span>Nagoh Relay v3 · <code>alerts.nagoh.xyz</code></span>
-    <span id="lastRefresh">Never refreshed</span>
-    <span id="kvCount">KV: — records</span>
-  </div>
-
-  <!-- ── Listings Management ───────────────────────────── -->
-  <div style="margin-top:32px">
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M8 8h8M8 16h5"/></svg>
-          Listings Management
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span class="count-badge" id="listingsCount">0 listings</span>
-          <button class="btn" onclick="fetchListings()" style="font-size:0.62rem;padding:5px 10px">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-            Refresh
-          </button>
-          <a class="btn" href="../create-listing.html" target="_blank" style="font-size:0.62rem;padding:5px 10px;text-decoration:none">+ New Listing</a>
-        </div>
-      </div>
-
-      <!-- Filter bar -->
-      <div style="padding:10px 20px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <button class="btn listings-filter-btn active" data-filter="all"    onclick="filterListings('all')"     style="font-size:0.6rem;padding:4px 10px">All</button>
-        <button class="btn listings-filter-btn"        data-filter="ios"    onclick="filterListings('ios')"     style="font-size:0.6rem;padding:4px 10px">iOS</button>
-        <button class="btn listings-filter-btn"        data-filter="android" onclick="filterListings('android')" style="font-size:0.6rem;padding:4px 10px">Android</button>
-        <button class="btn listings-filter-btn"        data-filter="both"   onclick="filterListings('both')"    style="font-size:0.6rem;padding:4px 10px">iOS + Android</button>
-        <span style="flex:1"></span>
-        <input id="listingsSearch" oninput="searchListings()" placeholder="Search listings…" style="width:180px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:6px 12px;font-size:0.7rem;font-family:var(--mono);transition:border-color 0.2s;outline:none" onfocus="this.style.borderColor='var(--border-hi)'" onblur="this.style.borderColor='var(--border)'" />
-      </div>
-
-      <div id="listingsTable" style="overflow-x:auto">
-        <div class="empty-state">
-          <span class="big">📋</span>
-          Click <strong>Refresh</strong> to load listings
-        </div>
-      </div>
-    </div>
-  </div>
-
 </div>
 
 <script>
-const CREDS = { user: 'admin', pass: 'admin' };
-const API   = 'https://alerts.nagoh.xyz';
+  // Configuration
+  const API_BASE = window.location.origin; // Uses same origin as worker
+  let allListings = [];
+  let currentFilter = 'all';
+  let currentSearch = '';
+  let adminKey = localStorage.getItem('nagoh_admin_key') || null;
+  let pendingDeleteId = null;
 
-// ── Auth ──────────────────────────────────────────────
-function login() {
-  const u = document.getElementById('username').value.trim();
-  const p = document.getElementById('password').value;
-  if (u === CREDS.user && p === CREDS.pass) {
-    sessionStorage.setItem('nagoh_auth', '1');
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    fetchSales();
-    fetchListings();
-  } else {
-    document.getElementById('loginError').textContent = '✗ Invalid credentials';
+  // Helper: Show toast notification
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
   }
-}
-function logout() { sessionStorage.removeItem('nagoh_auth'); location.reload(); }
-if (sessionStorage.getItem('nagoh_auth') === '1') {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  fetchSales();
-  fetchListings();
-}
 
-// ── Clock ─────────────────────────────────────────────
-(function tick() {
-  document.getElementById('liveClock').textContent = new Date().toLocaleString('en-US', {
-    weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit'
-  });
-  setTimeout(tick, 1000);
-})();
-
-// ── Status ────────────────────────────────────────────
-function setStatus(cls, label) {
-  document.getElementById('statusDot').className = 'dot ' + (cls||'');
-  document.getElementById('statusLabel').textContent = label;
-}
-
-// ── Toast ─────────────────────────────────────────────
-function toast(msg, type='') {
-  const el = document.createElement('div');
-  el.className = 'toast ' + type;
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 3200);
-}
-
-// ── Fetch Sales ───────────────────────────────────────
-async function fetchSales() {
-  const btn = document.getElementById('refreshBtn');
-  btn.classList.add('spinning');
-  setStatus('amber', 'Loading…');
-  try {
-    const res  = await fetch(`${API}/api/sales`, { headers:{ Accept:'application/json' } });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'API error');
-
-    const sales = data.sales || [];
-    renderFeed(sales);
-    renderKPIs(sales);
-    renderBreakdown(sales);
-    renderApps(sales);
-    setStatus('green', 'Connected');
-    document.getElementById('lastRefresh').textContent = `Last refreshed: ${new Date().toLocaleTimeString()}`;
-    document.getElementById('kvCount').textContent = `KV: ${data.count ?? sales.length} records`;
-  } catch(e) {
-    setStatus('red', 'Error');
-    toast('Connection error: ' + e.message, 'error');
-    document.getElementById('salesFeed').innerHTML = `
-      <div class="empty-state">
-        <span class="big">⚠️</span>
-        Cannot reach <code style="background:var(--surface2);padding:2px 6px;border-radius:4px">alerts.nagoh.xyz</code><br>
-        <span style="color:var(--red);font-size:0.68rem">${e.message}</span>
-      </div>`;
-  } finally {
-    btn.classList.remove('spinning');
+  // Fetch all listings from KV
+  async function refreshListings() {
+    const tableDiv = document.getElementById('listingsTable');
+    tableDiv.innerHTML = '<div class="loading"><div class="spinner"></div> Loading listings from KV...</div>';
+    
+    try {
+      const response = await fetch(`${API_BASE}/api/listings`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      
+      if (data.success && Array.isArray(data.listings)) {
+        allListings = data.listings;
+        document.getElementById('kvStatus').textContent = `KV: ${data.count} records`;
+        updateStats();
+        applyFiltersAndRender();
+      } else {
+        throw new Error(data.error || 'Invalid response');
+      }
+    } catch (error) {
+      console.error('Fetch error:', error);
+      tableDiv.innerHTML = `<div class="empty-state">⚠️ Failed to load listings: ${error.message}<br><button class="btn" style="margin-top:1rem" onclick="refreshListings()">Try Again</button></div>`;
+      showToast('Failed to load listings from KV', 'error');
+    }
   }
-}
 
-// ── Clear ─────────────────────────────────────────────
-async function clearData() {
-  if (!confirm('Delete ALL sales data from KV?\nThis cannot be undone.')) return;
-  setStatus('amber', 'Clearing…');
-  try {
-    const res  = await fetch(`${API}/api/sales`, { method:'DELETE', headers:{ Accept:'application/json' } });
-    const data = await res.json();
-    if (data.success) { toast('All data cleared', 'success'); fetchSales(); }
-    else throw new Error(data.error);
-  } catch(e) { toast('Clear failed: ' + e.message, 'error'); setStatus('red','Error'); }
-}
-
-// ── Debug ─────────────────────────────────────────────
-async function fetchDebug() {
-  const el = document.getElementById('debugPanel');
-  el.textContent = 'Pinging worker…';
-  try {
-    const d = await (await fetch(`${API}/debug`)).json();
-    const row = (k,v) => {
-      const c = String(v).startsWith('✓') ? 'var(--green)' : String(v).startsWith('✗') ? 'var(--red)' : 'var(--text)';
-      return `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border)">
-        <span style="color:var(--muted)">${k}</span><span style="color:${c}">${v}</span></div>`;
-    };
-    el.innerHTML =
-      row('APNs Key ID',      d.hasAPNSKeyID      ? '✓ Set' : '✗ Missing') +
-      row('APNs Team ID',     d.hasAPNSTeamID     ? '✓ Set' : '✗ Missing') +
-      row('APNs Private Key', d.hasAPNSPrivateKey ? '✓ Set' : '✗ Missing') +
-      row('Encryption Key',   d.hasEncryptionKey  ? '✓ Set' : '✗ Missing') +
-      row('Bundle ID',        d.nagohBundleID || '—') +
-      row('KV Records',       d.salesInKV ?? '—');
-  } catch(e) {
-    el.innerHTML = `<span style="color:var(--red)">✗ ${e.message}</span>`;
+  // Update statistics
+  function updateStats() {
+    const total = allListings.length;
+    const ios = allListings.filter(l => l.platform === 'iOS').length;
+    const android = allListings.filter(l => l.platform === 'Android' || l.platform === 'iOS + Android').length;
+    const avg = total > 0 ? (allListings.reduce((sum, l) => sum + (l.priceUsd || 0), 0) / total).toFixed(0) : 0;
+    
+    document.getElementById('totalListings').textContent = total;
+    document.getElementById('iosCount').textContent = ios;
+    document.getElementById('androidCount').textContent = android;
+    document.getElementById('avgPrice').textContent = `$${avg}`;
+    document.getElementById('listingsCount').textContent = total;
   }
-}
 
-// ── Render Feed ───────────────────────────────────────
-const TYPE_MAP = {
-  'INITIAL_BUY':       { icon:'💳', cls:'purchase' },
-  'DID_RENEW':         { icon:'🔄', cls:'renewal'  },
-  'SUBSCRIBED':        { icon:'⭐', cls:'purchase' },
-  'CANCEL':            { icon:'❌', cls:'cancel'   },
-  'DID_FAIL_TO_RENEW': { icon:'⚠️', cls:'cancel'   },
-  'REFUND':            { icon:'↩️', cls:'cancel'   },
-  'ONE_TIME_CHARGE':   { icon:'💰', cls:'purchase' },
-  'RENEWAL':           { icon:'🔄', cls:'renewal'  },
-};
-
-function renderFeed(sales) {
-  const el = document.getElementById('salesFeed');
-  document.getElementById('feedCount').textContent = `${sales.length} event${sales.length!==1?'s':''}`;
-  if (!sales.length) {
-    el.innerHTML = `<div class="empty-state"><span class="big">✨</span>No sales yet.<br>Webhooks from Apple will appear here.</div>`;
-    return;
+  // Filter and search
+  function setFilter(filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.filter === filter);
+    });
+    applyFiltersAndRender();
   }
-  el.innerHTML = sales.map((s, i) => {
-    const { icon, cls } = TYPE_MAP[s.notificationType?.toUpperCase()] || { icon:'📦', cls:'other' };
-    const amt  = s.revenue > 0 ? `$${s.revenue.toFixed(2)}` : null;
-    const ts   = new Date(s.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-    const app  = s.bundleID ? s.bundleID.split('.').pop().toUpperCase() : '—';
-    const sub  = s.subtype  ? ` · ${s.subtype}` : '';
-    return `<div class="sale-row" style="animation-delay:${Math.min(i*0.025,0.3)}s">
-      <div class="sale-icon ${cls}">${icon}</div>
-      <div>
-        <div class="sale-type">${s.notificationType||'EVENT'}<span class="sub">${sub}</span></div>
-        <div class="sale-meta">${app} · ${ts}</div>
-      </div>
-      <div class="sale-amount ${amt?'':'zero'}">${amt||'n/a'}</div>
-    </div>`;
-  }).join('');
-}
 
-// ── KPIs ──────────────────────────────────────────────
-function renderKPIs(sales) {
-  const today = new Date().toDateString();
-  let totalRev=0, todayRev=0, todayCnt=0, paidCnt=0;
-  for (const s of sales) {
-    if (s.revenue>0) { totalRev+=s.revenue; paidCnt++; }
-    if (new Date(s.timestamp).toDateString()===today) { todayCnt++; if(s.revenue>0) todayRev+=s.revenue; }
+  function searchListings() {
+    currentSearch = document.getElementById('searchInput').value.toLowerCase();
+    applyFiltersAndRender();
   }
-  const avg = paidCnt ? totalRev/paidCnt : 0;
-  document.getElementById('kpiToday').textContent      = `$${todayRev.toFixed(2)}`;
-  document.getElementById('kpiTodayCount').textContent = `${todayCnt} event${todayCnt!==1?'s':''} today`;
-  document.getElementById('kpiTotal').textContent      = `$${totalRev.toFixed(2)}`;
-  document.getElementById('kpiTotalCount').textContent = `${sales.length} total events`;
-  document.getElementById('kpiPaid').textContent       = paidCnt;
-  document.getElementById('kpiAvg').textContent        = `avg $${avg.toFixed(2)} per transaction`;
-  if (sales.length) {
-    const last = sales[0];
-    document.getElementById('kpiLast').textContent    = last.revenue>0 ? `$${last.revenue.toFixed(2)}` : last.notificationType||'—';
-    document.getElementById('kpiLastTime').textContent = timeAgo(new Date(last.timestamp));
+
+  function applyFiltersAndRender() {
+    let filtered = [...allListings];
+    
+    // Platform filter
+    if (currentFilter !== 'all') {
+      filtered = filtered.filter(l => l.platform === currentFilter);
+    }
+    
+    // Search
+    if (currentSearch) {
+      filtered = filtered.filter(l => 
+        (l.title || '').toLowerCase().includes(currentSearch) ||
+        (l.description || '').toLowerCase().includes(currentSearch) ||
+        (l.techStack || '').toLowerCase().includes(currentSearch) ||
+        (l.platform || '').toLowerCase().includes(currentSearch)
+      );
+    }
+    
+    renderListingsTable(filtered);
   }
-}
 
-// ── Breakdown ─────────────────────────────────────────
-function renderBreakdown(sales) {
-  const counts={};
-  for (const s of sales) { const k=s.notificationType||'UNKNOWN'; counts[k]=(counts[k]||0)+1; }
-  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-  const max=sorted[0]?.[1]||1;
-  document.getElementById('breakdownList').innerHTML = sorted.length
-    ? sorted.map(([k,v])=>`<div class="breakdown-row">
-        <span class="breakdown-label">${k}</span>
-        <div class="bar-wrap"><div class="bar" style="width:${Math.round(v/max*100)}%"></div></div>
-        <span class="breakdown-val">${v}</span></div>`).join('')
-    : `<div class="breakdown-row"><span class="breakdown-label" style="font-style:italic">No data</span></div>`;
-}
-
-function renderApps(sales) {
-  const map={};
-  for (const s of sales) {
-    const k = s.bundleID ? s.bundleID.split('.').pop().toUpperCase() : 'UNKNOWN';
-    if (!map[k]) map[k]={cnt:0,rev:0};
-    map[k].cnt++; if(s.revenue>0) map[k].rev+=s.revenue;
+  // Check if listing is expired
+  function isExpired(expiresAt) {
+    if (!expiresAt) return false;
+    return new Date(expiresAt) < new Date();
   }
-  const sorted=Object.entries(map).sort((a,b)=>b[1].cnt-a[1].cnt);
-  const max=sorted[0]?.[1].cnt||1;
-  document.getElementById('appList').innerHTML = sorted.length
-    ? sorted.map(([k,v])=>`<div class="breakdown-row">
-        <span class="breakdown-label">${k}</span>
-        <div class="bar-wrap"><div class="bar blue" style="width:${Math.round(v.cnt/max*100)}%"></div></div>
-        <span class="breakdown-val">${v.cnt}</span></div>`).join('')
-    : `<div class="breakdown-row"><span class="breakdown-label" style="font-style:italic">No data</span></div>`;
-}
 
-// ── Helpers ───────────────────────────────────────────
-function timeAgo(d) {
-  const s=Math.round((Date.now()-d)/1000);
-  if(s<60)  return `${s}s ago`;
-  if(s<3600) return `${Math.round(s/60)}m ago`;
-  if(s<86400) return `${Math.round(s/3600)}h ago`;
-  return `${Math.round(s/86400)}d ago`;
-}
-
-// ── Listings Management ───────────────────────────────
-const GITHUB_OWNER = 'NAGOHUSA';
-const GITHUB_REPO  = 'N.A.G.O.H';
-const LISTINGS_PATH = '_data/listings';
-const GITHUB_API = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${LISTINGS_PATH}`;
-
-let allListings = [];
-let activeFilter = 'all';
-
-async function fetchListings() {
-  const tableEl = document.getElementById('listingsTable');
-  tableEl.innerHTML = `<div class="empty-state"><span class="big" style="font-size:1.4rem">⏳</span>Loading listings…</div>`;
-  try {
-    const res = await fetch(GITHUB_API, { headers: { Accept: 'application/vnd.github+json' } });
-    if (!res.ok) throw new Error(`GitHub API ${res.status}`);
-    const files = await res.json();
-    const jsonFiles = files.filter(f => f.type === 'file' && f.name.endsWith('.json'));
-    allListings = await Promise.all(jsonFiles.map(f => fetch(f.download_url).then(r => r.json())));
-    document.getElementById('listingsCount').textContent = `${allListings.length} listing${allListings.length !== 1 ? 's' : ''}`;
-    renderListingsTable(allListings);
-  } catch(e) {
-    tableEl.innerHTML = `<div class="empty-state"><span class="big" style="font-size:1.4rem">⚠️</span><span style="color:var(--red)">${e.message}</span></div>`;
+  // Render table
+  function renderListingsTable(listings) {
+    const tableDiv = document.getElementById('listingsTable');
+    
+    if (!listings.length) {
+      tableDiv.innerHTML = `<div class="empty-state">📭 No listings found${currentFilter !== 'all' ? ' for this filter' : ''}.<br><a href="create-listing.html" class="btn" style="margin-top:1rem">+ Create your first listing</a></div>`;
+      return;
+    }
+    
+    const now = new Date();
+    const html = `
+      <table>
+        <thead>
+          <tr><th>Project</th><th>Platform</th><th>Price</th><th>Status</th><th>Created</th><th>Expires</th><th style="text-align:right">Actions</th></tr>
+        </thead>
+        <tbody>
+          ${listings.map(listing => {
+            const expired = isExpired(listing.expiresAt);
+            const platformClass = listing.platform === 'iOS' ? 'platform-ios' : (listing.platform === 'Android' ? 'platform-android' : 'platform-both');
+            const createdDate = listing.createdAt ? new Date(listing.createdAt).toLocaleDateString() : '—';
+            const expiresDate = listing.expiresAt ? new Date(listing.expiresAt).toLocaleDateString() : '—';
+            
+            return `
+              <tr>
+                <td>
+                  <div class="listing-title">${escapeHtml(listing.title)}</div>
+                  <div class="listing-desc">${escapeHtml(listing.description?.substring(0, 80) || '')}${listing.description?.length > 80 ? '…' : ''}</div>
+                  ${listing.techStack ? `<div style="font-size:0.6rem; color:var(--muted); margin-top:0.2rem">⚙️ ${escapeHtml(listing.techStack.substring(0, 50))}</div>` : ''}
+                </td>
+                <td><span class="platform-badge ${platformClass}">${listing.platform || '—'}</span></td>
+                <td class="price">$${listing.priceUsd || 0}</td>
+                <td>${expired ? '<span class="status-expired">● Expired</span>' : '<span class="status-active">● Active</span>'}</td>
+                <td style="font-size:0.65rem; color:var(--muted)">${createdDate}</td>
+                <td style="font-size:0.65rem; color:var(--muted)">${expiresDate}</td>
+                <td style="text-align:right">
+                  <div class="action-buttons">
+                    <a href="listing.html?id=${listing.id}" target="_blank" class="action-btn">👁 View</a>
+                    <a href="edit-listing.html?id=${listing.id}" class="action-btn">✏ Edit</a>
+                    <button onclick="confirmDelete('${listing.id}', '${escapeHtml(listing.title).replace(/'/g, "\\'")}')" class="action-btn delete-btn">🗑 Delete</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+    tableDiv.innerHTML = html;
   }
-}
 
-function filterListings(filter) {
-  activeFilter = filter;
-  document.querySelectorAll('.listings-filter-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.filter === filter);
-  });
-  applyListingsFilter();
-}
-
-function searchListings() {
-  applyListingsFilter();
-}
-
-function applyListingsFilter() {
-  const query = (document.getElementById('listingsSearch').value || '').toLowerCase();
-  let filtered = allListings;
-  if (activeFilter === 'ios')     filtered = filtered.filter(l => l.platform === 'iOS');
-  if (activeFilter === 'android') filtered = filtered.filter(l => l.platform === 'Android');
-  if (activeFilter === 'both')    filtered = filtered.filter(l => l.platform === 'iOS + Android');
-  if (query) filtered = filtered.filter(l =>
-    (l.title||'').toLowerCase().includes(query) ||
-    (l.description||'').toLowerCase().includes(query) ||
-    (l.techStack||'').toLowerCase().includes(query)
-  );
-  renderListingsTable(filtered);
-}
-
-function renderListingsTable(listings) {
-  const tableEl = document.getElementById('listingsTable');
-  if (!listings.length) {
-    tableEl.innerHTML = `<div class="empty-state"><span class="big" style="font-size:1.4rem">🔍</span>No listings match.</div>`;
-    return;
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
   }
-  const now = new Date();
-  tableEl.innerHTML = `
-    <table style="width:100%;border-collapse:collapse;font-size:0.72rem">
-      <thead>
-        <tr style="border-bottom:1px solid var(--border);color:var(--muted)">
-          <th style="padding:10px 20px;text-align:left;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;font-size:0.6rem">Project</th>
-          <th style="padding:10px 12px;text-align:left;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;font-size:0.6rem">Platform</th>
-          <th style="padding:10px 12px;text-align:left;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;font-size:0.6rem">Price</th>
-          <th style="padding:10px 12px;text-align:left;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;font-size:0.6rem">Status</th>
-          <th style="padding:10px 12px;text-align:left;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;font-size:0.6rem">Created</th>
-          <th style="padding:10px 20px;text-align:right;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;font-size:0.6rem">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${listings.map((l, i) => {
-          const expired = l.expiresAt && new Date(l.expiresAt) < now;
-          const statusLabel = expired
-            ? `<span style="color:var(--red);font-size:0.65rem">● Expired</span>`
-            : `<span style="color:var(--green);font-size:0.65rem">● Active</span>`;
-          const created = l.createdAt ? new Date(l.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
-          const platformColor = l.platform === 'iOS' ? 'var(--blue)' : l.platform === 'Android' ? 'var(--green)' : 'var(--accent)';
-          return `<tr style="border-bottom:1px solid rgba(255,255,255,0.03);animation:slideIn 0.2s ease both;animation-delay:${Math.min(i*0.03,0.3)}s" id="listing-row-${encodeURIComponent(l.id||'')}">
-            <td style="padding:12px 20px">
-              <div style="font-weight:500;color:var(--text);margin-bottom:2px">${l.title||'Untitled'}</div>
-              <div style="color:var(--muted);font-size:0.65rem;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.description||''}</div>
-            </td>
-            <td style="padding:12px;"><span style="color:${platformColor};font-size:0.68rem">${l.platform||'—'}</span></td>
-            <td style="padding:12px;font-family:var(--display);font-weight:700;color:var(--text)">$${l.priceUsd||0}</td>
-            <td style="padding:12px">${statusLabel}</td>
-            <td style="padding:12px;color:var(--muted)">${created}</td>
-            <td style="padding:12px 20px;text-align:right">
-              <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap">
-                <a href="../listing.html?id=${encodeURIComponent(l.id||'')}" target="_blank"
-                   style="display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:0.6rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 9px;border-radius:6px;cursor:pointer;text-decoration:none;transition:all 0.15s"
-                   onmouseover="this.style.borderColor='var(--border-hi)';this.style.color='var(--accent)'"
-                   onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
-                  View
-                </a>
-                <a href="../edit-listing.html?id=${encodeURIComponent(l.id||'')}" target="_blank"
-                   style="display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:0.6rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 9px;border-radius:6px;cursor:pointer;text-decoration:none;transition:all 0.15s"
-                   onmouseover="this.style.borderColor='var(--border-hi)';this.style.color='var(--accent)'"
-                   onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
-                  Edit
-                </a>
-                <button
-                  data-listing-id="${escAttr(l.id||'')}"
-                  data-listing-title="${escAttr(l.title||'Untitled')}"
-                  class="listing-delete-btn"
-                  style="display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:0.6rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(240,100,100,0.2);color:var(--red);padding:5px 9px;border-radius:6px;cursor:pointer;transition:all 0.15s"
-                  onmouseover="this.style.background='var(--red-dim)';this.style.borderColor='rgba(240,100,100,0.4)'"
-                  onmouseout="this.style.background='transparent';this.style.borderColor='rgba(240,100,100,0.2)'">
-                  Delete
-                </button>
-              </div>
-            </td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>`;
-}
 
-function escAttr(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-
-function adminDeleteListing(id, title) {
-  if (!confirm(`Delete listing "${title}"?\n\nThis requires the listing secret. Use the Edit page to delete with the seller's secret, or remove the file directly from the repository.`)) return;
-  window.open(`../edit-listing.html?id=${encodeURIComponent(id)}`, '_blank');
-}
-
-// Delegated click handler for delete buttons rendered inside the table
-document.getElementById('listingsTable').addEventListener('click', function(e) {
-  const btn = e.target.closest('.listing-delete-btn');
-  if (!btn) return;
-  adminDeleteListing(btn.dataset.listingId || '', btn.dataset.listingTitle || 'Untitled');
-});
-
-// Style active filter buttons
-const filterStyle = document.createElement('style');
-filterStyle.textContent = `.listings-filter-btn.active { border-color: var(--border-hi) !important; color: var(--accent) !important; background: var(--accent-dim) !important; }`;
-document.head.appendChild(filterStyle);
+  // Delete listing
+  async function confirmDelete(id, title) {
+    pendingDeleteId = id;
+    
+    if (adminKey) {
+      // Direct delete with stored admin key
+      await performDelete(id);
+    } else {
+      // Show admin modal
+      document.getElementById('adminModal').style.display = 'flex';
+      document.getElementById('adminKeyInput').value = '';
+      document.getElementById('adminKeyInput').focus();
+      // Store the title for the modal message
+      document.getElementById('adminModal').dataset.listingTitle = title;
+    }
+  }
+  
+  async function performDelete(id) {
+    if (!adminKey) {
+      showToast('Admin key required', 'error');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${API_BASE}/api/listings/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Key': adminKey
+        }
+      });
+      
+      const data = await response.json();
+      if (response.ok && data.success) {
+        showToast('Listing deleted successfully', 'success');
+        refreshListings();
+      } else {
+        showToast(data.error || 'Delete failed', 'error');
+        // If admin key is invalid, clear it
+        if (response.status === 401) {
+          adminKey = null;
+          localStorage.removeItem('nagoh_admin_key');
+          showToast('Admin key invalid, please re-enter', 'error');
+        }
+      }
+    } catch (error) {
+      showToast('Delete error: ' + error.message, 'error');
+    }
+    pendingDeleteId = null;
+  }
+  
+  // Admin modal functions
+  function showAdminModal() {
+    document.getElementById('adminModal').style.display = 'flex';
+    document.getElementById('adminKeyInput').value = '';
+    pendingDeleteId = null;
+  }
+  
+  function closeAdminModal() {
+    document.getElementById('adminModal').style.display = 'none';
+    pendingDeleteId = null;
+  }
+  
+  async function authenticateAdmin() {
+    const key = document.getElementById('adminKeyInput').value.trim();
+    if (!key) {
+      showToast('Please enter admin key', 'error');
+      return;
+    }
+    
+    // Test the key by attempting to delete a dummy? Better: just store and if delete fails, prompt again
+    adminKey = key;
+    localStorage.setItem('nagoh_admin_key', adminKey);
+    closeAdminModal();
+    
+    if (pendingDeleteId) {
+      await performDelete(pendingDeleteId);
+    } else {
+      showToast('Admin key saved', 'success');
+      // Optionally refresh to show admin actions
+      refreshListings();
+    }
+  }
+  
+  // Check URL params for Stripe payment return (session_id)
+  function checkPaymentReturn() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    const canceled = urlParams.get('canceled');
+    
+    if (canceled === '1') {
+      showToast('Payment was canceled. You can try again.', 'error');
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (sessionId) {
+      // Store session ID in localStorage for the create-listing page to use
+      localStorage.setItem('stripe_payment_session_id', sessionId);
+      showToast('✓ Payment successful! You can now create your listing.', 'success');
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }
+  
+  // Auto-refresh every 30 seconds
+  let autoRefreshInterval;
+  function startAutoRefresh() {
+    if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+    autoRefreshInterval = setInterval(() => {
+      refreshListings();
+    }, 30000);
+  }
+  
+  // Initial load
+  checkPaymentReturn();
+  refreshListings();
+  startAutoRefresh();
 </script>
 </body>
 </html>
