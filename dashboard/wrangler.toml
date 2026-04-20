@@ -6,7 +6,22 @@ compatibility_date = "2024-01-01"
 binding = "SALES_STORAGE"
 id = "SALES"
 
+# Add this for listings
+[[kv_namespaces]]
+binding = "LISTINGS_STORAGE"
+id = "LISTINGS"  # Create this KV namespace in your Cloudflare dashboard first
+
+[vars]
+ADMIN_API_KEY = "your-secure-key-here-change-this"
+SITE_BASE_URL = "https://nagoh.xyz"
+LISTING_FEE_CENTS = "500"
+CURRENCY = "usd"
+
 [env.production]
 [[env.production.kv_namespaces]]
 binding = "SALES_STORAGE"
 id = "SALES"
+
+[[env.production.kv_namespaces]]
+binding = "LISTINGS_STORAGE"
+id = "LISTINGS"
