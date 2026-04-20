@@ -513,7 +513,7 @@ body::after {
         <button class="btn listings-filter-btn"        data-filter="android" onclick="filterListings('android')" style="font-size:0.6rem;padding:4px 10px">Android</button>
         <button class="btn listings-filter-btn"        data-filter="both"   onclick="filterListings('both')"    style="font-size:0.6rem;padding:4px 10px">iOS + Android</button>
         <span style="flex:1"></span>
-        <input id="listingsSearch" oninput="searchListings()" placeholder="Search listings…" style="width:180px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:5px 10px;font-size:0.7rem;font-family:var(--mono)" />
+        <input id="listingsSearch" oninput="searchListings()" placeholder="Search listings…" style="width:180px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:6px 12px;font-size:0.7rem;font-family:var(--mono);transition:border-color 0.2s;outline:none" onfocus="this.style.borderColor='var(--border-hi)'" onblur="this.style.borderColor='var(--border)'" />
       </div>
 
       <div id="listingsTable" style="overflow-x:auto">
@@ -819,7 +819,7 @@ function renderListingsTable(listings) {
             ? `<span style="color:var(--red);font-size:0.65rem">● Expired</span>`
             : `<span style="color:var(--green);font-size:0.65rem">● Active</span>`;
           const created = l.createdAt ? new Date(l.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
-          const platformColor = l.platform === 'iOS' ? 'var(--blue)' : l.platform === 'Android' ? 'var(--green)' : 'var(--amber)';
+          const platformColor = l.platform === 'iOS' ? 'var(--blue)' : l.platform === 'Android' ? 'var(--green)' : 'var(--accent)';
           return `<tr style="border-bottom:1px solid rgba(255,255,255,0.03);animation:slideIn 0.2s ease both;animation-delay:${Math.min(i*0.03,0.3)}s" id="listing-row-${encodeURIComponent(l.id||'')}">
             <td style="padding:12px 20px">
               <div style="font-weight:500;color:var(--text);margin-bottom:2px">${l.title||'Untitled'}</div>
@@ -833,13 +833,13 @@ function renderListingsTable(listings) {
               <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap">
                 <a href="../listing.html?id=${encodeURIComponent(l.id||'')}" target="_blank"
                    style="display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:0.6rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 9px;border-radius:6px;cursor:pointer;text-decoration:none;transition:all 0.15s"
-                   onmouseover="this.style.borderColor='var(--border-hi)';this.style.color='var(--green)'"
+                   onmouseover="this.style.borderColor='var(--border-hi)';this.style.color='var(--accent)'"
                    onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
                   View
                 </a>
                 <a href="../edit-listing.html?id=${encodeURIComponent(l.id||'')}" target="_blank"
                    style="display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:0.6rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 9px;border-radius:6px;cursor:pointer;text-decoration:none;transition:all 0.15s"
-                   onmouseover="this.style.borderColor='var(--border-hi)';this.style.color='var(--green)'"
+                   onmouseover="this.style.borderColor='var(--border-hi)';this.style.color='var(--accent)'"
                    onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
                   Edit
                 </a>
