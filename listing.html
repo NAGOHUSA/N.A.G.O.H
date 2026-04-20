@@ -3,14 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Listing • AppCodeMarket</title>
+  <title>Listing • N.A.G.O.H</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo" style="text-decoration:none">N.A.G.O.H<span>.</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html#marketplace">Marketplace</a></li>
+        <li><a href="index.html#how-it-works">How It Works</a></li>
+        <li><a href="index.html#contact">Support</a></li>
+      </ul>
+      <a class="btn" href="create-listing.html">List Your App</a>
+    </div>
+  </nav>
+
   <main class="container">
-    <a href="index.html">← Back to marketplace</a>
-    <div id="listingDetail" class="card"></div>
+    <div class="page-header">
+      <a href="index.html" class="back-link">← Back to marketplace</a>
+      <h1 id="listingTitle">Loading…</h1>
+    </div>
+    <div id="listingDetail"></div>
   </main>
+
+  <footer class="section-sm" style="border-top:1px solid var(--border);margin-top:4rem">
+    <div class="container">
+      <div class="footer">
+        <div class="footer-logo">N.A.G.O.H<span>.</span></div>
+        <small style="color:var(--muted)">N.A.G.O.H does not process transactions between buyer and seller.</small>
+      </div>
+    </div>
+  </footer>
+
   <script src="assets/js/main.js"></script>
 </body>
 </html>

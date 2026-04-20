@@ -398,6 +398,43 @@ body::after {
     <span id="kvCount">KV: — records</span>
   </div>
 
+  <!-- ── Listings Management ───────────────────────────── -->
+  <div style="margin-top:32px">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M8 8h8M8 16h5"/></svg>
+          Listings Management
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="count-badge" id="listingsCount">0 listings</span>
+          <button class="btn" onclick="fetchListings()" style="font-size:0.62rem;padding:5px 10px">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            Refresh
+          </button>
+          <a class="btn" href="../create-listing.html" target="_blank" style="font-size:0.62rem;padding:5px 10px;text-decoration:none">+ New Listing</a>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div style="padding:10px 20px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn listings-filter-btn active" data-filter="all"    onclick="filterListings('all')"     style="font-size:0.6rem;padding:4px 10px">All</button>
+        <button class="btn listings-filter-btn"        data-filter="ios"    onclick="filterListings('ios')"     style="font-size:0.6rem;padding:4px 10px">iOS</button>
+        <button class="btn listings-filter-btn"        data-filter="android" onclick="filterListings('android')" style="font-size:0.6rem;padding:4px 10px">Android</button>
+        <button class="btn listings-filter-btn"        data-filter="both"   onclick="filterListings('both')"    style="font-size:0.6rem;padding:4px 10px">iOS + Android</button>
+        <span style="flex:1"></span>
+        <input id="listingsSearch" oninput="searchListings()" placeholder="Search listings…" style="width:180px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:5px 10px;font-size:0.7rem;font-family:var(--mono)" />
+      </div>
+
+      <div id="listingsTable" style="overflow-x:auto">
+        <div class="empty-state">
+          <span class="big">📋</span>
+          Click <strong>Refresh</strong> to load listings
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -413,6 +450,7 @@ function login() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     fetchSales();
+    fetchListings();
   } else {
     document.getElementById('loginError').textContent = '✗ Invalid credentials';
   }
@@ -422,6 +460,7 @@ if (sessionStorage.getItem('nagoh_auth') === '1') {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   fetchSales();
+  fetchListings();
 }
 
 // ── Clock ─────────────────────────────────────────────
@@ -612,6 +651,150 @@ function timeAgo(d) {
   if(s<86400) return `${Math.round(s/3600)}h ago`;
   return `${Math.round(s/86400)}d ago`;
 }
+
+// ── Listings Management ───────────────────────────────
+const GITHUB_OWNER = 'NAGOHUSA';
+const GITHUB_REPO  = 'N.A.G.O.H';
+const LISTINGS_PATH = '_data/listings';
+const GITHUB_API = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${LISTINGS_PATH}`;
+
+let allListings = [];
+let activeFilter = 'all';
+
+async function fetchListings() {
+  const tableEl = document.getElementById('listingsTable');
+  tableEl.innerHTML = `<div class="empty-state"><span class="big" style="font-size:1.4rem">⏳</span>Loading listings…</div>`;
+  try {
+    const res = await fetch(GITHUB_API, { headers: { Accept: 'application/vnd.github+json' } });
+    if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+    const files = await res.json();
+    const jsonFiles = files.filter(f => f.type === 'file' && f.name.endsWith('.json'));
+    allListings = await Promise.all(jsonFiles.map(f => fetch(f.download_url).then(r => r.json())));
+    document.getElementById('listingsCount').textContent = `${allListings.length} listing${allListings.length !== 1 ? 's' : ''}`;
+    renderListingsTable(allListings);
+  } catch(e) {
+    tableEl.innerHTML = `<div class="empty-state"><span class="big" style="font-size:1.4rem">⚠️</span><span style="color:var(--red)">${e.message}</span></div>`;
+  }
+}
+
+function filterListings(filter) {
+  activeFilter = filter;
+  document.querySelectorAll('.listings-filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === filter);
+  });
+  applyListingsFilter();
+}
+
+function searchListings() {
+  applyListingsFilter();
+}
+
+function applyListingsFilter() {
+  const query = (document.getElementById('listingsSearch').value || '').toLowerCase();
+  let filtered = allListings;
+  if (activeFilter === 'ios')     filtered = filtered.filter(l => l.platform === 'iOS');
+  if (activeFilter === 'android') filtered = filtered.filter(l => l.platform === 'Android');
+  if (activeFilter === 'both')    filtered = filtered.filter(l => l.platform === 'iOS + Android');
+  if (query) filtered = filtered.filter(l =>
+    (l.title||'').toLowerCase().includes(query) ||
+    (l.description||'').toLowerCase().includes(query) ||
+    (l.techStack||'').toLowerCase().includes(query)
+  );
+  renderListingsTable(filtered);
+}
+
+function renderListingsTable(listings) {
+  const tableEl = document.getElementById('listingsTable');
+  if (!listings.length) {
+    tableEl.innerHTML = `<div class="empty-state"><span class="big" style="font-size:1.4rem">🔍</span>No listings match.</div>`;
+    return;
+  }
+  const now = new Date();
+  tableEl.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:0.72rem">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border);color:var(--muted)">
+          <th style="padding:10px 20px;text-align:left;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;font-size:0.6rem">Project</th>
+          <th style="padding:10px 12px;text-align:left;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;font-size:0.6rem">Platform</th>
+          <th style="padding:10px 12px;text-align:left;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;font-size:0.6rem">Price</th>
+          <th style="padding:10px 12px;text-align:left;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;font-size:0.6rem">Status</th>
+          <th style="padding:10px 12px;text-align:left;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;font-size:0.6rem">Created</th>
+          <th style="padding:10px 20px;text-align:right;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;font-size:0.6rem">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${listings.map((l, i) => {
+          const expired = l.expiresAt && new Date(l.expiresAt) < now;
+          const statusLabel = expired
+            ? `<span style="color:var(--red);font-size:0.65rem">● Expired</span>`
+            : `<span style="color:var(--green);font-size:0.65rem">● Active</span>`;
+          const created = l.createdAt ? new Date(l.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+          const platformColor = l.platform === 'iOS' ? 'var(--blue)' : l.platform === 'Android' ? 'var(--green)' : 'var(--amber)';
+          return `<tr style="border-bottom:1px solid rgba(255,255,255,0.03);animation:slideIn 0.2s ease both;animation-delay:${Math.min(i*0.03,0.3)}s" id="listing-row-${encodeURIComponent(l.id||'')}">
+            <td style="padding:12px 20px">
+              <div style="font-weight:500;color:var(--text);margin-bottom:2px">${l.title||'Untitled'}</div>
+              <div style="color:var(--muted);font-size:0.65rem;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.description||''}</div>
+            </td>
+            <td style="padding:12px;"><span style="color:${platformColor};font-size:0.68rem">${l.platform||'—'}</span></td>
+            <td style="padding:12px;font-family:var(--display);font-weight:700;color:var(--text)">$${l.priceUsd||0}</td>
+            <td style="padding:12px">${statusLabel}</td>
+            <td style="padding:12px;color:var(--muted)">${created}</td>
+            <td style="padding:12px 20px;text-align:right">
+              <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap">
+                <a href="../listing.html?id=${encodeURIComponent(l.id||'')}" target="_blank"
+                   style="display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:0.6rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 9px;border-radius:6px;cursor:pointer;text-decoration:none;transition:all 0.15s"
+                   onmouseover="this.style.borderColor='var(--border-hi)';this.style.color='var(--green)'"
+                   onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+                  View
+                </a>
+                <a href="../edit-listing.html?id=${encodeURIComponent(l.id||'')}" target="_blank"
+                   style="display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:0.6rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 9px;border-radius:6px;cursor:pointer;text-decoration:none;transition:all 0.15s"
+                   onmouseover="this.style.borderColor='var(--border-hi)';this.style.color='var(--green)'"
+                   onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+                  Edit
+                </a>
+                <button
+                  data-listing-id="${escAttr(l.id||'')}"
+                  data-listing-title="${escAttr(l.title||'Untitled')}"
+                  class="listing-delete-btn"
+                  style="display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:0.6rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(240,100,100,0.2);color:var(--red);padding:5px 9px;border-radius:6px;cursor:pointer;transition:all 0.15s"
+                  onmouseover="this.style.background='var(--red-dim)';this.style.borderColor='rgba(240,100,100,0.4)'"
+                  onmouseout="this.style.background='transparent';this.style.borderColor='rgba(240,100,100,0.2)'">
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+function escAttr(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function adminDeleteListing(id, title) {
+  if (!confirm(`Delete listing "${title}"?\n\nThis requires the listing secret. Use the Edit page to delete with the seller's secret, or remove the file directly from the repository.`)) return;
+  window.open(`../edit-listing.html?id=${encodeURIComponent(id)}`, '_blank');
+}
+
+// Delegated click handler for delete buttons rendered inside the table
+document.getElementById('listingsTable').addEventListener('click', function(e) {
+  const btn = e.target.closest('.listing-delete-btn');
+  if (!btn) return;
+  adminDeleteListing(btn.dataset.listingId || '', btn.dataset.listingTitle || 'Untitled');
+});
+
+// Style active filter buttons
+const filterStyle = document.createElement('style');
+filterStyle.textContent = `.listings-filter-btn.active { border-color: var(--border-hi) !important; color: var(--green) !important; background: var(--green-dim) !important; }`;
+document.head.appendChild(filterStyle);
 </script>
 </body>
 </html>
