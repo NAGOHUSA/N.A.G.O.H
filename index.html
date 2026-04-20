@@ -3,26 +3,235 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AppCodeMarket</title>
+  <title>N.A.G.O.H — App Code Marketplace</title>
+  <meta name="description" content="Buy and sell unfinished iOS/Android app source code. Give your project a second life on the N.A.G.O.H marketplace." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
-  <header class="container">
-    <h1>AppCodeMarket</h1>
-    <p>Buy and sell unfinished iOS/Android app source code.</p>
-    <a class="btn" href="create-listing.html">Create listing</a>
-  </header>
 
-  <main class="container">
-    <section>
-      <h2>Available Listings</h2>
+  <!-- ── Navigation ─────────────────────────────────── -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo" style="text-decoration:none">N.A.G.O.H<span>.</span></a>
+      <ul class="nav-links">
+        <li><a href="#marketplace">Marketplace</a></li>
+        <li><a href="#why">Why NAGOH</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#contact">Support</a></li>
+      </ul>
+      <a class="btn" href="create-listing.html">List Your App</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ───────────────────────────────────────── -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-eyebrow">
+        <span class="section-label">App Code Marketplace</span>
+      </div>
+      <h1>Give your app project<br /><em>a second chance</em></h1>
+      <p class="hero-sub">
+        N.A.G.O.H connects developers sitting on unfinished or shelved iOS &amp; Android projects
+        with buyers ready to take them to market. Stop letting great code collect dust.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-solid" href="#marketplace">Browse Listings</a>
+        <a class="btn btn-ghost" href="create-listing.html">Sell Your Project</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Why NAGOH ──────────────────────────────────── -->
+  <section class="section" id="why">
+    <div class="container">
+      <div class="text-center" style="margin-bottom:0.5rem">
+        <span class="section-label">Why NAGOH</span>
+      </div>
+      <h2 class="text-center">Why every stalled project<br />deserves a new owner</h2>
+      <div class="why-grid">
+        <div class="why-card animate-in" style="animation-delay:0.05s">
+          <span class="why-icon">🚀</span>
+          <div class="why-title">Unlock Hidden Value</div>
+          <p class="why-desc">
+            Your half-built app has real value — working auth flows, polished UI screens, battle-tested data models.
+            Don't write it off. Monetise it.
+          </p>
+        </div>
+        <div class="why-card animate-in" style="animation-delay:0.10s">
+          <span class="why-icon">⚡</span>
+          <div class="why-title">Jump-Start Development</div>
+          <p class="why-desc">
+            Buyers skip months of boilerplate and get straight to building the features that matter.
+            Existing codebases cut time-to-market dramatically.
+          </p>
+        </div>
+        <div class="why-card animate-in" style="animation-delay:0.15s">
+          <span class="why-icon">🎯</span>
+          <div class="why-title">Right Fit, Right Price</div>
+          <p class="why-desc">
+            Sellers set their own price and describe exactly what's included. Buyers know what they're
+            getting before committing — no surprise scope.
+          </p>
+        </div>
+        <div class="why-card animate-in" style="animation-delay:0.20s">
+          <span class="why-icon">🌍</span>
+          <div class="why-title">Market-Ready Reach</div>
+          <p class="why-desc">
+            Projects that couldn't find their market through traditional channels get a second shot
+            in front of a developer audience actively looking to buy.
+          </p>
+        </div>
+        <div class="why-card animate-in" style="animation-delay:0.25s">
+          <span class="why-icon">🔒</span>
+          <div class="why-title">Transparent Listings</div>
+          <p class="why-desc">
+            Every listing shows platform, tech stack, repository link, and direct seller contact.
+            Admin-reviewed listings keep the marketplace clean and trustworthy.
+          </p>
+        </div>
+        <div class="why-card animate-in" style="animation-delay:0.30s">
+          <span class="why-icon">💡</span>
+          <div class="why-title">Ideas Find New Life</div>
+          <p class="why-desc">
+            A pivot, a shutdown, a change of heart — whatever the reason, NAGOH gives innovative
+            ideas a path forward with someone who believes in them.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ── Marketplace ────────────────────────────────── -->
+  <section class="section" id="marketplace">
+    <div class="container">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem">
+        <div>
+          <span class="section-label">Live Listings</span>
+          <h2 style="margin-top:0.5rem">Available Projects</h2>
+        </div>
+        <a class="btn" href="create-listing.html">+ List Your App</a>
+      </div>
       <div id="listings" class="grid"></div>
-      <p id="emptyState" class="muted hidden">No listings available right now.</p>
-    </section>
-  </main>
+      <p id="emptyState" class="muted hidden" style="text-align:center;padding:3rem 0;font-size:0.85rem">
+        No listings available right now — check back soon or <a href="create-listing.html">list your own project</a>.
+      </p>
+    </div>
+  </section>
 
-  <footer class="container muted">
-    <small>AppCodeMarket does not process app purchase transactions between buyer and seller.</small>
+  <hr class="divider" />
+
+  <!-- ── How It Works ───────────────────────────────── -->
+  <section class="section" id="how-it-works">
+    <div class="container">
+      <div class="text-center" style="margin-bottom:0.5rem">
+        <span class="section-label">How It Works</span>
+      </div>
+      <h2 class="text-center">Simple process, real results</h2>
+
+      <p class="text-center muted" style="margin-top:0.75rem;margin-bottom:2.5rem;font-size:0.85rem;max-width:520px;margin-left:auto;margin-right:auto">
+        Whether you're selling an unfinished project or buying one, the process is designed to be
+        clear, fast, and fair for everyone involved.
+      </p>
+
+      <div style="margin-bottom:3rem">
+        <h3 style="font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1.25rem">For Sellers</h3>
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-num">01</div>
+            <div class="step-title">Pay the Listing Fee</div>
+            <p class="step-desc">A small one-time fee keeps the marketplace spam-free and ensures only serious sellers list their projects.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">02</div>
+            <div class="step-title">Submit Your Project</div>
+            <p class="step-desc">Fill in your project details — title, description, platform, tech stack, price, and your seller payment link.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">03</div>
+            <div class="step-title">Admin Review</div>
+            <p class="step-desc">Our team reviews each submission to ensure quality and relevance before it goes live on the marketplace.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">04</div>
+            <div class="step-title">Get Discovered</div>
+            <p class="step-desc">Your listing is published and developers actively looking to buy browse and contact you directly to purchase.</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1.25rem">For Buyers</h3>
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-num">01</div>
+            <div class="step-title">Browse Listings</div>
+            <p class="step-desc">Filter by platform or tech stack and explore curated projects that match what you're looking to build.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">02</div>
+            <div class="step-title">Review the Details</div>
+            <p class="step-desc">Each listing includes a description, platform, tech stack, and a link to the code repository for due diligence.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">03</div>
+            <div class="step-title">Buy Directly from Seller</div>
+            <p class="step-desc">Click "Buy from Seller" to go to the seller's own payment page. Transactions happen directly between buyer and seller.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">04</div>
+            <div class="step-title">Take Ownership</div>
+            <p class="step-desc">Once paid, work with the seller to transfer the repository and any assets. You now own the project outright.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ── Contact / Support ──────────────────────────── -->
+  <section class="section" id="contact">
+    <div class="container">
+      <div class="text-center" style="margin-bottom:0.5rem">
+        <span class="section-label">Support</span>
+      </div>
+      <h2 class="text-center">We're here to help</h2>
+      <div class="contact-box">
+        <h3>Get in touch with our team</h3>
+        <p>Have a question about a listing, need help with the process, or want to report an issue?
+          Reach out and we'll get back to you as quickly as possible.</p>
+        <a class="contact-email" href="mailto:support@nagohcreative.com">support@nagohcreative.com</a>
+        <br />
+        <a class="btn btn-solid" href="mailto:support@nagohcreative.com">Send Us a Message</a>
+        <p style="margin-top:1.5rem;font-size:0.72rem;color:var(--muted)">
+          Typical response time: within 1–2 business days.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ─────────────────────────────────────── -->
+  <footer class="section-sm" style="border-top:1px solid var(--border)">
+    <div class="container">
+      <div class="footer">
+        <div>
+          <div class="footer-logo">N.A.G.O.H<span>.</span></div>
+          <p style="font-size:0.7rem;color:var(--muted);margin-top:4px">Not Another Graveyard Of Hopes</p>
+        </div>
+        <div style="display:flex;gap:2rem;flex-wrap:wrap">
+          <a href="#marketplace" style="font-size:0.7rem;color:var(--muted)">Marketplace</a>
+          <a href="#how-it-works" style="font-size:0.7rem;color:var(--muted)">How It Works</a>
+          <a href="create-listing.html" style="font-size:0.7rem;color:var(--muted)">List a Project</a>
+          <a href="#contact" style="font-size:0.7rem;color:var(--muted)">Support</a>
+        </div>
+        <small style="color:var(--muted)">N.A.G.O.H does not process transactions between buyer and seller.</small>
+      </div>
+    </div>
   </footer>
 
   <script src="assets/js/main.js"></script>

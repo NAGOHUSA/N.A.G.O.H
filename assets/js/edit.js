@@ -8,8 +8,13 @@
   const secret = params.get('secret');
 
   function setStatus(message, isError) {
+    statusEl.classList.remove('hidden');
     statusEl.textContent = message;
-    statusEl.style.background = isError ? '#450a0a' : '#0b1220';
+    if (isError) {
+      statusEl.classList.add('error');
+    } else {
+      statusEl.classList.remove('error');
+    }
   }
 
   async function loadListing() {
