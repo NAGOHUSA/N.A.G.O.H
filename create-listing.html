@@ -1,15 +1,13 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create Listing • N.A.G.O.H (Test Mode – Payment Bypassed)</title>
+  <title>Create Listing • N.A.G.O.H (Live KV)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    /* ===== RESET & GLOBAL ===== */
     * {
       margin: 0;
       padding: 0;
@@ -41,7 +39,6 @@
       padding: 0 2rem;
     }
 
-    /* navigation */
     .nav {
       border-bottom: 1px solid var(--border);
       background: rgba(5,5,10,0.8);
@@ -82,7 +79,6 @@
     }
     .nav-links a:hover { color: var(--accent-primary); }
 
-    /* cards & typography */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -114,7 +110,6 @@
     h3 { font-family: var(--display); font-weight: 600; color: white; }
     .muted { color: var(--muted); font-size: 0.8rem; }
 
-    /* forms */
     label {
       display: block;
       font-size: 0.7rem;
@@ -181,7 +176,11 @@
       font-family: monospace;
       background: #0e0e18;
       border-left: 3px solid var(--accent-secondary);
+      white-space: pre-wrap;
+      word-break: break-word;
     }
+    .status.error { border-left-color: #f06464; color: #ffb8c4; }
+    .status.success { border-left-color: #52dcb4; color: #c0ffea; }
     .hidden { display: none; }
     .footer {
       display: flex;
@@ -221,6 +220,14 @@
       border: 1px dashed var(--accent-primary);
       color: #cdc6ff;
     }
+    .demo-badge {
+      background: rgba(82,220,180,0.08);
+      border: 1px solid rgba(82,220,180,0.2);
+      border-radius: 1rem;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.65rem;
+      color: var(--accent-secondary);
+    }
     @media (max-width: 780px) {
       .container { padding: 0 1rem; }
       div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
@@ -231,10 +238,10 @@
 
 <nav class="nav">
   <div class="nav-inner">
-    <a href="#" class="nav-logo" style="text-decoration:none">N.A.G.O.H<span>.</span></a>
+    <a href="dashboard.html" class="nav-logo" style="text-decoration:none">N.A.G.O.H<span>.</span></a>
     <ul class="nav-links">
+      <li><a href="dashboard.html">Dashboard</a></li>
       <li><a href="#">Marketplace</a></li>
-      <li><a href="#">How It Works</a></li>
       <li><a href="#">Support</a></li>
     </ul>
   </div>
@@ -242,80 +249,83 @@
 
 <main class="container">
   <div class="page-header">
-    <a href="#" class="back-link">← Back to marketplace</a>
-    <h1>List Your Project <span class="payment-badge">TEST MODE – Payment Skipped</span></h1>
-    <p class="muted" style="margin-top:0.5rem;font-size:0.88rem">✅ Payment step is bypassed for testing. After submitting, you'll see a success simulation — perfect for validating the listing flow.</p>
+    <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+    <h1>List Your Project <span class="payment-badge">LIVE KV MODE</span></h1>
+    <p class="muted" style="margin-top:0.5rem;font-size:0.88rem">✅ Payment bypass enabled for testing. Listings are written directly to Cloudflare KV and appear instantly in the dashboard.</p>
   </div>
 
   <div style="display:grid;gap:1.5rem;grid-template-columns:1fr 320px;align-items:start">
 
     <div style="display:flex;flex-direction:column;gap:1.5rem">
 
-      <!-- Step 1 - Bypassed payment card (simulated) -->
+      <!-- Step 1 - Bypassed payment -->
       <div class="card">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem">
           <span style="font-family:var(--display);font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#8a78ff,#52dcb4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">01</span>
           <h3 style="font-size:1rem">Pay Listing Fee <span style="background:#1e2a2a; color:#52dcb4; font-size:0.7rem; padding:2px 8px; border-radius:20px; margin-left:8px;">BYPASSED</span></h3>
         </div>
-        <p class="muted" style="font-size:0.82rem;margin-bottom:1.25rem">🔓 In production this would require Stripe payment. For testing, the fee is automatically considered "paid". Click below to simulate completion & unlock form.</p>
+        <p class="muted" style="font-size:0.82rem;margin-bottom:1.25rem">🔓 Test mode active. Click below to simulate payment and unlock the listing form. Listings will be saved to KV.</p>
         <button id="mockPayButton" class="btn btn-solid">✅ Simulate Payment & Unlock Listing</button>
-        <div id="paymentSimulationStatus" class="status hidden" style="margin-top:1rem;"></div>
+        <div id="paymentSimulationStatus" class="status hidden"></div>
       </div>
 
-      <!-- Step 2 - Submit Listing Details (initially disabled until mock payment) -->
-      <div class="card" id="listingFormCard" style="opacity:0.6; transition:opacity 0.25s; pointer-events:none">
+      <!-- Step 2 - Submit Listing Details -->
+      <div class="card" id="listingFormCard" style="opacity:0.6; pointer-events:none">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.25rem">
           <span style="font-family:var(--display);font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#8a78ff,#52dcb4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">02</span>
           <h3 style="font-size:1rem">Submit Listing Details</h3>
+          <span class="demo-badge" id="demoBadge" style="display:none">Demo ready</span>
         </div>
         <form id="createForm">
-          <label>Project name<input required name="title" id="titleInput" placeholder="e.g. FinTrack Pro" /></label>
-          <label>Short description<textarea required name="description" placeholder="Describe what the app does, what's been built, and what's missing…"></textarea></label>
-          <label>Platform
+          <label>Project name <span class="muted">*</span><input required name="title" id="titleInput" placeholder="e.g. FinTrack Pro" /></label>
+          <label>Short description <span class="muted">*</span><textarea required name="description" placeholder="Describe what the app does, what's been built, and what's missing…"></textarea></label>
+          <label>Platform <span class="muted">*</span>
             <select name="platform" required>
               <option value="iOS">iOS</option>
               <option value="Android">Android</option>
               <option value="iOS + Android">iOS + Android</option>
             </select>
           </label>
-          <label>GitHub repository URL<input required name="repoUrl" type="url" placeholder="https://github.com/yourname/yourrepo" /></label>
-          <label>Seller purchase / payment link<input required name="sellerPaymentLink" type="url" placeholder="https://buy.stripe.com/…" /></label>
-          <label>Listing price (USD)<input required name="priceUsd" type="number" min="1" step="1" placeholder="e.g. 499" /></label>
+          <label>GitHub repository URL <span class="muted">*</span><input required name="repoUrl" type="url" placeholder="https://github.com/yourname/yourrepo" /></label>
+          <label>Seller purchase / payment link <span class="muted">*</span><input required name="sellerPaymentLink" type="url" placeholder="https://buy.stripe.com/…" /></label>
+          <label>Listing price (USD) <span class="muted">*</span><input required name="priceUsd" type="number" min="1" step="1" placeholder="e.g. 499" /></label>
           <label>Tech stack<input name="techStack" placeholder="SwiftUI, Kotlin, Firebase…" /></label>
           <label>App icon URL <span class="muted">(optional)</span><input name="iconUrl" type="url" placeholder="https://…/icon.png" /></label>
-          <label>Contact email<input required name="contactEmail" type="email" placeholder="you@example.com" /></label>
-          <label>Listing duration (days)<input required name="expiresInDays" type="number" min="1" max="90" value="30" /></label>
-          <button class="btn btn-solid" type="submit" style="width:100%;justify-content:center">Create Listing →</button>
+          <label>Contact email <span class="muted">*</span><input required name="contactEmail" type="email" placeholder="you@example.com" /></label>
+          <label>Listing duration (days) <span class="muted">*</span><input required name="expiresInDays" type="number" min="1" max="90" value="30" /></label>
+          <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+            <button type="button" id="demoFillBtn" class="btn btn-ghost" style="flex:1; justify-content:center">⚡ Fill Demo Data</button>
+            <button type="submit" class="btn btn-solid" style="flex:1; justify-content:center">Create Listing →</button>
+          </div>
         </form>
         <pre id="createStatus" class="status hidden"></pre>
       </div>
     </div>
 
-    <!-- Sidebar info -->
+    <!-- Sidebar -->
     <div style="display:flex;flex-direction:column;gap:1.25rem">
       <div class="card">
         <div class="test-note">
-          🧪 <strong>Bypass mode active</strong><br>
-          • No Stripe redirect required.<br>
-          • Click "Simulate Payment" to unlock form.<br>
-          • All submissions will be logged to console & show preview.
+          🧪 <strong>Live KV Mode</strong><br>
+          • Payment bypassed for testing<br>
+          • Listings go directly to Cloudflare KV<br>
+          • View them instantly in the dashboard<br>
+          • Demo data available for quick testing
         </div>
         <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem">What Happens Next</div>
         <div style="font-size:0.8rem;color:var(--muted);line-height:1.8">
-          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;<strong>Pay the listing fee via Stripe</strong> <span style="color:#52dcb4;">(simulated)</span></div>
+          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;<strong>Pay the listing fee</strong> <span style="color:#52dcb4;">(simulated)</span></div>
           <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;Fill in your project details</div>
-          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;Our team reviews your submission</div>
-          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;Listing goes live on the marketplace</div>
+          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;<strong>Written to KV database</strong> — instantly live</div>
+          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;View in dashboard immediately</div>
           <div style="padding:0.5rem 0">✓ &nbsp;Buyers contact you directly</div>
         </div>
       </div>
       <div class="card">
-        <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem">Need Help?</div>
-        <p style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem">Questions about the listing process? Our support team is here for you.</p>
-        <a class="btn btn-ghost" href="mailto:support@nagohcreative.com" style="font-size:0.68rem">support@nagohcreative.com</a>
+        <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem">API Status</div>
+        <div id="apiStatus" style="font-size:0.7rem; color:var(--green);">✓ Ready to write to KV</div>
       </div>
     </div>
-
   </div>
 </main>
 
@@ -324,172 +334,85 @@
   <div class="container">
     <div class="footer">
       <div class="footer-logo">N.A.G.O.H<span>.</span></div>
-      <small style="color:var(--muted)">N.A.G.O.H does not process transactions between buyer and seller. (Test environment – payment disabled)</small>
+      <small style="color:var(--muted)">Listings are stored in Cloudflare KV and appear instantly in the marketplace.</small>
     </div>
   </div>
 </footer>
 
 <script>
   (function() {
-    // ---------- TEST MODE: Bypass payment simulation ----------
-    // Simulate Stripe session token: we bypass actual redirect & store fake payment flag
+    const API_BASE = window.location.origin;
     let paymentCompleted = false;
+    let fakeSessionId = null;
+    
     const listingCard = document.getElementById('listingFormCard');
     const mockPayBtn = document.getElementById('mockPayButton');
     const paymentStatusDiv = document.getElementById('paymentSimulationStatus');
     const createStatusPre = document.getElementById('createStatus');
+    const form = document.getElementById('createForm');
+    const apiStatusSpan = document.getElementById('apiStatus');
 
-    // Helper to show status messages
     function showStatus(element, message, isError = false) {
       if (!element) return;
       element.textContent = message;
       element.classList.remove('hidden');
-      element.style.borderLeftColor = isError ? '#ff5e7e' : '#52dcb4';
-      if (isError) {
-        element.style.color = '#ffb8c4';
-      } else {
-        element.style.color = '#c0ffea';
+      element.classList.remove('error', 'success');
+      element.classList.add(isError ? 'error' : 'success');
+      
+      if (!isError) {
+        setTimeout(() => {
+          if (element && !element.matches(':hover')) {
+            // keep visible but user can see
+          }
+        }, 8000);
       }
-      setTimeout(() => {
-        if (element && !element.matches(':hover')) {
-          // optional auto hide after 5 sec, but we keep for clarity
-        }
-      }, 5000);
     }
 
-    // unlock listing form after simulated payment
+    async function testAPIConnection() {
+      try {
+        const response = await fetch(`${API_BASE}/api/listings`);
+        if (response.ok) {
+          apiStatusSpan.innerHTML = '✓ KV connected · Ready to create listings';
+          apiStatusSpan.style.color = '#52dcb4';
+        } else {
+          apiStatusSpan.innerHTML = '⚠ API available but check worker';
+          apiStatusSpan.style.color = '#f0b429';
+        }
+      } catch (err) {
+        apiStatusSpan.innerHTML = '✗ Cannot reach API. Make sure worker is deployed.';
+        apiStatusSpan.style.color = '#f06464';
+        console.error('API test failed:', err);
+      }
+    }
+
     function unlockForm() {
       if (paymentCompleted) return;
       paymentCompleted = true;
-      // enable visual and pointer events
+      fakeSessionId = 'bypass_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+      sessionStorage.setItem('nagoh_payment_session', fakeSessionId);
+      
       listingCard.style.opacity = '1';
       listingCard.style.pointerEvents = 'auto';
-      // update the payment card UI to show success state
       mockPayBtn.disabled = true;
       mockPayBtn.textContent = '✓ Payment Simulated Successfully';
       mockPayBtn.style.opacity = '0.7';
       mockPayBtn.style.cursor = 'default';
-      showStatus(paymentStatusDiv, '✅ Payment simulation complete! You can now fill out and submit your listing.', false);
       
-      // additional visual feedback: change step 1 badge
+      showStatus(paymentStatusDiv, '✅ Payment simulation complete! You can now create a listing that will be saved to KV.', false);
+      
       const stepOneBadge = document.querySelector('.card:first-child h3 span');
       if (stepOneBadge) stepOneBadge.textContent = 'PAID (TEST)';
-      
-      // Also we can store a fake stripe session token in sessionStorage for realism
-      sessionStorage.setItem('nagoh_test_payment_token', 'bypass_stripe_sim_' + Date.now());
     }
 
-    // simulate payment click handler
     mockPayBtn.addEventListener('click', () => {
       if (paymentCompleted) {
         showStatus(paymentStatusDiv, '⚠️ Payment already simulated. You can now submit the listing.', false);
         return;
       }
-      // Simulate async Stripe redirect flow? but we directly unlock
       unlockForm();
     });
 
-    // If user tries to submit before payment, prevent
-    const form = document.getElementById('createForm');
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      if (!paymentCompleted) {
-        // Payment not bypassed yet
-        showStatus(createStatusPre, '❌ Payment required: please click "Simulate Payment & Unlock Listing" first.', true);
-        createStatusPre.classList.remove('hidden');
-        return;
-      }
-      
-      // Gather form data (same as original, but we bypass actual backend call with a simulation for testing)
-      const formData = new FormData(form);
-      const listingData = {};
-      for (let [key, value] of formData.entries()) {
-        listingData[key] = value.trim();
-      }
-      
-      // Basic client-side validation (mirror required fields)
-      const requiredFields = ['title', 'description', 'platform', 'repoUrl', 'sellerPaymentLink', 'priceUsd', 'contactEmail', 'expiresInDays'];
-      let missing = false;
-      for (let field of requiredFields) {
-        if (!listingData[field]) {
-          showStatus(createStatusPre, `⛔ Missing field: ${field}. Please fill out all required fields.`, true);
-          missing = true;
-          return;
-        }
-      }
-      if (listingData.priceUsd && (isNaN(parseFloat(listingData.priceUsd)) || parseFloat(listingData.priceUsd) < 1)) {
-        showStatus(createStatusPre, '❌ Price must be a positive number.', true);
-        return;
-      }
-      const days = parseInt(listingData.expiresInDays);
-      if (isNaN(days) || days < 1 || days > 90) {
-        showStatus(createStatusPre, '❌ Duration must be between 1 and 90 days.', true);
-        return;
-      }
-      
-      // Build a mock API response / simulate successful listing creation
-      // In a real integration this would POST to backend with stripe session token.
-      // For testing we display success and output the created listing object.
-      const mockListingId = 'lst_' + Math.random().toString(36).substring(2, 10);
-      const timestamp = new Date().toISOString();
-      
-      // Simulate network delay
-      showStatus(createStatusPre, '⏳ Submitting listing (simulated)...', false);
-      createStatusPre.classList.remove('hidden');
-      
-      setTimeout(() => {
-        // Create enriched object
-        const finalListing = {
-          id: mockListingId,
-          ...listingData,
-          priceUsd: parseFloat(listingData.priceUsd),
-          expiresInDays: days,
-          createdAt: timestamp,
-          paymentStatus: 'bypassed_test_mode',
-          status: 'pending_review',
-          message: '✅ Listing created successfully! (Payment bypassed - review simulation)'
-        };
-        
-        // Log to console for developer validation
-        console.log('=== N.A.G.O.H LISTING CREATED (TEST MODE) ===');
-        console.log(JSON.stringify(finalListing, null, 2));
-        console.log('=== End Listing ===');
-        
-        // Store in localStorage for demo persistence? optional
-        const previousListings = JSON.parse(localStorage.getItem('nagoh_test_listings') || '[]');
-        previousListings.push(finalListing);
-        localStorage.setItem('nagoh_test_listings', JSON.stringify(previousListings));
-        
-        // Show success with details
-        let successMessage = `🎉 LISTING CREATED SUCCESSFULLY! (TEST MODE)\n`;
-        successMessage += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-        successMessage += `Project: ${finalListing.title}\n`;
-        successMessage += `Platform: ${finalListing.platform}\n`;
-        successMessage += `Price: $${finalListing.priceUsd}\n`;
-        successMessage += `Contact: ${finalListing.contactEmail}\n`;
-        successMessage += `Status: pending admin review (simulated)\n`;
-        successMessage += `Listing ID: ${mockListingId}\n`;
-        successMessage += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-        successMessage += `✨ Listing process fully verified. The actual backend would store this. ✨`;
-        
-        showStatus(createStatusPre, successMessage, false);
-        
-        // Optionally reset form? not required but we keep filled for debugging
-        // Also optionally highlight that payment simulation persists
-        // Clear any previous hidden
-        createStatusPre.style.whiteSpace = 'pre-wrap';
-        
-        // (Extra) If we want to show a success green border
-        createStatusPre.style.borderLeftColor = '#52dcb4';
-        
-        // Also announce that the flow works
-        const announcement = document.createElement('div');
-        // not necessary but nice
-      }, 600);
-    });
-    
-    // Prefill some demo data for faster testing? optional but helpful
+    // Demo data
     function setDemoPlaceholders() {
       const demoValues = {
         title: "SwiftWallet - AI Finance Tracker",
@@ -506,66 +429,134 @@
         const field = form.querySelector(`[name="${name}"]`);
         if (field) field.value = value;
       }
+      document.getElementById('demoBadge').style.display = 'inline-block';
+      setTimeout(() => {
+        document.getElementById('demoBadge').style.opacity = '0.5';
+      }, 2000);
     }
-    
-    // add small helper note to demo-fill quickly (not required but convenient)
-    const addDemoButton = () => {
-      const formCard = document.getElementById('listingFormCard');
-      if (formCard) {
-        const demoBtn = document.createElement('button');
-        demoBtn.type = 'button';
-        demoBtn.textContent = '⚡ Fill Demo Data';
-        demoBtn.className = 'btn btn-ghost';
-        demoBtn.style.marginTop = '0.8rem';
-        demoBtn.style.width = '100%';
-        demoBtn.style.fontSize = '0.7rem';
-        demoBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          if (!paymentCompleted) {
-            showStatus(createStatusPre, '🔓 Please simulate payment first before filling demo data.', true);
-            return;
-          }
-          setDemoPlaceholders();
-          showStatus(createStatusPre, '🧪 Demo data filled! You can edit or submit.', false);
-        });
-        const parentOfForm = document.querySelector('#createForm');
-        if (parentOfForm && !document.getElementById('demoFillHelper')) {
-          const wrapper = document.createElement('div');
-          wrapper.id = 'demoFillHelper';
-          wrapper.style.marginTop = '12px';
-          wrapper.appendChild(demoBtn);
-          parentOfForm.parentNode?.insertBefore(wrapper, parentOfForm.nextSibling);
+
+    document.getElementById('demoFillBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!paymentCompleted) {
+        showStatus(createStatusPre, '🔓 Please simulate payment first before filling demo data.', true);
+        return;
+      }
+      setDemoPlaceholders();
+      showStatus(createStatusPre, '🧪 Demo data filled! Review and submit to save to KV.', false);
+    });
+
+    // Submit to live KV via Worker API
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!paymentCompleted) {
+        showStatus(createStatusPre, '❌ Payment required: please click "Simulate Payment & Unlock Listing" first.', true);
+        createStatusPre.classList.remove('hidden');
+        return;
+      }
+      
+      const formData = new FormData(form);
+      const listingData = {};
+      for (let [key, value] of formData.entries()) {
+        listingData[key] = value.trim();
+      }
+      
+      // Validation
+      const requiredFields = ['title', 'description', 'platform', 'repoUrl', 'sellerPaymentLink', 'priceUsd', 'contactEmail', 'expiresInDays'];
+      for (let field of requiredFields) {
+        if (!listingData[field]) {
+          showStatus(createStatusPre, `⛔ Missing field: ${field}. Please fill out all required fields.`, true);
+          return;
         }
       }
-    };
+      
+      const price = parseFloat(listingData.priceUsd);
+      if (isNaN(price) || price < 1) {
+        showStatus(createStatusPre, '❌ Price must be a positive number.', true);
+        return;
+      }
+      
+      const days = parseInt(listingData.expiresInDays);
+      if (isNaN(days) || days < 1 || days > 90) {
+        showStatus(createStatusPre, '❌ Duration must be between 1 and 90 days.', true);
+        return;
+      }
+      
+      // Prepare payload for worker
+      const payload = {
+        ...listingData,
+        priceUsd: price,
+        expiresInDays: days,
+        paymentSessionId: fakeSessionId,
+        skipPayment: true  // bypass flag for test mode
+      };
+      
+      showStatus(createStatusPre, '⏳ Creating listing and saving to KV...', false);
+      createStatusPre.classList.remove('hidden');
+      
+      try {
+        const response = await fetch(`${API_BASE}/api/listings`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+          // Success - listing saved to KV
+          const successMsg = `🎉 LISTING SAVED TO KV!\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nProject: ${listingData.title}\nPlatform: ${listingData.platform}\nPrice: $${price}\nContact: ${listingData.contactEmail}\nListing ID: ${result.id}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n✨ View it instantly in the dashboard! ✨\n\nEdit URL: ${result.editUrl || 'use dashboard'}`;
+          showStatus(createStatusPre, successMsg, false);
+          
+          // Reset form or offer to create another
+          setTimeout(() => {
+            if (confirm('Listing created successfully! Would you like to create another?')) {
+              form.reset();
+              // Keep payment bypass active
+            } else {
+              window.location.href = 'dashboard.html';
+            }
+          }, 1000);
+        } else {
+          throw new Error(result.error || 'Failed to save to KV');
+        }
+      } catch (error) {
+        console.error('Create listing error:', error);
+        showStatus(createStatusPre, `❌ Failed to save to KV: ${error.message}\n\nMake sure your worker is deployed and LISTINGS_STORAGE KV binding is configured.`, true);
+      }
+    });
     
-    // If someone tries to submit without payment, we already covered. Also add dynamic indicator.
-    // Also ensure card starts disabled
+    // Check URL for auto-unlock (bypass param)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('bypass') === 'true' && !paymentCompleted) {
+      unlockForm();
+      showStatus(paymentStatusDiv, '🔓 Auto-unlocked via URL parameter. Ready to create listings.', false);
+    }
+    
+    // Check if returning from Stripe (real payment)
+    const sessionId = urlParams.get('session_id');
+    if (sessionId && !paymentCompleted) {
+      fakeSessionId = sessionId;
+      unlockForm();
+      showStatus(paymentStatusDiv, '✅ Payment detected! You can now create your listing.', false);
+    }
+    
+    // Test API connection on load
+    testAPIConnection();
+    
+    // Initial state
     if (!paymentCompleted) {
       listingCard.style.opacity = '0.6';
       listingCard.style.pointerEvents = 'none';
     }
     
-    // On page load, check if there's any leftover flag? but fresh start.
-    // Provide a small indicator: payment step card shows bypass info
     const stepOneDiv = document.querySelector('.card:first-child p.muted');
     if (stepOneDiv) {
-      stepOneDiv.innerHTML = '🔓 <strong>Test mode:</strong> No real Stripe integration. Click "Simulate Payment" to instantly unlock listing form.';
+      stepOneDiv.innerHTML = '🔓 <strong>Test mode:</strong> Payment bypassed. Click simulate, then submit — your listing goes straight to KV.';
     }
     
-    addDemoButton();
-    
-    // edge: simulate that the user might have previously paid? no, fresh each time.
-    // Provide manual override via URL param for advanced testers
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('bypass') === 'true' && !paymentCompleted) {
-      unlockForm();
-      showStatus(paymentStatusDiv, '🔓 Auto-unlocked via URL parameter (?bypass=true). Ready to submit.', false);
-    }
-    
-    // additional hint
-    console.log('N.A.G.O.H Test Mode: Payment bypass active. Click simulate payment to enable listing creation.');
+    console.log('N.A.G.O.H Create Listing — Live KV Mode. Listings will be saved to Cloudflare KV.');
   })();
 </script>
 </body>
-
+</html>
