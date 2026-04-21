@@ -14,6 +14,7 @@ zone_name = "nagoh.xyz"
 [vars]
 GITHUB_OWNER = "NAGOHUSA"
 GITHUB_REPO = "N.A.G.O.H"
+GITHUB_BRANCH = "main"
 SITE_BASE_URL = "https://nagoh.xyz"
 # Set secrets via:
 #   wrangler secret put GITHUB_TOKEN
