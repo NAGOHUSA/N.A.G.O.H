@@ -376,7 +376,7 @@
           apiStatusSpan.innerHTML = '✓ Worker connected · Ready to create listings';
           apiStatusSpan.style.color = '#52dcb4';
         } else if (!ct.includes('application/json')) {
-          apiStatusSpan.innerHTML = '✗ Worker not reachable — check Cloudflare route for nagoh.xyz/api/*';
+          apiStatusSpan.innerHTML = '✗ Worker not reachable — check Cloudflare route for alerts.nagoh.xyz/api/*';
           apiStatusSpan.style.color = '#f06464';
         } else {
           apiStatusSpan.innerHTML = '⚠ API available but check worker';
@@ -511,7 +511,7 @@
           result = await response.json();
         } else {
           const body = await response.text();
-          throw new Error(`Worker not reachable at ${API_BASE}/api/listings — received non-JSON response. Make sure the Cloudflare Worker is deployed and the nagoh.xyz/api/* route is configured.\n\nRaw response: ${body.slice(0, 300)}`);
+          throw new Error(`Worker not reachable at ${API_BASE}/api/listings — received non-JSON response. Make sure the Cloudflare Worker is deployed and the alerts.nagoh.xyz/api/* route is configured.\n\nRaw response: ${body.slice(0, 300)}`);
         }
 
         if (response.ok && result.success) {
