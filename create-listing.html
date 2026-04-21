@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create Listing • N.A.G.O.H (Live KV)</title>
+  <title>Create Listing • N.A.G.O.H</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
@@ -179,8 +179,9 @@
       white-space: pre-wrap;
       word-break: break-word;
     }
-    .status.error { border-left-color: #f06464; color: #ffb8c4; }
-    .status.success { border-left-color: #52dcb4; color: #c0ffea; }
+    .status.error { border-left-color: #f06464; color: #ffb8c4; background: #1a0a0a; }
+    .status.success { border-left-color: #52dcb4; color: #c0ffea; background: #0a1a1a; }
+    .status.info { border-left-color: #8a78ff; color: #cdc6ff; background: #0a0a1a; }
     .hidden { display: none; }
     .footer {
       display: flex;
@@ -228,6 +229,15 @@
       font-size: 0.65rem;
       color: var(--accent-secondary);
     }
+    .success-badge {
+      display: inline-block;
+      background: rgba(82,220,180,0.2);
+      border-radius: 2rem;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.65rem;
+      margin-left: 0.5rem;
+      color: #52dcb4;
+    }
     @media (max-width: 780px) {
       .container { padding: 0 1rem; }
       div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
@@ -238,9 +248,9 @@
 
 <nav class="nav">
   <div class="nav-inner">
-    <a href="dashboard.html" class="nav-logo" style="text-decoration:none">N.A.G.O.H<span>.</span></a>
+    <a href="#" class="nav-logo" style="text-decoration:none">N.A.G.O.H<span>.</span></a>
     <ul class="nav-links">
-      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="#">Dashboard</a></li>
       <li><a href="#">Marketplace</a></li>
       <li><a href="#">Support</a></li>
     </ul>
@@ -249,33 +259,27 @@
 
 <main class="container">
   <div class="page-header">
-    <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
-    <h1>List Your Project <span class="payment-badge">LIVE KV MODE</span></h1>
-    <p class="muted" style="margin-top:0.5rem;font-size:0.88rem">✅ Payment bypass enabled for testing. Listings are written directly to Cloudflare KV and appear instantly in the dashboard.</p>
+    <a href="#" class="back-link">← Back to Dashboard</a>
+    <h1>List Your Project <span class="payment-badge">LIVE</span></h1>
+    <p class="muted" style="margin-top:0.5rem;font-size:0.88rem">✅ Worker connected and ready. Test mode active - no payment required.</p>
   </div>
 
   <div style="display:grid;gap:1.5rem;grid-template-columns:1fr 320px;align-items:start">
 
     <div style="display:flex;flex-direction:column;gap:1.5rem">
-
-      <!-- Step 1 - Bypassed payment -->
-      <div class="card">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem">
-          <span style="font-family:var(--display);font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#8a78ff,#52dcb4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">01</span>
-          <h3 style="font-size:1rem">Pay Listing Fee <span style="background:#1e2a2a; color:#52dcb4; font-size:0.7rem; padding:2px 8px; border-radius:20px; margin-left:8px;">BYPASSED</span></h3>
-        </div>
-        <p class="muted" style="font-size:0.82rem;margin-bottom:1.25rem">🔓 Test mode active. Click below to simulate payment and unlock the listing form. Listings will be saved to KV.</p>
-        <button id="mockPayButton" class="btn btn-solid">✅ Simulate Payment & Unlock Listing</button>
-        <div id="paymentSimulationStatus" class="status hidden"></div>
-      </div>
-
-      <!-- Step 2 - Submit Listing Details -->
-      <div class="card" id="listingFormCard" style="opacity:0.6; pointer-events:none">
+      <!-- Submit Listing Details -->
+      <div class="card" id="listingFormCard">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.25rem">
-          <span style="font-family:var(--display);font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#8a78ff,#52dcb4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">02</span>
+          <span style="font-family:var(--display);font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#8a78ff,#52dcb4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">01</span>
           <h3 style="font-size:1rem">Submit Listing Details</h3>
           <span class="demo-badge" id="demoBadge" style="display:none">Demo ready</span>
         </div>
+        
+        <!-- Worker Status -->
+        <div id="workerStatus" class="status info" style="margin-bottom:1rem;">
+          🔍 Connecting to worker...
+        </div>
+        
         <form id="createForm">
           <label>Project name <span class="muted">*</span><input required name="title" id="titleInput" placeholder="e.g. FinTrack Pro" /></label>
           <label>Short description <span class="muted">*</span><textarea required name="description" placeholder="Describe what the app does, what's been built, and what's missing…"></textarea></label>
@@ -298,7 +302,7 @@
             <button type="submit" class="btn btn-solid" style="flex:1; justify-content:center">Create Listing →</button>
           </div>
         </form>
-        <pre id="createStatus" class="status hidden"></pre>
+        <div id="createStatus" class="status hidden"></div>
       </div>
     </div>
 
@@ -306,24 +310,24 @@
     <div style="display:flex;flex-direction:column;gap:1.25rem">
       <div class="card">
         <div class="test-note">
-          🧪 <strong>Live KV Mode</strong><br>
-          • Payment bypassed for testing<br>
-          • Submission saved as pending<br>
-          • Admin reviews and approves from dashboard<br>
-          • Demo data available for quick testing
+          🚀 <strong>Worker Connected!</strong><br>
+          • Endpoint: nagoh-relay-v2.gregoryhogan.workers.dev<br>
+          • Test mode active - no payment required<br>
+          • Submissions saved to KV storage<br>
+          • Admin approval required for marketplace
         </div>
-        <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem">What Happens Next</div>
+        <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem">Process</div>
         <div style="font-size:0.8rem;color:var(--muted);line-height:1.8">
-          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;<strong>Pay the listing fee</strong> <span style="color:#52dcb4;">(simulated)</span></div>
           <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;Fill in your project details</div>
-          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;<strong>Submitted for review</strong> — saved as pending</div>
-          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;Admin approves from the dashboard</div>
-          <div style="padding:0.5rem 0">✓ &nbsp;Once approved, buyers can contact you</div>
+          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;Submit for review</div>
+          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;Admin approves listing</div>
+          <div style="padding:0.5rem 0">✓ &nbsp;Appears on marketplace</div>
         </div>
       </div>
       <div class="card">
-        <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem">API Status</div>
-        <div id="apiStatus" style="font-size:0.7rem; color:var(--green);">✓ Ready to submit listing</div>
+        <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem">Connection Status</div>
+        <div id="apiStatus" style="font-size:0.7rem; color:#52dcb4;">✓ Connected to worker</div>
+        <button id="testConnectionBtn" class="btn btn-ghost" style="width:100%; margin-top:1rem; justify-content:center">🔄 Test Connection</button>
       </div>
     </div>
   </div>
@@ -334,83 +338,64 @@
   <div class="container">
     <div class="footer">
       <div class="footer-logo">N.A.G.O.H<span>.</span></div>
-      <small style="color:var(--muted)">Submissions are reviewed by the team before appearing on the marketplace.</small>
+      <small style="color:var(--muted)">Submissions are reviewed before appearing on the marketplace.</small>
     </div>
   </div>
 </footer>
 
 <script>
   (function() {
-    // Use relative path if hosted on same domain, otherwise use the worker URL
-    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-      ? 'https://alerts.nagoh.xyz'  // Replace with your worker URL
-      : '';
+    // Your worker URL
+    const WORKER_URL = 'https://nagoh-relay-v2.gregoryhogan.workers.dev';
     
-    let paymentCompleted = false;
-    let fakeSessionId = null;
-    
-    const listingCard = document.getElementById('listingFormCard');
-    const mockPayBtn = document.getElementById('mockPayButton');
-    const paymentStatusDiv = document.getElementById('paymentSimulationStatus');
     const createStatusPre = document.getElementById('createStatus');
     const form = document.getElementById('createForm');
+    const workerStatusDiv = document.getElementById('workerStatus');
     const apiStatusSpan = document.getElementById('apiStatus');
-
-    function showStatus(element, message, isError = false) {
+    
+    function showStatus(element, message, type = 'success') {
       if (!element) return;
       element.textContent = message;
-      element.classList.remove('hidden');
-      element.classList.remove('error', 'success');
-      element.classList.add(isError ? 'error' : 'success');
+      element.classList.remove('hidden', 'error', 'success', 'info');
+      element.classList.add(type);
+      console.log(`[${type.toUpperCase()}] ${message}`);
     }
-
-    async function testAPIConnection() {
+    
+    async function testWorkerConnection() {
+      showStatus(workerStatusDiv, '🔍 Testing worker connection...', 'info');
+      
       try {
-        const url = `${API_BASE}/api/listings`;
-        const response = await fetch(url);
-        const ct = response.headers.get('content-type') || '';
-        if (response.ok && ct.includes('application/json')) {
-          apiStatusSpan.innerHTML = '✓ Worker connected · Ready to create listings';
+        // Test health endpoint
+        const healthUrl = `${WORKER_URL}/health`;
+        console.log('Testing:', healthUrl);
+        
+        const response = await fetch(healthUrl);
+        console.log('Health response status:', response.status);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Health data:', data);
+          showStatus(workerStatusDiv, '✅ Worker connected and online! Ready to accept listings.', 'success');
+          apiStatusSpan.innerHTML = '✓ Worker online • Ready';
           apiStatusSpan.style.color = '#52dcb4';
-        } else if (!ct.includes('application/json')) {
-          apiStatusSpan.innerHTML = '⚠ Worker reachable but check configuration';
-          apiStatusSpan.style.color = '#f0b429';
+          return true;
         } else {
-          apiStatusSpan.innerHTML = '✓ API available';
-          apiStatusSpan.style.color = '#52dcb4';
+          const text = await response.text();
+          showStatus(workerStatusDiv, `⚠️ Worker returned status ${response.status}. Check worker logs.`, 'error');
+          apiStatusSpan.innerHTML = '⚠ Worker error';
+          apiStatusSpan.style.color = '#f0b429';
+          return false;
         }
-      } catch (err) {
-        apiStatusSpan.innerHTML = '⚠ Cannot reach API. Make sure worker is deployed.';
+      } catch (error) {
+        console.error('Connection error:', error);
+        showStatus(workerStatusDiv, `❌ Cannot reach worker: ${error.message}. Make sure worker is deployed.`, 'error');
+        apiStatusSpan.innerHTML = '✗ Worker unreachable';
         apiStatusSpan.style.color = '#f06464';
-        console.error('API test failed:', err);
+        return false;
       }
     }
-
-    function unlockForm() {
-      if (paymentCompleted) return;
-      paymentCompleted = true;
-      fakeSessionId = 'bypass_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
-      sessionStorage.setItem('nagoh_payment_session', fakeSessionId);
-      
-      listingCard.style.opacity = '1';
-      listingCard.style.pointerEvents = 'auto';
-      mockPayBtn.disabled = true;
-      mockPayBtn.textContent = '✓ Payment Simulated Successfully';
-      mockPayBtn.style.opacity = '0.7';
-      mockPayBtn.style.cursor = 'default';
-      
-      showStatus(paymentStatusDiv, '✅ Payment simulation complete! You can now create a listing that will be saved to KV.', false);
-    }
-
-    mockPayBtn.addEventListener('click', () => {
-      if (paymentCompleted) {
-        showStatus(paymentStatusDiv, '⚠️ Payment already simulated. You can now submit the listing.', false);
-        return;
-      }
-      unlockForm();
-    });
-
-    // Demo data
+    
+    // Demo data filler
     function setDemoPlaceholders() {
       const demoValues = {
         title: "SwiftWallet - AI Finance Tracker",
@@ -428,30 +413,25 @@
         if (field) field.value = value;
       }
       document.getElementById('demoBadge').style.display = 'inline-block';
+      showStatus(createStatusPre, '🧪 Demo data filled! Review and submit.', 'success');
       setTimeout(() => {
         document.getElementById('demoBadge').style.opacity = '0.5';
       }, 2000);
     }
-
+    
     document.getElementById('demoFillBtn').addEventListener('click', (e) => {
       e.preventDefault();
-      if (!paymentCompleted) {
-        showStatus(createStatusPre, '🔓 Please simulate payment first before filling demo data.', true);
-        return;
-      }
       setDemoPlaceholders();
-      showStatus(createStatusPre, '🧪 Demo data filled! Review and submit to save to KV.', false);
     });
-
-    // Submit to live KV via Worker API
+    
+    document.getElementById('testConnectionBtn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await testWorkerConnection();
+    });
+    
+    // Submit listing to worker
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
-      if (!paymentCompleted) {
-        showStatus(createStatusPre, '❌ Payment required: please click "Simulate Payment & Unlock Listing" first.', true);
-        createStatusPre.classList.remove('hidden');
-        return;
-      }
       
       const formData = new FormData(form);
       const listingData = {};
@@ -463,24 +443,24 @@
       const requiredFields = ['title', 'description', 'platform', 'repoUrl', 'sellerPaymentLink', 'priceUsd', 'contactEmail', 'expiresInDays'];
       for (let field of requiredFields) {
         if (!listingData[field]) {
-          showStatus(createStatusPre, `⛔ Missing field: ${field}. Please fill out all required fields.`, true);
+          showStatus(createStatusPre, `⛔ Missing field: ${field}. Please fill out all required fields.`, 'error');
           return;
         }
       }
       
       const price = parseFloat(listingData.priceUsd);
       if (isNaN(price) || price < 1) {
-        showStatus(createStatusPre, '❌ Price must be a positive number.', true);
+        showStatus(createStatusPre, '❌ Price must be a positive number.', 'error');
         return;
       }
       
       const days = parseInt(listingData.expiresInDays);
       if (isNaN(days) || days < 1 || days > 90) {
-        showStatus(createStatusPre, '❌ Duration must be between 1 and 90 days.', true);
+        showStatus(createStatusPre, '❌ Duration must be between 1 and 90 days.', 'error');
         return;
       }
       
-      // Prepare payload for worker - matches what the worker expects
+      // Prepare payload for worker
       const payload = {
         title: listingData.title,
         description: listingData.description,
@@ -488,73 +468,61 @@
         repoUrl: listingData.repoUrl,
         sellerPaymentLink: listingData.sellerPaymentLink,
         priceUsd: price,
-        techStack: listingData.techStack,
-        iconUrl: listingData.iconUrl,
+        techStack: listingData.techStack || '',
+        iconUrl: listingData.iconUrl || '',
         contactEmail: listingData.contactEmail,
         expiresInDays: days,
-        skipPayment: true  // bypass flag for test mode
+        skipPayment: true  // Test mode - no payment required
       };
       
-      showStatus(createStatusPre, '⏳ Creating listing and saving to KV...', false);
+      showStatus(createStatusPre, '⏳ Submitting listing to worker...', 'info');
       createStatusPre.classList.remove('hidden');
       
       try {
-        const url = `${API_BASE}/api/listings`;
+        const url = `${WORKER_URL}/api/listings`;
+        console.log('POST to:', url);
+        console.log('Payload:', payload);
+        
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-
+        
+        console.log('Response status:', response.status);
+        const responseText = await response.text();
+        console.log('Response body:', responseText);
+        
         let result;
-        const ct = response.headers.get('content-type') || '';
-        if (ct.includes('application/json')) {
-          result = await response.json();
-        } else {
-          const body = await response.text();
-          throw new Error(`Worker returned non-JSON response. Make sure the CloudFlare Worker is deployed.\n\nResponse: ${body.slice(0, 300)}`);
+        try {
+          result = JSON.parse(responseText);
+        } catch(e) {
+          throw new Error(`Worker returned invalid response. Status: ${response.status}\n\nResponse: ${responseText.substring(0, 300)}`);
         }
-
+        
         if (response.ok && result.success) {
-          // Success - listing submitted for review
-          const successMsg = `✅ LISTING SUBMITTED FOR REVIEW!\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nProject: ${listingData.title}\nPlatform: ${listingData.platform}\nPrice: $${price}\nContact: ${listingData.contactEmail}\nSubmission ID: ${result.id}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⏳ Your listing is pending admin approval.\nCheck the dashboard to track its status.\n\n${result.editUrl ? 'Edit URL: ' + result.editUrl : ''}`;
-          showStatus(createStatusPre, successMsg, false);
-
-          // Reset form after successful submission
+          const successMsg = `✅ LISTING SUBMITTED FOR REVIEW!\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📱 Project: ${listingData.title}\n🎯 Platform: ${listingData.platform}\n💰 Price: $${price}\n📧 Contact: ${listingData.contactEmail}\n🆔 Submission ID: ${result.id}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⏳ Your listing is pending admin approval.\n\n${result.editUrl ? '✏️ Edit URL: ' + result.editUrl : ''}`;
+          showStatus(createStatusPre, successMsg, 'success');
+          
+          // Optionally reset form
           setTimeout(() => {
-            if (confirm('Listing submitted for review! Would you like to submit another?')) {
+            if (confirm('Listing submitted successfully! Would you like to submit another?')) {
               form.reset();
-              // Keep payment bypass active for next submission
-            } else {
-              window.location.href = 'dashboard.html';
             }
-          }, 1000);
+          }, 500);
         } else {
-          throw new Error(result.error || 'Submission failed');
+          throw new Error(result.error || 'Submission failed - check worker logs');
         }
       } catch (error) {
-        console.error('Create listing error:', error);
-        showStatus(createStatusPre, `❌ Failed to submit listing: ${error.message}\n\nMake sure your worker is deployed and KV namespace is properly bound.`, true);
+        console.error('Submission error:', error);
+        showStatus(createStatusPre, `❌ Failed to submit listing:\n\n${error.message}\n\nMake sure your worker is properly configured with KV binding.`, 'error');
       }
     });
     
-    // Check URL for auto-unlock (bypass param)
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('bypass') === 'true' && !paymentCompleted) {
-      unlockForm();
-      showStatus(paymentStatusDiv, '🔓 Auto-unlocked via URL parameter. Ready to create listings.', false);
-    }
+    // Initialize - test connection on load
+    testWorkerConnection();
     
-    // Test API connection on load
-    testAPIConnection();
-    
-    // Initial state
-    if (!paymentCompleted) {
-      listingCard.style.opacity = '0.6';
-      listingCard.style.pointerEvents = 'none';
-    }
-    
-    console.log('N.A.G.O.H Create Listing — Submissions are saved as pending and require admin approval.');
+    console.log('Page loaded. Worker URL:', WORKER_URL);
   })();
 </script>
 </body>
