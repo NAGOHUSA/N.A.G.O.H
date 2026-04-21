@@ -252,7 +252,7 @@ async function handleApplePush(token, request, env) {
   try {
     notification = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
   } catch {
-    return json({ error: 'Could not decode notification payload' }, 400);
+    return json({ error: 'Could not decode notification payload: invalid base64 encoding or malformed JSON' }, 400);
   }
 
   const notificationType = notification.notificationType || 'UNKNOWN';
