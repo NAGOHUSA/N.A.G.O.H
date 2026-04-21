@@ -1,17 +1,21 @@
-name = "appcodemarket-webhook"
+name = "nagoh-alerts"
 main = "index.js"
 compatibility_date = "2026-01-01"
 
-# Route all /api/* requests on the production domain to this worker.
-# Static HTML/CSS/JS files are served by GitHub Pages via Cloudflare CDN.
+# Handles all requests on the alerts subdomain:
+#   /health              — health check
+#   /webhook             — Stripe payment-link webhook
+#   /v1/push/:token      — Apple App Store Server Notifications
+#   /api/*               — listings & submissions API
 [[routes]]
-pattern = "alerts.nagoh.xyz/api/*"
-zone_name = "aleets.nagoh.xyz"
+pattern = "alerts.nagoh.xyz/*"
+zone_name = "nagoh.xyz"
 
 [vars]
 GITHUB_OWNER = "NAGOHUSA"
 GITHUB_REPO = "N.A.G.O.H"
 SITE_BASE_URL = "https://nagoh.xyz"
-LISTING_FEE_CENTS = "500"
-CURRENCY = "usd"
-# Set secrets via: wrangler secret put ADMIN_KEY / GITHUB_TOKEN / STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET
+# Set secrets via:
+#   wrangler secret put GITHUB_TOKEN
+#   wrangler secret put STRIPE_WEBHOOK_SECRET
+#   wrangler secret put ADMIN_KEY
