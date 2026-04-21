@@ -1,4 +1,27 @@
-const API_HEADERS = {
+// alerts.nagoh.xyz/* — Cloudflare Worker
+//
+// Routes handled:
+//   GET  /health                            Health check
+//   POST /webhook                           Stripe payment-link webhook (no STRIPE_SECRET_KEY needed)
+//   POST /v1/push/:token                    Apple App Store Server Notification receiver
+//   GET  /api/listings                      List approved listings
+//   POST /api/listings                      Submit listing (payment verified via webhook record)
+//   GET  /api/listings/:id?secret=…         Get listing (requires secret)
+//   PUT  /api/listings/:id                  Update listing (requires secret)
+//   DELETE /api/listings/:id               Delete listing (admin key or secret)
+//   GET  /api/submissions                   List submissions (admin)
+//   POST /api/submissions/:id/approve       Approve submission (admin)
+//   POST /api/submissions/:id/reject        Reject submission (admin)
+//
+// Required secrets (wrangler secret put …):
+//   GITHUB_TOKEN           — PAT with repo write access
+//   STRIPE_WEBHOOK_SECRET  — Stripe webhook signing secret (no Stripe API key needed)
+//   ADMIN_KEY              — arbitrary secret for admin endpoints
+//
+// Required vars (wrangler.toml [vars]):
+//   GITHUB_OWNER, GITHUB_REPO, SITE_BASE_URL
+
+const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type,Stripe-Signature,X-Admin-Key',
@@ -7,46 +30,41 @@ const API_HEADERS = {
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: API_HEADERS });
+      return new Response(null, { status: 204, headers: CORS });
     }
 
     const url = new URL(request.url);
+    const { pathname } = url;
 
     try {
-      if (url.pathname === '/api/create-checkout' && request.method === 'POST') {
-        return withCors(await createCheckoutSession(request, env));
+      // Health check
+      if (pathname === '/health' && request.method === 'GET') {
+        return withCors(json({ ok: true, service: 'alerts.nagoh.xyz', ts: new Date().toISOString() }));
       }
 
-      if (url.pathname === '/webhook' && request.method === 'POST') {
+      // Stripe payment-link webhook (records paid sessions; no Stripe API call needed)
+      if (pathname === '/webhook' && request.method === 'POST') {
         return withCors(await handleStripeWebhook(request, env));
       }
 
-      if (url.pathname === '/api/listings' && request.method === 'GET') {
+      // Apple App Store Server Notifications
+      const pushMatch = pathname.match(/^\/v1\/push\/(.+)$/);
+      if (pushMatch && request.method === 'POST') {
+        return withCors(await handleApplePush(pushMatch[1], request, env));
+      }
+
+      // Listings
+      if (pathname === '/api/listings' && request.method === 'GET') {
         return withCors(await listListings(env));
       }
 
-      if (url.pathname === '/api/listings' && request.method === 'POST') {
+      if (pathname === '/api/listings' && request.method === 'POST') {
         return withCors(await createListing(request, env));
       }
 
-      if (url.pathname === '/api/submissions' && request.method === 'GET') {
-        return withCors(await listSubmissions(request, env));
-      }
-
-      const submissionActionMatch = url.pathname.match(/^\/api\/submissions\/([a-z0-9-]+)\/(approve|reject)$/i);
-      if (submissionActionMatch && request.method === 'POST') {
-        const [, submissionId, action] = submissionActionMatch;
-        if (action === 'approve') {
-          return withCors(await approveSubmission(submissionId, request, env));
-        } else {
-          return withCors(await rejectSubmission(submissionId, request, env));
-        }
-      }
-
-      const listingMatch = url.pathname.match(/^\/api\/listings\/([a-z0-9-]+)$/i);
+      const listingMatch = pathname.match(/^\/api\/listings\/([a-z0-9-]+)$/i);
       if (listingMatch) {
         const listingId = listingMatch[1];
-
         if (request.method === 'GET') {
           return withCors(await getListingWithSecret(listingId, url.searchParams.get('secret'), env));
         }
@@ -58,6 +76,20 @@ export default {
         }
       }
 
+      // Submissions (admin)
+      if (pathname === '/api/submissions' && request.method === 'GET') {
+        return withCors(await listSubmissions(request, env));
+      }
+
+      const submissionActionMatch = pathname.match(/^\/api\/submissions\/([a-z0-9-]+)\/(approve|reject)$/i);
+      if (submissionActionMatch && request.method === 'POST') {
+        const [, submissionId, action] = submissionActionMatch;
+        if (action === 'approve') {
+          return withCors(await approveSubmission(submissionId, request, env));
+        }
+        return withCors(await rejectSubmission(submissionId, request, env));
+      }
+
       return withCors(json({ error: 'Not found' }, 404));
     } catch (error) {
       return withCors(json({ error: error.message || 'Server error' }, 500));
@@ -65,9 +97,11 @@ export default {
   },
 };
 
+// ── Core helpers ──────────────────────────────────────────────────────────────
+
 function withCors(response) {
   const headers = new Headers(response.headers);
-  Object.entries(API_HEADERS).forEach(([k, v]) => headers.set(k, v));
+  Object.entries(CORS).forEach(([k, v]) => headers.set(k, v));
   return new Response(response.body, { status: response.status, headers });
 }
 
@@ -82,99 +116,6 @@ function requiredEnv(env, key) {
   const value = env[key];
   if (!value) throw new Error(`Missing environment variable: ${key}`);
   return value;
-}
-
-async function createCheckoutSession(request, env) {
-  const stripeSecret = requiredEnv(env, 'STRIPE_SECRET_KEY');
-  const body = await request.json().catch(() => ({}));
-  const successBase = body.successUrl || `${env.SITE_BASE_URL || 'https://nagoh.xyz'}/create-listing.html`;
-  const cancelBase = body.cancelUrl || `${env.SITE_BASE_URL || 'https://nagoh.xyz'}/create-listing.html?canceled=1`;
-  const listingFeeCents = Number(env.LISTING_FEE_CENTS || 500);
-  const currency = (env.CURRENCY || 'usd').toLowerCase();
-
-  const form = new URLSearchParams({
-    mode: 'payment',
-    success_url: `${successBase}?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: cancelBase,
-    'line_items[0][price_data][currency]': currency,
-    'line_items[0][price_data][unit_amount]': String(listingFeeCents),
-    'line_items[0][price_data][product_data][name]': 'AppCodeMarket listing fee',
-    'line_items[0][quantity]': '1',
-  });
-
-  const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${stripeSecret}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: form,
-  });
-
-  const result = await response.json();
-  if (!response.ok) return json({ error: result?.error?.message || 'Stripe checkout failed' }, 400);
-
-  return json({ id: result.id, url: result.url });
-}
-
-async function handleStripeWebhook(request, env) {
-  const stripeWebhookSecret = requiredEnv(env, 'STRIPE_WEBHOOK_SECRET');
-  const signature = request.headers.get('Stripe-Signature');
-  const rawBody = await request.text();
-
-  const valid = await verifyStripeSignature(rawBody, signature, stripeWebhookSecret);
-  if (!valid) return json({ error: 'Invalid Stripe signature' }, 400);
-
-  const event = JSON.parse(rawBody);
-
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data?.object;
-    if (session?.id) {
-      await writeJsonFile(
-        env,
-        `_data/checkout-events/${session.id}.json`,
-        {
-          sessionId: session.id,
-          eventType: event.type,
-          paymentStatus: session.payment_status,
-          amountTotal: session.amount_total,
-          currency: session.currency,
-          completedAt: new Date().toISOString(),
-        },
-        `Record completed listing-fee checkout ${session.id}`,
-      );
-    }
-  }
-
-  return json({ received: true });
-}
-
-async function verifyStripeSignature(payload, stripeSignatureHeader, webhookSecret) {
-  if (!stripeSignatureHeader) return false;
-
-  const parsed = Object.fromEntries(
-    stripeSignatureHeader
-      .split(',')
-      .map((part) => part.split('='))
-      .filter(([k, v]) => k && v),
-  );
-
-  const timestamp = parsed.t;
-  const v1 = parsed.v1;
-  if (!timestamp || !v1) return false;
-
-  const signedPayload = `${timestamp}.${payload}`;
-  const key = await crypto.subtle.importKey(
-    'raw',
-    new TextEncoder().encode(webhookSecret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
-  );
-
-  const signatureBuffer = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(signedPayload));
-  const digestHex = [...new Uint8Array(signatureBuffer)].map((b) => b.toString(16).padStart(2, '0')).join('');
-  return safeEqual(digestHex, v1);
 }
 
 function safeEqual(a, b) {
@@ -206,6 +147,154 @@ function validateEmail(email) {
   return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(email || ''));
 }
 
+async function sha256(text) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function matchesSecret(secret, hash) {
+  return safeEqual(await sha256(secret), hash || '');
+}
+
+function verifyAdminKey(request, env) {
+  const adminKey = env.ADMIN_KEY;
+  if (!adminKey) return { ok: false, error: 'Admin key not configured on server' };
+  const requestKey = request.headers.get('X-Admin-Key');
+  if (!requestKey) return { ok: false, error: 'X-Admin-Key header required' };
+  if (!safeEqual(requestKey, adminKey)) return { ok: false, error: 'Invalid admin key' };
+  return { ok: true };
+}
+
+// ── Stripe webhook ────────────────────────────────────────────────────────────
+// Verifies the Stripe-Signature header and records completed payment-link
+// sessions so createListing can confirm payment without calling the Stripe API.
+
+async function handleStripeWebhook(request, env) {
+  const webhookSecret = requiredEnv(env, 'STRIPE_WEBHOOK_SECRET');
+  const signature = request.headers.get('Stripe-Signature');
+  const rawBody = await request.text();
+
+  if (!(await verifyStripeSignature(rawBody, signature, webhookSecret))) {
+    return json({ error: 'Invalid Stripe signature' }, 400);
+  }
+
+  const event = JSON.parse(rawBody);
+
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data?.object;
+    if (session?.id) {
+      await writeJsonFile(
+        env,
+        `_data/checkout-sessions/${session.id}.json`,
+        {
+          sessionId: session.id,
+          paymentStatus: session.payment_status,
+          amountTotal: session.amount_total,
+          currency: session.currency,
+          completedAt: new Date().toISOString(),
+        },
+        `Record Stripe payment-link session ${session.id}`,
+      );
+    }
+  }
+
+  return json({ received: true });
+}
+
+async function verifyStripeSignature(payload, stripeSignatureHeader, webhookSecret) {
+  if (!stripeSignatureHeader) return false;
+
+  const parsed = Object.fromEntries(
+    stripeSignatureHeader
+      .split(',')
+      .map((part) => part.split('='))
+      .filter(([k, v]) => k && v),
+  );
+
+  const { t, v1 } = parsed;
+  if (!t || !v1) return false;
+
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(webhookSecret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+
+  const signatureBuffer = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${t}.${payload}`));
+  const digestHex = [...new Uint8Array(signatureBuffer)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  return safeEqual(digestHex, v1);
+}
+
+// ── Apple App Store Server Notifications ─────────────────────────────────────
+// Receives Apple JWS notifications, decodes them, and persists to GitHub
+// so you can audit subscription events from the dashboard.
+
+async function handleApplePush(token, request, env) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'Invalid JSON body' }, 400);
+  }
+
+  const { signedPayload } = body || {};
+  if (!signedPayload || typeof signedPayload !== 'string') {
+    return json({ error: 'signedPayload is required' }, 400);
+  }
+
+  // Apple JWS format: header.payload.signature — decode the middle part
+  const parts = signedPayload.split('.');
+  if (parts.length < 2) return json({ error: 'Malformed signedPayload' }, 400);
+
+  let notification;
+  try {
+    notification = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+  } catch {
+    return json({ error: 'Could not decode notification payload' }, 400);
+  }
+
+  const notificationType = notification.notificationType || 'UNKNOWN';
+  const subtype = notification.subtype || '';
+
+  // Decode signed transaction info if present (non-fatal if it fails)
+  let transactionInfo = null;
+  const txJws = notification.data?.signedTransactionInfo;
+  if (txJws && typeof txJws === 'string') {
+    try {
+      const txParts = txJws.split('.');
+      if (txParts.length >= 2) {
+        transactionInfo = JSON.parse(atob(txParts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      }
+    } catch {
+      // non-fatal
+    }
+  }
+
+  const record = {
+    token,
+    notificationType,
+    subtype,
+    transactionInfo,
+    rawNotification: notification,
+    receivedAt: new Date().toISOString(),
+  };
+
+  // Persist to GitHub for audit (non-fatal if GitHub write fails)
+  const id = crypto.randomUUID();
+  await writeJsonFile(
+    env,
+    `_data/apple-notifications/${id}.json`,
+    record,
+    `Apple push notification ${notificationType} ${id}`,
+  ).catch(() => {});
+
+  return json({ received: true, message: 'Notification Sent!', notificationType, subtype });
+}
+
+// ── Listing validation ────────────────────────────────────────────────────────
+
 function normalizeListingPayload(payload) {
   const priceUsd = Number(payload.priceUsd);
   const expiresInDays = Math.max(1, Math.min(90, Number(payload.expiresInDays || 30)));
@@ -231,24 +320,35 @@ function normalizeListingPayload(payload) {
   };
 }
 
+// ── Create listing ────────────────────────────────────────────────────────────
+// Payment verification uses the webhook-recorded session file instead of
+// calling the Stripe API, so no STRIPE_SECRET_KEY is required.
+
 async function createListing(request, env) {
   const body = await request.json();
   const isTestMode = body.skipPayment === true;
 
   if (!isTestMode) {
     const sessionId = body.sessionId || body.paymentSessionId;
-    if (!sessionId) return json({ error: 'sessionId is required' }, 400);
-
-    const session = await fetchCheckoutSession(sessionId, env);
-    if (!session || session.payment_status !== 'paid' || session.status !== 'complete') {
-      return json({ error: 'Stripe session is not paid and complete' }, 400);
+    if (!sessionId) {
+      return json({ error: 'sessionId is required — complete the Stripe payment link first' }, 400);
     }
 
-    const sessionMarkerPath = `_data/checkout-sessions/${sessionId}.json`;
-    const alreadyUsed = await readJsonFile(env, sessionMarkerPath).catch(() => null);
-    if (alreadyUsed) return json({ error: 'This checkout session was already used' }, 400);
+    // Verify payment was recorded by the /webhook handler (no Stripe API call)
+    const sessionRecord = await readJsonFile(env, `_data/checkout-sessions/${sessionId}.json`).catch(() => null);
+    if (!sessionRecord || sessionRecord.paymentStatus !== 'paid') {
+      return json(
+        { error: 'Payment not confirmed. Complete the Stripe payment link and try again.' },
+        400,
+      );
+    }
 
-    await writeJsonFile(env, sessionMarkerPath, { usedAt: new Date().toISOString() }, `Mark checkout ${sessionId} as used`);
+    // Prevent a session from being used twice
+    const usedPath = `_data/checkout-sessions-used/${sessionId}.json`;
+    const alreadyUsed = await readJsonFile(env, usedPath).catch(() => null);
+    if (alreadyUsed) return json({ error: 'This payment session has already been used' }, 400);
+
+    await writeJsonFile(env, usedPath, { usedAt: new Date().toISOString() }, `Mark session ${sessionId} as used`);
   }
 
   const normalized = normalizeListingPayload(body);
@@ -290,6 +390,8 @@ async function createListing(request, env) {
   });
 }
 
+// ── Get / update / delete listing ────────────────────────────────────────────
+
 async function getListingWithSecret(listingId, secret, env) {
   const file = await readJsonFile(env, `_data/listings/${listingId}.json`);
   const secretFile = await readJsonFile(env, `_data/listing-secrets/${listingId}.json`);
@@ -297,7 +399,6 @@ async function getListingWithSecret(listingId, secret, env) {
   if (!(await matchesSecret(secret, secretFile.secretHash))) {
     return json({ error: 'Unauthorized' }, 401);
   }
-
   return json({ listing: file });
 }
 
@@ -347,23 +448,108 @@ async function deleteListing(listingId, request, env) {
   return json({ success: true, ok: true });
 }
 
-async function matchesSecret(secret, hash) {
-  return safeEqual(await sha256(secret), hash || '');
+// ── List approved listings ────────────────────────────────────────────────────
+
+async function listListings(env) {
+  try {
+    const files = await listDirectory(env, '_data/listings');
+    const jsonFiles = files.filter((f) => f.type === 'file' && f.name.endsWith('.json'));
+
+    const listings = await Promise.all(
+      jsonFiles.map((f) => readJsonFile(env, `_data/listings/${f.name}`).catch(() => null)),
+    );
+
+    const validListings = listings.filter(Boolean);
+    return json({ success: true, listings: validListings, count: validListings.length });
+  } catch (error) {
+    return json({ success: false, error: error.message, listings: [], count: 0 });
+  }
 }
 
-async function sha256(text) {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+// ── Submissions (admin-only) ──────────────────────────────────────────────────
+
+async function listSubmissions(request, env) {
+  const adminAuth = verifyAdminKey(request, env);
+  if (!adminAuth.ok) return json({ error: adminAuth.error }, 401);
+
+  try {
+    const files = await listDirectory(env, '_data/submissions');
+    const jsonFiles = files.filter((f) => f.type === 'file' && f.name.endsWith('.json'));
+
+    const submissions = await Promise.all(
+      jsonFiles.map((f) => readJsonFile(env, `_data/submissions/${f.name}`).catch(() => null)),
+    );
+
+    const validSubmissions = submissions.filter(Boolean);
+    return json({ success: true, submissions: validSubmissions, count: validSubmissions.length });
+  } catch (error) {
+    return json({ success: false, error: error.message, submissions: [], count: 0 });
+  }
 }
 
-async function fetchCheckoutSession(sessionId, env) {
-  const stripeSecret = requiredEnv(env, 'STRIPE_SECRET_KEY');
-  const response = await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`, {
-    headers: { Authorization: `Bearer ${stripeSecret}` },
-  });
-  if (!response.ok) return null;
-  return response.json();
+async function approveSubmission(submissionId, request, env) {
+  const adminAuth = verifyAdminKey(request, env);
+  if (!adminAuth.ok) return json({ error: adminAuth.error }, 401);
+
+  const submissionPath = `_data/submissions/${submissionId}.json`;
+  const existingData = await readJsonFile(env, submissionPath, true);
+  const submission = existingData.content;
+
+  if (submission.status === 'approved') return json({ error: 'Submission already approved' }, 400);
+  if (submission.status === 'rejected') return json({ error: 'Cannot approve a rejected submission' }, 400);
+
+  const now = new Date();
+  const listing = {
+    id: submission.id,
+    title: submission.title,
+    description: submission.description,
+    platform: submission.platform,
+    repoUrl: submission.repoUrl,
+    sellerPaymentLink: submission.sellerPaymentLink,
+    priceUsd: submission.priceUsd,
+    techStack: submission.techStack,
+    iconUrl: submission.iconUrl,
+    contactEmail: submission.contactEmail,
+    createdAt: submission.submittedAt,
+    expiresAt: submission.expiresAt,
+    approvedAt: now.toISOString(),
+    status: 'approved',
+  };
+
+  await writeJsonFile(env, `_data/listings/${submissionId}.json`, listing, `Approve listing ${submissionId}`);
+
+  const updatedSubmission = { ...submission, status: 'approved', approvedAt: now.toISOString() };
+  await writeJsonFile(env, submissionPath, updatedSubmission, `Mark submission ${submissionId} as approved`, existingData.sha);
+
+  return json({ success: true, id: submissionId });
 }
+
+async function rejectSubmission(submissionId, request, env) {
+  const adminAuth = verifyAdminKey(request, env);
+  if (!adminAuth.ok) return json({ error: adminAuth.error }, 401);
+
+  const submissionPath = `_data/submissions/${submissionId}.json`;
+  const existingData = await readJsonFile(env, submissionPath, true);
+  const submission = existingData.content;
+
+  if (submission.status === 'approved') return json({ error: 'Cannot reject an already approved submission' }, 400);
+  if (submission.status === 'rejected') return json({ error: 'Submission already rejected' }, 400);
+
+  const body = await request.json().catch(() => ({}));
+  const now = new Date();
+  const updatedSubmission = {
+    ...submission,
+    status: 'rejected',
+    rejectedAt: now.toISOString(),
+    rejectionReason: String(body.reason || '').trim() || null,
+  };
+
+  await writeJsonFile(env, submissionPath, updatedSubmission, `Reject submission ${submissionId}`, existingData.sha);
+
+  return json({ success: true, id: submissionId });
+}
+
+// ── GitHub helpers ────────────────────────────────────────────────────────────
 
 function githubHeaders(env) {
   const token = requiredEnv(env, 'GITHUB_TOKEN');
@@ -444,17 +630,6 @@ async function deleteFile(env, path, sha, message) {
   return safeJson(response, path);
 }
 
-function verifyAdminKey(request, env) {
-  const adminKey = env.ADMIN_KEY;
-  if (!adminKey) return { ok: false, error: 'Admin key not configured on server' };
-  const requestKey = request.headers.get('X-Admin-Key');
-  if (!requestKey) return { ok: false, error: 'X-Admin-Key header required' };
-  if (!safeEqual(requestKey, adminKey)) return { ok: false, error: 'Invalid admin key' };
-  return { ok: true };
-}
-
-// ── List directory ──────────────────────────────────────────────────────────
-
 async function listDirectory(env, path) {
   const response = await fetch(githubContentUrl(env, path), { headers: githubHeaders(env) });
   if (!response.ok) {
@@ -463,117 +638,4 @@ async function listDirectory(env, path) {
   }
   const result = await safeJson(response, path);
   return Array.isArray(result) ? result : [];
-}
-
-// ── List approved listings ──────────────────────────────────────────────────
-
-async function listListings(env) {
-  try {
-    const files = await listDirectory(env, '_data/listings');
-    const jsonFiles = files.filter(f => f.type === 'file' && f.name.endsWith('.json'));
-
-    const listings = await Promise.all(
-      jsonFiles.map(f => readJsonFile(env, `_data/listings/${f.name}`).catch(() => null)),
-    );
-
-    const validListings = listings.filter(Boolean);
-    return json({ success: true, listings: validListings, count: validListings.length });
-  } catch (error) {
-    return json({ success: false, error: error.message, listings: [], count: 0 });
-  }
-}
-
-// ── List submissions (admin-only) ───────────────────────────────────────────
-
-async function listSubmissions(request, env) {
-  const adminAuth = verifyAdminKey(request, env);
-  if (!adminAuth.ok) return json({ error: adminAuth.error }, 401);
-
-  try {
-    const files = await listDirectory(env, '_data/submissions');
-    const jsonFiles = files.filter(f => f.type === 'file' && f.name.endsWith('.json'));
-
-    const submissions = await Promise.all(
-      jsonFiles.map(f => readJsonFile(env, `_data/submissions/${f.name}`).catch(() => null)),
-    );
-
-    const validSubmissions = submissions.filter(Boolean);
-    return json({ success: true, submissions: validSubmissions, count: validSubmissions.length });
-  } catch (error) {
-    return json({ success: false, error: error.message, submissions: [], count: 0 });
-  }
-}
-
-// ── Approve submission (admin-only) ────────────────────────────────────────
-
-async function approveSubmission(submissionId, request, env) {
-  const adminAuth = verifyAdminKey(request, env);
-  if (!adminAuth.ok) return json({ error: adminAuth.error }, 401);
-
-  const submissionPath = `_data/submissions/${submissionId}.json`;
-  const existingData = await readJsonFile(env, submissionPath, true);
-  const submission = existingData.content;
-
-  if (submission.status === 'approved') {
-    return json({ error: 'Submission already approved' }, 400);
-  }
-  if (submission.status === 'rejected') {
-    return json({ error: 'Cannot approve a rejected submission' }, 400);
-  }
-
-  const now = new Date();
-  const listing = {
-    id: submission.id,
-    title: submission.title,
-    description: submission.description,
-    platform: submission.platform,
-    repoUrl: submission.repoUrl,
-    sellerPaymentLink: submission.sellerPaymentLink,
-    priceUsd: submission.priceUsd,
-    techStack: submission.techStack,
-    iconUrl: submission.iconUrl,
-    contactEmail: submission.contactEmail,
-    createdAt: submission.submittedAt,
-    expiresAt: submission.expiresAt,
-    approvedAt: now.toISOString(),
-    status: 'approved',
-  };
-
-  await writeJsonFile(env, `_data/listings/${submissionId}.json`, listing, `Approve listing ${submissionId}`);
-
-  const updatedSubmission = { ...submission, status: 'approved', approvedAt: now.toISOString() };
-  await writeJsonFile(env, submissionPath, updatedSubmission, `Mark submission ${submissionId} as approved`, existingData.sha);
-
-  return json({ success: true, id: submissionId });
-}
-
-// ── Reject submission (admin-only) ─────────────────────────────────────────
-
-async function rejectSubmission(submissionId, request, env) {
-  const adminAuth = verifyAdminKey(request, env);
-  if (!adminAuth.ok) return json({ error: adminAuth.error }, 401);
-
-  const submissionPath = `_data/submissions/${submissionId}.json`;
-  const existingData = await readJsonFile(env, submissionPath, true);
-  const submission = existingData.content;
-
-  if (submission.status === 'approved') {
-    return json({ error: 'Cannot reject an already approved submission' }, 400);
-  }
-  if (submission.status === 'rejected') {
-    return json({ error: 'Submission already rejected' }, 400);
-  }
-
-  const body = await request.json().catch(() => ({}));
-  const now = new Date();
-  const updatedSubmission = {
-    ...submission,
-    status: 'rejected',
-    rejectedAt: now.toISOString(),
-    rejectionReason: String(body.reason || '').trim() || null,
-  };
-
-  await writeJsonFile(env, submissionPath, updatedSubmission, `Reject submission ${submissionId}`, existingData.sha);
-
-  return json({ success: true, id: submissionId });
 }
