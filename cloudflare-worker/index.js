@@ -1,7 +1,7 @@
 const API_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type,Stripe-Signature',
+  'Access-Control-Allow-Headers': 'Content-Type,Stripe-Signature,X-Admin-Key',
 };
 
 export default {
@@ -21,8 +21,26 @@ export default {
         return withCors(await handleStripeWebhook(request, env));
       }
 
+      if (url.pathname === '/api/listings' && request.method === 'GET') {
+        return withCors(await listListings(env));
+      }
+
       if (url.pathname === '/api/listings' && request.method === 'POST') {
         return withCors(await createListing(request, env));
+      }
+
+      if (url.pathname === '/api/submissions' && request.method === 'GET') {
+        return withCors(await listSubmissions(request, env));
+      }
+
+      const submissionActionMatch = url.pathname.match(/^\/api\/submissions\/([a-z0-9-]+)\/(approve|reject)$/i);
+      if (submissionActionMatch && request.method === 'POST') {
+        const [, submissionId, action] = submissionActionMatch;
+        if (action === 'approve') {
+          return withCors(await approveSubmission(submissionId, request, env));
+        } else {
+          return withCors(await rejectSubmission(submissionId, request, env));
+        }
       }
 
       const listingMatch = url.pathname.match(/^\/api\/listings\/([a-z0-9-]+)$/i);
@@ -215,16 +233,23 @@ function normalizeListingPayload(payload) {
 
 async function createListing(request, env) {
   const body = await request.json();
-  if (!body.sessionId) return json({ error: 'sessionId is required' }, 400);
+  const isTestMode = body.skipPayment === true;
 
-  const session = await fetchCheckoutSession(body.sessionId, env);
-  if (!session || session.payment_status !== 'paid' || session.status !== 'complete') {
-    return json({ error: 'Stripe session is not paid and complete' }, 400);
+  if (!isTestMode) {
+    const sessionId = body.sessionId || body.paymentSessionId;
+    if (!sessionId) return json({ error: 'sessionId is required' }, 400);
+
+    const session = await fetchCheckoutSession(sessionId, env);
+    if (!session || session.payment_status !== 'paid' || session.status !== 'complete') {
+      return json({ error: 'Stripe session is not paid and complete' }, 400);
+    }
+
+    const sessionMarkerPath = `_data/checkout-sessions/${sessionId}.json`;
+    const alreadyUsed = await readJsonFile(env, sessionMarkerPath).catch(() => null);
+    if (alreadyUsed) return json({ error: 'This checkout session was already used' }, 400);
+
+    await writeJsonFile(env, sessionMarkerPath, { usedAt: new Date().toISOString() }, `Mark checkout ${sessionId} as used`);
   }
-
-  const sessionMarkerPath = `_data/checkout-sessions/${body.sessionId}.json`;
-  const alreadyUsed = await readJsonFile(env, sessionMarkerPath).catch(() => null);
-  if (alreadyUsed) return json({ error: 'This checkout session was already used' }, 400);
 
   const normalized = normalizeListingPayload(body);
   const idBase = slugify(normalized.title) || 'app-listing';
@@ -234,7 +259,7 @@ async function createListing(request, env) {
   const now = new Date();
   const expiresAt = new Date(now.getTime() + normalized.expiresInDays * 86400000).toISOString();
 
-  const listing = {
+  const submission = {
     id,
     title: normalized.title,
     description: normalized.description,
@@ -245,18 +270,24 @@ async function createListing(request, env) {
     techStack: normalized.techStack,
     iconUrl: normalized.iconUrl,
     contactEmail: normalized.contactEmail,
-    createdAt: now.toISOString(),
+    submittedAt: now.toISOString(),
     expiresAt,
+    status: 'pending',
+    testMode: isTestMode,
   };
 
-  await writeJsonFile(env, `_data/listings/${id}.json`, listing, `Create listing ${id}`);
-  await writeJsonFile(env, `_data/listing-secrets/${id}.json`, { secretHash }, `Store listing edit secret ${id}`);
-  await writeJsonFile(env, sessionMarkerPath, { usedAt: now.toISOString(), listingId: id }, `Mark checkout ${body.sessionId} as used`);
+  await writeJsonFile(env, `_data/submissions/${id}.json`, submission, `Submit listing ${id}`);
+  await writeJsonFile(env, `_data/listing-secrets/${id}.json`, { secretHash }, `Store listing secret ${id}`);
 
   const siteBaseUrl = env.SITE_BASE_URL || 'https://nagoh.xyz';
   const editUrl = `${siteBaseUrl}/edit-listing.html?id=${encodeURIComponent(id)}&secret=${encodeURIComponent(secret)}`;
 
-  return json({ id, editUrl });
+  return json({
+    success: true,
+    id,
+    editUrl,
+    message: 'Listing submitted for review. It will appear on the marketplace once approved by an admin.',
+  });
 }
 
 async function getListingWithSecret(listingId, secret, env) {
@@ -294,18 +325,26 @@ async function updateListing(listingId, request, env) {
 }
 
 async function deleteListing(listingId, request, env) {
-  const body = await request.json();
-  if (!body.secret) return json({ error: 'secret is required' }, 400);
+  const body = await request.json().catch(() => ({}));
+  const adminAuth = verifyAdminKey(request, env);
+  const hasAdminKey = adminAuth.ok;
+
+  if (!hasAdminKey && !body.secret) {
+    return json({ error: 'secret or X-Admin-Key header is required' }, 400);
+  }
 
   const existing = await readJsonFile(env, `_data/listings/${listingId}.json`, true);
-  const secretMeta = await readJsonFile(env, `_data/listing-secrets/${listingId}.json`, true);
-  if (!(await matchesSecret(body.secret, secretMeta.content.secretHash))) {
-    return json({ error: 'Unauthorized' }, 401);
+
+  if (!hasAdminKey) {
+    const secretMeta = await readJsonFile(env, `_data/listing-secrets/${listingId}.json`, true);
+    if (!(await matchesSecret(body.secret, secretMeta.content.secretHash))) {
+      return json({ error: 'Unauthorized' }, 401);
+    }
+    await deleteFile(env, `_data/listing-secrets/${listingId}.json`, secretMeta.sha, `Delete listing secret ${listingId}`);
   }
 
   await deleteFile(env, `_data/listings/${listingId}.json`, existing.sha, `Delete listing ${listingId}`);
-  await deleteFile(env, `_data/listing-secrets/${listingId}.json`, secretMeta.sha, `Delete listing secret ${listingId}`);
-  return json({ ok: true });
+  return json({ success: true, ok: true });
 }
 
 async function matchesSecret(secret, hash) {
@@ -391,4 +430,140 @@ async function deleteFile(env, path, sha, message) {
   }
 
   return response.json();
+}
+
+// ── Admin key verification ──────────────────────────────────────────────────
+
+function verifyAdminKey(request, env) {
+  const adminKey = env.ADMIN_KEY;
+  if (!adminKey) return { ok: false, error: 'Admin key not configured on server' };
+  const requestKey = request.headers.get('X-Admin-Key');
+  if (!requestKey) return { ok: false, error: 'X-Admin-Key header required' };
+  if (!safeEqual(requestKey, adminKey)) return { ok: false, error: 'Invalid admin key' };
+  return { ok: true };
+}
+
+// ── List directory ──────────────────────────────────────────────────────────
+
+async function listDirectory(env, path) {
+  const response = await fetch(githubContentUrl(env, path), { headers: githubHeaders(env) });
+  if (!response.ok) {
+    if (response.status === 404) return [];
+    throw new Error(`GitHub list directory failed for ${path}: ${response.status}`);
+  }
+  const result = await response.json();
+  return Array.isArray(result) ? result : [];
+}
+
+// ── List approved listings ──────────────────────────────────────────────────
+
+async function listListings(env) {
+  try {
+    const files = await listDirectory(env, '_data/listings');
+    const jsonFiles = files.filter(f => f.type === 'file' && f.name.endsWith('.json'));
+
+    const listings = await Promise.all(
+      jsonFiles.map(f => readJsonFile(env, `_data/listings/${f.name}`).catch(() => null)),
+    );
+
+    const validListings = listings.filter(Boolean);
+    return json({ success: true, listings: validListings, count: validListings.length });
+  } catch (error) {
+    return json({ success: false, error: error.message, listings: [], count: 0 });
+  }
+}
+
+// ── List submissions (admin-only) ───────────────────────────────────────────
+
+async function listSubmissions(request, env) {
+  const adminAuth = verifyAdminKey(request, env);
+  if (!adminAuth.ok) return json({ error: adminAuth.error }, 401);
+
+  try {
+    const files = await listDirectory(env, '_data/submissions');
+    const jsonFiles = files.filter(f => f.type === 'file' && f.name.endsWith('.json'));
+
+    const submissions = await Promise.all(
+      jsonFiles.map(f => readJsonFile(env, `_data/submissions/${f.name}`).catch(() => null)),
+    );
+
+    const validSubmissions = submissions.filter(Boolean);
+    return json({ success: true, submissions: validSubmissions, count: validSubmissions.length });
+  } catch (error) {
+    return json({ success: false, error: error.message, submissions: [], count: 0 });
+  }
+}
+
+// ── Approve submission (admin-only) ────────────────────────────────────────
+
+async function approveSubmission(submissionId, request, env) {
+  const adminAuth = verifyAdminKey(request, env);
+  if (!adminAuth.ok) return json({ error: adminAuth.error }, 401);
+
+  const submissionPath = `_data/submissions/${submissionId}.json`;
+  const existingData = await readJsonFile(env, submissionPath, true);
+  const submission = existingData.content;
+
+  if (submission.status === 'approved') {
+    return json({ error: 'Submission already approved' }, 400);
+  }
+  if (submission.status === 'rejected') {
+    return json({ error: 'Cannot approve a rejected submission' }, 400);
+  }
+
+  const now = new Date();
+  const listing = {
+    id: submission.id,
+    title: submission.title,
+    description: submission.description,
+    platform: submission.platform,
+    repoUrl: submission.repoUrl,
+    sellerPaymentLink: submission.sellerPaymentLink,
+    priceUsd: submission.priceUsd,
+    techStack: submission.techStack,
+    iconUrl: submission.iconUrl,
+    contactEmail: submission.contactEmail,
+    createdAt: submission.submittedAt,
+    expiresAt: submission.expiresAt,
+    approvedAt: now.toISOString(),
+    status: 'approved',
+  };
+
+  await writeJsonFile(env, `_data/listings/${submissionId}.json`, listing, `Approve listing ${submissionId}`);
+
+  const updatedSubmission = { ...submission, status: 'approved', approvedAt: now.toISOString() };
+  await writeJsonFile(env, submissionPath, updatedSubmission, `Mark submission ${submissionId} as approved`, existingData.sha);
+
+  return json({ success: true, id: submissionId });
+}
+
+// ── Reject submission (admin-only) ─────────────────────────────────────────
+
+async function rejectSubmission(submissionId, request, env) {
+  const adminAuth = verifyAdminKey(request, env);
+  if (!adminAuth.ok) return json({ error: adminAuth.error }, 401);
+
+  const submissionPath = `_data/submissions/${submissionId}.json`;
+  const existingData = await readJsonFile(env, submissionPath, true);
+  const submission = existingData.content;
+
+  if (submission.status === 'approved') {
+    return json({ error: 'Cannot reject an already approved submission' }, 400);
+  }
+  if (submission.status === 'rejected') {
+    return json({ error: 'Submission already rejected' }, 400);
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const now = new Date();
+  const updatedSubmission = {
+    ...submission,
+    status: 'rejected',
+    rejectedAt: now.toISOString(),
+    rejectionReason: String(body.reason || '').trim() || null,
+  };
+
+  await writeJsonFile(env, submissionPath, updatedSubmission, `Reject submission ${submissionId}`, existingData.sha);
+
+  return json({ success: true, id: submissionId });
 }

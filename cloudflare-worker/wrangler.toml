@@ -8,3 +8,4 @@ GITHUB_REPO = "N.A.G.O.H"
 SITE_BASE_URL = "https://nagoh.xyz"
 LISTING_FEE_CENTS = "500"
 CURRENCY = "usd"
+# Set ADMIN_KEY as a secret via: wrangler secret put ADMIN_KEY
