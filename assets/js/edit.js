@@ -1,5 +1,5 @@
 (function () {
-  const workerBase = window.APP_CODE_MARKET_WORKER_BASE || '';
+  const workerBase = window.APP_CODE_MARKET_WORKER_BASE || 'https://alerts.nagoh.xyz';
   const form = document.getElementById('editForm');
   const statusEl = document.getElementById('editStatus');
   const deleteBtn = document.getElementById('deleteBtn');
