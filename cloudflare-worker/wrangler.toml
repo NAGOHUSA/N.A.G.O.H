@@ -5,8 +5,8 @@ compatibility_date = "2026-01-01"
 # Route all /api/* requests on the production domain to this worker.
 # Static HTML/CSS/JS files are served by GitHub Pages via Cloudflare CDN.
 [[routes]]
-pattern = "nagoh.xyz/api/*"
-zone_name = "nagoh.xyz"
+pattern = "alerts.nagoh.xyz/api/*"
+zone_name = "aleets.nagoh.xyz"
 
 [vars]
 GITHUB_OWNER = "NAGOHUSA"
