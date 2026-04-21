@@ -434,6 +434,7 @@ async function deleteListing(listingId, request, env) {
     return json({ error: 'secret or X-Admin-Key header is required' }, 400);
   }
 
+  // Verify the listing exists before proceeding; throws if not found
   await readJsonFile(env, `_data/listings/${listingId}.json`);
 
   if (!hasAdminKey) {
@@ -566,6 +567,7 @@ async function deleteFile(env, path) {
 }
 
 async function listDirectory(env, prefix) {
+  // KV list returns up to 1000 keys per call — sufficient for this marketplace
   const result = await kv(env).list({ prefix: `${prefix}/`, limit: 1000 });
   return result.keys.map((k) => ({
     name: k.name.slice(prefix.length + 1),
