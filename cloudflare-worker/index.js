@@ -14,12 +14,14 @@
 //   POST /api/submissions/:id/reject        Reject submission (admin)
 //
 // Required secrets (wrangler secret put …):
-//   GITHUB_TOKEN           — PAT with repo write access
 //   STRIPE_WEBHOOK_SECRET  — Stripe webhook signing secret (no Stripe API key needed)
 //   ADMIN_KEY              — arbitrary secret for admin endpoints
 //
+// Required KV namespace (wrangler.toml [[kv_namespaces]]):
+//   LISTINGS               — KV binding for all listings, submissions, sessions, secrets
+//
 // Required vars (wrangler.toml [vars]):
-//   GITHUB_OWNER, GITHUB_REPO, SITE_BASE_URL
+//   SITE_BASE_URL
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -193,7 +195,6 @@ async function handleStripeWebhook(request, env) {
           currency: session.currency,
           completedAt: new Date().toISOString(),
         },
-        `Record Stripe payment-link session ${session.id}`,
       );
     }
   }
@@ -287,7 +288,6 @@ async function handleApplePush(token, request, env) {
     env,
     `_data/apple-notifications/${id}.json`,
     record,
-    `Apple push notification ${notificationType} ${id}`,
   ).catch(() => {});
 
   return json({ received: true, message: 'Notification Sent!', notificationType, subtype });
@@ -348,7 +348,7 @@ async function createListing(request, env) {
     const alreadyUsed = await readJsonFile(env, usedPath).catch(() => null);
     if (alreadyUsed) return json({ error: 'This payment session has already been used' }, 400);
 
-    await writeJsonFile(env, usedPath, { usedAt: new Date().toISOString() }, `Mark session ${sessionId} as used`);
+    await writeJsonFile(env, usedPath, { usedAt: new Date().toISOString() });
   }
 
   const normalized = normalizeListingPayload(body);
@@ -376,8 +376,8 @@ async function createListing(request, env) {
     testMode: isTestMode,
   };
 
-  await writeJsonFile(env, `_data/submissions/${id}.json`, submission, `Submit listing ${id}`);
-  await writeJsonFile(env, `_data/listing-secrets/${id}.json`, { secretHash }, `Store listing secret ${id}`);
+  await writeJsonFile(env, `_data/submissions/${id}.json`, submission);
+  await writeJsonFile(env, `_data/listing-secrets/${id}.json`, { secretHash });
 
   const siteBaseUrl = env.SITE_BASE_URL || 'https://nagoh.xyz';
   const editUrl = `${siteBaseUrl}/edit-listing.html?id=${encodeURIComponent(id)}&secret=${encodeURIComponent(secret)}`;
@@ -406,7 +406,7 @@ async function updateListing(listingId, request, env) {
   const body = await request.json();
   if (!body.secret) return json({ error: 'secret is required' }, 400);
 
-  const existing = await readJsonFile(env, `_data/listings/${listingId}.json`, true);
+  const existing = await readJsonFile(env, `_data/listings/${listingId}.json`);
   const secretFile = await readJsonFile(env, `_data/listing-secrets/${listingId}.json`);
   if (!(await matchesSecret(body.secret, secretFile.secretHash))) {
     return json({ error: 'Unauthorized' }, 401);
@@ -415,13 +415,13 @@ async function updateListing(listingId, request, env) {
   const normalized = normalizeListingPayload(body);
   const now = new Date();
   const updated = {
-    ...existing.content,
+    ...existing,
     ...normalized,
     expiresAt: new Date(now.getTime() + normalized.expiresInDays * 86400000).toISOString(),
     updatedAt: now.toISOString(),
   };
 
-  await writeJsonFile(env, `_data/listings/${listingId}.json`, updated, `Update listing ${listingId}`, existing.sha);
+  await writeJsonFile(env, `_data/listings/${listingId}.json`, updated);
   return json({ ok: true, id: listingId });
 }
 
@@ -434,17 +434,17 @@ async function deleteListing(listingId, request, env) {
     return json({ error: 'secret or X-Admin-Key header is required' }, 400);
   }
 
-  const existing = await readJsonFile(env, `_data/listings/${listingId}.json`, true);
+  await readJsonFile(env, `_data/listings/${listingId}.json`);
 
   if (!hasAdminKey) {
-    const secretMeta = await readJsonFile(env, `_data/listing-secrets/${listingId}.json`, true);
-    if (!(await matchesSecret(body.secret, secretMeta.content.secretHash))) {
+    const secretMeta = await readJsonFile(env, `_data/listing-secrets/${listingId}.json`);
+    if (!(await matchesSecret(body.secret, secretMeta.secretHash))) {
       return json({ error: 'Unauthorized' }, 401);
     }
-    await deleteFile(env, `_data/listing-secrets/${listingId}.json`, secretMeta.sha, `Delete listing secret ${listingId}`);
+    await deleteFile(env, `_data/listing-secrets/${listingId}.json`);
   }
 
-  await deleteFile(env, `_data/listings/${listingId}.json`, existing.sha, `Delete listing ${listingId}`);
+  await deleteFile(env, `_data/listings/${listingId}.json`);
   return json({ success: true, ok: true });
 }
 
@@ -492,8 +492,7 @@ async function approveSubmission(submissionId, request, env) {
   if (!adminAuth.ok) return json({ error: adminAuth.error }, 401);
 
   const submissionPath = `_data/submissions/${submissionId}.json`;
-  const existingData = await readJsonFile(env, submissionPath, true);
-  const submission = existingData.content;
+  const submission = await readJsonFile(env, submissionPath);
 
   if (submission.status === 'approved') return json({ error: 'Submission already approved' }, 400);
   if (submission.status === 'rejected') return json({ error: 'Cannot approve a rejected submission' }, 400);
@@ -516,10 +515,10 @@ async function approveSubmission(submissionId, request, env) {
     status: 'approved',
   };
 
-  await writeJsonFile(env, `_data/listings/${submissionId}.json`, listing, `Approve listing ${submissionId}`);
+  await writeJsonFile(env, `_data/listings/${submissionId}.json`, listing);
 
   const updatedSubmission = { ...submission, status: 'approved', approvedAt: now.toISOString() };
-  await writeJsonFile(env, submissionPath, updatedSubmission, `Mark submission ${submissionId} as approved`, existingData.sha);
+  await writeJsonFile(env, submissionPath, updatedSubmission);
 
   return json({ success: true, id: submissionId });
 }
@@ -529,8 +528,7 @@ async function rejectSubmission(submissionId, request, env) {
   if (!adminAuth.ok) return json({ error: adminAuth.error }, 401);
 
   const submissionPath = `_data/submissions/${submissionId}.json`;
-  const existingData = await readJsonFile(env, submissionPath, true);
-  const submission = existingData.content;
+  const submission = await readJsonFile(env, submissionPath);
 
   if (submission.status === 'approved') return json({ error: 'Cannot reject an already approved submission' }, 400);
   if (submission.status === 'rejected') return json({ error: 'Submission already rejected' }, 400);
@@ -544,98 +542,33 @@ async function rejectSubmission(submissionId, request, env) {
     rejectionReason: String(body.reason || '').trim() || null,
   };
 
-  await writeJsonFile(env, submissionPath, updatedSubmission, `Reject submission ${submissionId}`, existingData.sha);
+  await writeJsonFile(env, submissionPath, updatedSubmission);
 
   return json({ success: true, id: submissionId });
 }
 
-// ── GitHub helpers ────────────────────────────────────────────────────────────
+// ── KV helpers ────────────────────────────────────────────────────────────────
 
-function githubHeaders(env) {
-  const token = requiredEnv(env, 'GITHUB_TOKEN');
-  return {
-    Authorization: `Bearer ${token}`,
-    Accept: 'application/vnd.github+json',
-    'Content-Type': 'application/json',
-    'X-GitHub-Api-Version': '2022-11-28',
-  };
+const kv = (env) => env.LISTINGS;
+
+async function readJsonFile(env, path) {
+  const value = await kv(env).get(path, 'json');
+  if (value === null) throw new Error(`Not found: ${path}`);
+  return value;
 }
 
-function githubContentUrl(env, path) {
-  const owner = requiredEnv(env, 'GITHUB_OWNER');
-  const repo = requiredEnv(env, 'GITHUB_REPO');
-  return `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+async function writeJsonFile(env, path, data) {
+  await kv(env).put(path, JSON.stringify(data));
 }
 
-async function safeJson(response, context) {
-  const ct = response.headers.get('content-type') || '';
-  if (!ct.includes('application/json')) {
-    const body = await response.text();
-    throw new Error(`GitHub API returned non-JSON for ${context} (status ${response.status}): ${body.slice(0, 200)}`);
-  }
-  return response.json();
+async function deleteFile(env, path) {
+  await kv(env).delete(path);
 }
 
-async function readJsonFile(env, path, includeSha = false) {
-  const response = await fetch(githubContentUrl(env, path), { headers: githubHeaders(env) });
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`GitHub read failed for ${path} (status ${response.status}): ${body.slice(0, 200)}`);
-  }
-  const file = await safeJson(response, path);
-  const raw = atob(file.content.replace(/\n/g, ''));
-  const content = JSON.parse(raw);
-  return includeSha ? { content, sha: file.sha } : content;
-}
-
-async function writeJsonFile(env, path, data, message, sha) {
-  const payload = {
-    message,
-    content: btoa(JSON.stringify(data, null, 2)),
-    branch: env.GITHUB_BRANCH || 'main',
-  };
-
-  if (sha) payload.sha = sha;
-
-  const response = await fetch(githubContentUrl(env, path), {
-    method: 'PUT',
-    headers: githubHeaders(env),
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`GitHub write failed for ${path} (status ${response.status}): ${error.slice(0, 200)}`);
-  }
-
-  return safeJson(response, path);
-}
-
-async function deleteFile(env, path, sha, message) {
-  const response = await fetch(githubContentUrl(env, path), {
-    method: 'DELETE',
-    headers: githubHeaders(env),
-    body: JSON.stringify({
-      message,
-      sha,
-      branch: env.GITHUB_BRANCH || 'main',
-    }),
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`GitHub delete failed for ${path}: ${error}`);
-  }
-
-  return safeJson(response, path);
-}
-
-async function listDirectory(env, path) {
-  const response = await fetch(githubContentUrl(env, path), { headers: githubHeaders(env) });
-  if (!response.ok) {
-    if (response.status === 404) return [];
-    throw new Error(`GitHub list directory failed for ${path}: ${response.status}`);
-  }
-  const result = await safeJson(response, path);
-  return Array.isArray(result) ? result : [];
+async function listDirectory(env, prefix) {
+  const result = await kv(env).list({ prefix: `${prefix}/`, limit: 1000 });
+  return result.keys.map((k) => ({
+    name: k.name.slice(prefix.length + 1),
+    type: 'file',
+  }));
 }
