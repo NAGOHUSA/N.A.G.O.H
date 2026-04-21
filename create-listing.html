@@ -341,10 +341,7 @@
 
 <script>
   (function() {
-    // Use relative path if hosted on same domain, otherwise use the worker URL
-    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-      ? 'https://alerts.nagoh.xyz'  // Replace with your worker URL
-      : '';
+    const API_BASE = window.APP_CODE_MARKET_WORKER_BASE || 'https://alerts.nagoh.xyz';
     
     let paymentCompleted = false;
     let fakeSessionId = null;
