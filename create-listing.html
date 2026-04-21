@@ -308,22 +308,22 @@
         <div class="test-note">
           🧪 <strong>Live KV Mode</strong><br>
           • Payment bypassed for testing<br>
-          • Listings go directly to Cloudflare KV<br>
-          • View them instantly in the dashboard<br>
+          • Submission saved as pending<br>
+          • Admin reviews and approves from dashboard<br>
           • Demo data available for quick testing
         </div>
         <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem">What Happens Next</div>
         <div style="font-size:0.8rem;color:var(--muted);line-height:1.8">
           <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;<strong>Pay the listing fee</strong> <span style="color:#52dcb4;">(simulated)</span></div>
           <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;Fill in your project details</div>
-          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;<strong>Written to KV database</strong> — instantly live</div>
-          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;View in dashboard immediately</div>
-          <div style="padding:0.5rem 0">✓ &nbsp;Buyers contact you directly</div>
+          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;<strong>Submitted for review</strong> — saved as pending</div>
+          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;Admin approves from the dashboard</div>
+          <div style="padding:0.5rem 0">✓ &nbsp;Once approved, buyers can contact you</div>
         </div>
       </div>
       <div class="card">
         <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem">API Status</div>
-        <div id="apiStatus" style="font-size:0.7rem; color:var(--green);">✓ Ready to write to KV</div>
+        <div id="apiStatus" style="font-size:0.7rem; color:var(--green);">✓ Ready to submit listing</div>
       </div>
     </div>
   </div>
@@ -334,7 +334,7 @@
   <div class="container">
     <div class="footer">
       <div class="footer-logo">N.A.G.O.H<span>.</span></div>
-      <small style="color:var(--muted)">Listings are stored in Cloudflare KV and appear instantly in the marketplace.</small>
+      <small style="color:var(--muted)">Submissions are reviewed by the team before appearing on the marketplace.</small>
     </div>
   </div>
 </footer>
@@ -504,17 +504,17 @@
         const result = await response.json();
         
         if (response.ok && result.success) {
-          // Success - listing saved to KV
-          const successMsg = `🎉 LISTING SAVED TO KV!\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nProject: ${listingData.title}\nPlatform: ${listingData.platform}\nPrice: $${price}\nContact: ${listingData.contactEmail}\nListing ID: ${result.id}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n✨ View it instantly in the dashboard! ✨\n\nEdit URL: ${result.editUrl || 'use dashboard'}`;
+          // Success - listing submitted for review
+          const successMsg = `📬 LISTING SUBMITTED FOR REVIEW!\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nProject: ${listingData.title}\nPlatform: ${listingData.platform}\nPrice: $${price}\nContact: ${listingData.contactEmail}\nSubmission ID: ${result.id}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⏳ Your listing is pending admin approval.\nCheck the dashboard to track its status.\n\nEdit URL: ${result.editUrl || 'check dashboard'}`;
           showStatus(createStatusPre, successMsg, false);
           
           // Reset form or offer to create another
           setTimeout(() => {
-            if (confirm('Listing created successfully! Would you like to create another?')) {
+            if (confirm('Listing submitted for review! Would you like to submit another?')) {
               form.reset();
               // Keep payment bypass active
             } else {
-              window.location.href = 'dashboard.html';
+              window.location.href = 'dashboard/index.html';
             }
           }, 1000);
         } else {
@@ -522,7 +522,7 @@
         }
       } catch (error) {
         console.error('Create listing error:', error);
-        showStatus(createStatusPre, `❌ Failed to save to KV: ${error.message}\n\nMake sure your worker is deployed and LISTINGS_STORAGE KV binding is configured.`, true);
+        showStatus(createStatusPre, `❌ Failed to submit listing: ${error.message}\n\nMake sure your worker is deployed and GITHUB_TOKEN is configured.`, true);
       }
     });
     
@@ -555,7 +555,7 @@
       stepOneDiv.innerHTML = '🔓 <strong>Test mode:</strong> Payment bypassed. Click simulate, then submit — your listing goes straight to KV.';
     }
     
-    console.log('N.A.G.O.H Create Listing — Live KV Mode. Listings will be saved to Cloudflare KV.');
+    console.log('N.A.G.O.H Create Listing — Submissions are saved as pending and require admin approval.');
   })();
 </script>
 </body>

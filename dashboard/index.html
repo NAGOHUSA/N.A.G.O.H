@@ -389,10 +389,17 @@
     <div class="stat-card"><div class="stat-label">iOS Apps</div><div class="stat-value" id="iosCount">—</div><div class="stat-sub">platform breakdown</div></div>
     <div class="stat-card"><div class="stat-label">Android Apps</div><div class="stat-value" id="androidCount">—</div><div class="stat-sub">including cross-platform</div></div>
     <div class="stat-card"><div class="stat-label">Avg. Price</div><div class="stat-value" id="avgPrice">—</div><div class="stat-sub">USD per listing</div></div>
+    <div class="stat-card" style="border-color:rgba(240,180,41,0.25)"><div class="stat-label">Pending Review</div><div class="stat-value" id="pendingCount" style="background:linear-gradient(135deg,#f0b429,#f06464);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">—</div><div class="stat-sub">awaiting approval</div></div>
   </div>
 
-  <!-- Filter bar -->
-  <div class="filter-bar">
+  <!-- Tab navigation -->
+  <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0">
+    <button id="tab-listings" class="filter-btn active" style="border-radius:0.5rem 0.5rem 0 0;border-bottom:none;padding-bottom:0.75rem" onclick="switchTab('listings')">📋 Active Listings</button>
+    <button id="tab-submissions" class="filter-btn" style="border-radius:0.5rem 0.5rem 0 0;border-bottom:none;padding-bottom:0.75rem" onclick="switchTab('submissions')">📥 Pending Submissions <span id="pendingBadge" class="count-badge" style="background:rgba(240,180,41,0.15);color:var(--amber)">0</span></button>
+  </div>
+
+  <!-- Filter bar (listings only) -->
+  <div class="filter-bar" id="listingsFilterBar">
     <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All</button>
     <button class="filter-btn" data-filter="iOS" onclick="setFilter('iOS')">iOS</button>
     <button class="filter-btn" data-filter="Android" onclick="setFilter('Android')">Android</button>
@@ -402,7 +409,7 @@
   </div>
 
   <!-- Listings table -->
-  <div class="listings-panel">
+  <div class="listings-panel" id="listingsPanel">
     <div class="panel-header">
       <div class="panel-title">
         📋 Marketplace Listings
@@ -412,6 +419,23 @@
     </div>
     <div class="table-container" id="listingsTable">
       <div class="loading"><div class="spinner"></div> Loading listings from KV...</div>
+    </div>
+  </div>
+
+  <!-- Submissions table -->
+  <div class="listings-panel" id="submissionsPanel" style="display:none">
+    <div class="panel-header">
+      <div class="panel-title">
+        📥 Pending Submissions
+        <span class="count-badge" id="submissionsCount">0</span>
+      </div>
+      <div style="display:flex;gap:0.5rem;align-items:center">
+        <div style="font-size:0.65rem; color:var(--muted)" id="submissionsStatus">Admin key required</div>
+        <button class="btn" onclick="loadSubmissions()">⟳ Refresh</button>
+      </div>
+    </div>
+    <div class="table-container" id="submissionsTable">
+      <div class="empty-state">🔑 Enter your admin key above to load submissions.</div>
     </div>
   </div>
 </div>
@@ -433,8 +457,10 @@
   // Configuration
   const API_BASE = window.location.origin; // Uses same origin as worker
   let allListings = [];
+  let allSubmissions = [];
   let currentFilter = 'all';
   let currentSearch = '';
+  let currentTab = 'listings';
   let adminKey = localStorage.getItem('nagoh_admin_key') || null;
   let pendingDeleteId = null;
 
@@ -484,6 +510,26 @@
     document.getElementById('androidCount').textContent = android;
     document.getElementById('avgPrice').textContent = `$${avg}`;
     document.getElementById('listingsCount').textContent = total;
+  }
+
+  function updatePendingBadge() {
+    const pending = allSubmissions.filter(s => s.status === 'pending').length;
+    document.getElementById('pendingCount').textContent = pending;
+    document.getElementById('pendingBadge').textContent = pending;
+    document.getElementById('submissionsCount').textContent = allSubmissions.length;
+  }
+
+  // Tab switching
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('tab-listings').classList.toggle('active', tab === 'listings');
+    document.getElementById('tab-submissions').classList.toggle('active', tab === 'submissions');
+    document.getElementById('listingsPanel').style.display = tab === 'listings' ? '' : 'none';
+    document.getElementById('listingsFilterBar').style.display = tab === 'listings' ? '' : 'none';
+    document.getElementById('submissionsPanel').style.display = tab === 'submissions' ? '' : 'none';
+    if (tab === 'submissions') {
+      loadSubmissions();
+    }
   }
 
   // Filter and search
@@ -587,7 +633,151 @@
     });
   }
 
-  // Delete listing
+  // ── Submissions ────────────────────────────────────────────────────────────
+
+  async function loadSubmissions() {
+    if (!adminKey) {
+      document.getElementById('submissionsTable').innerHTML = '<div class="empty-state">🔑 Enter your admin key (click Admin button) to view submissions.</div>';
+      document.getElementById('submissionsStatus').textContent = 'Admin key required';
+      return;
+    }
+
+    const tableDiv = document.getElementById('submissionsTable');
+    tableDiv.innerHTML = '<div class="loading"><div class="spinner"></div> Loading submissions...</div>';
+
+    try {
+      const response = await fetch(`${API_BASE}/api/submissions`, {
+        headers: { 'X-Admin-Key': adminKey }
+      });
+
+      if (response.status === 401) {
+        tableDiv.innerHTML = '<div class="empty-state">🔒 Invalid admin key. Click Admin to re-enter.</div>';
+        document.getElementById('submissionsStatus').textContent = 'Auth failed';
+        adminKey = null;
+        localStorage.removeItem('nagoh_admin_key');
+        return;
+      }
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+
+      if (data.success && Array.isArray(data.submissions)) {
+        allSubmissions = data.submissions;
+        document.getElementById('submissionsStatus').textContent = `${data.count} total`;
+        updatePendingBadge();
+        renderSubmissionsTable(allSubmissions);
+      } else {
+        throw new Error(data.error || 'Invalid response');
+      }
+    } catch (error) {
+      console.error('Submissions fetch error:', error);
+      tableDiv.innerHTML = `<div class="empty-state">⚠️ Failed to load submissions: ${error.message}<br><button class="btn" style="margin-top:1rem" onclick="loadSubmissions()">Try Again</button></div>`;
+      showToast('Failed to load submissions', 'error');
+    }
+  }
+
+  function renderSubmissionsTable(submissions) {
+    const tableDiv = document.getElementById('submissionsTable');
+
+    if (!submissions.length) {
+      tableDiv.innerHTML = '<div class="empty-state">📭 No submissions yet.</div>';
+      return;
+    }
+
+    const statusBadge = (s) => {
+      if (s.status === 'approved') return '<span style="color:var(--green);font-size:0.7rem">✓ Approved</span>';
+      if (s.status === 'rejected') return '<span style="color:var(--red);font-size:0.7rem">✗ Rejected</span>';
+      return '<span style="color:var(--amber);font-size:0.7rem">⏳ Pending</span>';
+    };
+
+    const html = `
+      <table>
+        <thead>
+          <tr><th>Project</th><th>Platform</th><th>Price</th><th>Status</th><th>Submitted</th><th style="text-align:right">Actions</th></tr>
+        </thead>
+        <tbody>
+          ${submissions.map(sub => {
+            const platformClass = sub.platform === 'iOS' ? 'platform-ios' : (sub.platform === 'Android' ? 'platform-android' : 'platform-both');
+            const submittedDate = sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString() : '—';
+            const isPending = sub.status === 'pending';
+
+            return `
+              <tr>
+                <td>
+                  <div class="listing-title">${escapeHtml(sub.title)}</div>
+                  <div class="listing-desc">${escapeHtml(sub.description?.substring(0, 80) || '')}${sub.description?.length > 80 ? '…' : ''}</div>
+                  ${sub.contactEmail ? `<div style="font-size:0.6rem;color:var(--muted);margin-top:0.2rem">✉ ${escapeHtml(sub.contactEmail)}</div>` : ''}
+                  ${sub.testMode ? '<div style="font-size:0.6rem;color:var(--amber);margin-top:0.1rem">🧪 test mode</div>' : ''}
+                </td>
+                <td><span class="platform-badge ${platformClass}">${sub.platform || '—'}</span></td>
+                <td class="price">$${sub.priceUsd || 0}</td>
+                <td>${statusBadge(sub)}</td>
+                <td style="font-size:0.65rem;color:var(--muted)">${submittedDate}</td>
+                <td style="text-align:right">
+                  <div class="action-buttons">
+                    ${isPending ? `<button onclick="approveSubmission('${sub.id}')" class="action-btn" style="border-color:rgba(82,220,180,0.3);color:var(--green)">✓ Approve</button>` : ''}
+                    ${isPending ? `<button onclick="rejectSubmission('${sub.id}')" class="action-btn delete-btn">✗ Reject</button>` : ''}
+                    ${!isPending ? `<span style="font-size:0.6rem;color:var(--muted)">${sub.status === 'approved' ? (sub.approvedAt ? new Date(sub.approvedAt).toLocaleDateString() : '—') : (sub.rejectedAt ? new Date(sub.rejectedAt).toLocaleDateString() : '—')}</span>` : ''}
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+    tableDiv.innerHTML = html;
+  }
+
+  async function approveSubmission(id) {
+    if (!adminKey) { showToast('Admin key required', 'error'); return; }
+    const sub = allSubmissions.find(s => s.id === id);
+    const title = sub ? sub.title : id;
+    if (!confirm(`Approve "${title}"?\n\nThis will publish the listing to the marketplace.`)) return;
+
+    try {
+      const response = await fetch(`${API_BASE}/api/submissions/${id}/approve`, {
+        method: 'POST',
+        headers: { 'X-Admin-Key': adminKey }
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        showToast(`✓ "${title}" approved and published!`, 'success');
+        await Promise.all([loadSubmissions(), refreshListings()]);
+      } else {
+        showToast(data.error || 'Approval failed', 'error');
+        if (response.status === 401) { adminKey = null; localStorage.removeItem('nagoh_admin_key'); }
+      }
+    } catch (error) {
+      showToast('Approve error: ' + error.message, 'error');
+    }
+  }
+
+  async function rejectSubmission(id) {
+    if (!adminKey) { showToast('Admin key required', 'error'); return; }
+    const sub = allSubmissions.find(s => s.id === id);
+    const title = sub ? sub.title : id;
+    const reason = prompt(`Reject "${title}"?\n\nOptional: enter a reason (or leave blank):`);
+    if (reason === null) return; // user cancelled
+
+    try {
+      const response = await fetch(`${API_BASE}/api/submissions/${id}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
+        body: JSON.stringify({ reason })
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        showToast(`✗ "${title}" rejected.`, 'success');
+        loadSubmissions();
+      } else {
+        showToast(data.error || 'Rejection failed', 'error');
+        if (response.status === 401) { adminKey = null; localStorage.removeItem('nagoh_admin_key'); }
+      }
+    } catch (error) {
+      showToast('Reject error: ' + error.message, 'error');
+    }
+  }
   async function confirmDelete(id, title) {
     pendingDeleteId = id;
     
@@ -666,8 +856,8 @@
       await performDelete(pendingDeleteId);
     } else {
       showToast('Admin key saved', 'success');
-      // Optionally refresh to show admin actions
       refreshListings();
+      if (currentTab === 'submissions') loadSubmissions();
     }
   }
   
@@ -695,13 +885,15 @@
   function startAutoRefresh() {
     if (autoRefreshInterval) clearInterval(autoRefreshInterval);
     autoRefreshInterval = setInterval(() => {
-      refreshListings();
+      if (currentTab === 'listings') refreshListings();
+      else if (currentTab === 'submissions') loadSubmissions();
     }, 30000);
   }
   
   // Initial load
   checkPaymentReturn();
   refreshListings();
+  if (adminKey) loadSubmissions(); // pre-load pending count if key is cached
   startAutoRefresh();
 </script>
 </body>
