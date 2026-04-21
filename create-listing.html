@@ -341,7 +341,7 @@
 
 <script>
   (function() {
-    const API_BASE = window.location.origin;
+    const API_BASE = window.NAGOH_WORKER_BASE || window.location.origin;
     let paymentCompleted = false;
     let fakeSessionId = null;
     
@@ -371,9 +371,13 @@
     async function testAPIConnection() {
       try {
         const response = await fetch(`${API_BASE}/api/listings`);
-        if (response.ok) {
-          apiStatusSpan.innerHTML = '✓ KV connected · Ready to create listings';
+        const ct = response.headers.get('content-type') || '';
+        if (response.ok && ct.includes('application/json')) {
+          apiStatusSpan.innerHTML = '✓ Worker connected · Ready to create listings';
           apiStatusSpan.style.color = '#52dcb4';
+        } else if (!ct.includes('application/json')) {
+          apiStatusSpan.innerHTML = '✗ Worker not reachable — check Cloudflare route for nagoh.xyz/api/*';
+          apiStatusSpan.style.color = '#f06464';
         } else {
           apiStatusSpan.innerHTML = '⚠ API available but check worker';
           apiStatusSpan.style.color = '#f0b429';
@@ -500,14 +504,21 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        
-        const result = await response.json();
-        
+
+        let result;
+        const ct = response.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+          result = await response.json();
+        } else {
+          const body = await response.text();
+          throw new Error(`Worker not reachable at ${API_BASE}/api/listings — received non-JSON response. Make sure the Cloudflare Worker is deployed and the nagoh.xyz/api/* route is configured.\n\nRaw response: ${body.slice(0, 300)}`);
+        }
+
         if (response.ok && result.success) {
           // Success - listing submitted for review
           const successMsg = `📬 LISTING SUBMITTED FOR REVIEW!\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nProject: ${listingData.title}\nPlatform: ${listingData.platform}\nPrice: $${price}\nContact: ${listingData.contactEmail}\nSubmission ID: ${result.id}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⏳ Your listing is pending admin approval.\nCheck the dashboard to track its status.\n\nEdit URL: ${result.editUrl || 'check dashboard'}`;
           showStatus(createStatusPre, successMsg, false);
-          
+
           // Reset form or offer to create another
           setTimeout(() => {
             if (confirm('Listing submitted for review! Would you like to submit another?')) {
@@ -518,7 +529,7 @@
             }
           }, 1000);
         } else {
-          throw new Error(result.error || 'Failed to save to KV');
+          throw new Error(result.error || 'Submission failed');
         }
       } catch (error) {
         console.error('Create listing error:', error);

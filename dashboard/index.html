@@ -455,7 +455,7 @@
 
 <script>
   // Configuration
-  const API_BASE = window.location.origin; // Uses same origin as worker
+  const API_BASE = window.NAGOH_WORKER_BASE || window.location.origin; // Set window.NAGOH_WORKER_BASE to override (e.g. workers.dev URL)
   let allListings = [];
   let allSubmissions = [];
   let currentFilter = 'all';
@@ -473,19 +473,29 @@
     setTimeout(() => toast.remove(), 3000);
   }
 
-  // Fetch all listings from KV
+  // Helper: parse JSON from a fetch response, with a clear error when the worker isn't reachable
+  async function safeParseJson(response) {
+    const ct = response.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) {
+      const body = await response.text();
+      throw new Error(`Worker not reachable at ${API_BASE} — received non-JSON response (HTTP ${response.status}). Check that the Cloudflare Worker is deployed and the nagoh.xyz/api/* route is configured.\n\nRaw: ${body.slice(0, 200)}`);
+    }
+    return response.json();
+  }
+
+  // Fetch all listings
   async function refreshListings() {
     const tableDiv = document.getElementById('listingsTable');
-    tableDiv.innerHTML = '<div class="loading"><div class="spinner"></div> Loading listings from KV...</div>';
-    
+    tableDiv.innerHTML = '<div class="loading"><div class="spinner"></div> Loading listings...</div>';
+
     try {
       const response = await fetch(`${API_BASE}/api/listings`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
-      
+      const data = await safeParseJson(response);
+
       if (data.success && Array.isArray(data.listings)) {
         allListings = data.listings;
-        document.getElementById('kvStatus').textContent = `KV: ${data.count} records`;
+        document.getElementById('kvStatus').textContent = `Listings: ${data.count} records`;
         updateStats();
         applyFiltersAndRender();
       } else {
@@ -494,7 +504,7 @@
     } catch (error) {
       console.error('Fetch error:', error);
       tableDiv.innerHTML = `<div class="empty-state">⚠️ Failed to load listings: ${error.message}<br><button class="btn" style="margin-top:1rem" onclick="refreshListings()">Try Again</button></div>`;
-      showToast('Failed to load listings from KV', 'error');
+      showToast('Failed to load listings', 'error');
     }
   }
 
@@ -659,7 +669,7 @@
       }
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      const data = await safeParseJson(response);
 
       if (data.success && Array.isArray(data.submissions)) {
         allSubmissions = data.submissions;
@@ -740,7 +750,7 @@
         method: 'POST',
         headers: { 'X-Admin-Key': adminKey }
       });
-      const data = await response.json();
+      const data = await safeParseJson(response);
       if (response.ok && data.success) {
         showToast(`✓ "${title}" approved and published!`, 'success');
         await Promise.all([loadSubmissions(), refreshListings()]);
@@ -766,7 +776,7 @@
         headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
         body: JSON.stringify({ reason })
       });
-      const data = await response.json();
+      const data = await safeParseJson(response);
       if (response.ok && data.success) {
         showToast(`✗ "${title}" rejected.`, 'success');
         loadSubmissions();
@@ -780,7 +790,7 @@
   }
   async function confirmDelete(id, title) {
     pendingDeleteId = id;
-    
+
     if (adminKey) {
       // Direct delete with stored admin key
       await performDelete(id);
@@ -793,13 +803,13 @@
       document.getElementById('adminModal').dataset.listingTitle = title;
     }
   }
-  
+
   async function performDelete(id) {
     if (!adminKey) {
       showToast('Admin key required', 'error');
       return;
     }
-    
+
     try {
       const response = await fetch(`${API_BASE}/api/listings/${id}`, {
         method: 'DELETE',
@@ -808,8 +818,8 @@
           'X-Admin-Key': adminKey
         }
       });
-      
-      const data = await response.json();
+
+      const data = await safeParseJson(response);
       if (response.ok && data.success) {
         showToast('Listing deleted successfully', 'success');
         refreshListings();

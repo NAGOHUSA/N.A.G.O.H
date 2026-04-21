@@ -381,10 +381,22 @@ function githubContentUrl(env, path) {
   return `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 }
 
+async function safeJson(response, context) {
+  const ct = response.headers.get('content-type') || '';
+  if (!ct.includes('application/json')) {
+    const body = await response.text();
+    throw new Error(`GitHub API returned non-JSON for ${context} (status ${response.status}): ${body.slice(0, 200)}`);
+  }
+  return response.json();
+}
+
 async function readJsonFile(env, path, includeSha = false) {
   const response = await fetch(githubContentUrl(env, path), { headers: githubHeaders(env) });
-  if (!response.ok) throw new Error(`GitHub read failed for ${path}`);
-  const file = await response.json();
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`GitHub read failed for ${path} (status ${response.status}): ${body.slice(0, 200)}`);
+  }
+  const file = await safeJson(response, path);
   const raw = atob(file.content.replace(/\n/g, ''));
   const content = JSON.parse(raw);
   return includeSha ? { content, sha: file.sha } : content;
@@ -407,10 +419,10 @@ async function writeJsonFile(env, path, data, message, sha) {
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`GitHub write failed for ${path}: ${error}`);
+    throw new Error(`GitHub write failed for ${path} (status ${response.status}): ${error.slice(0, 200)}`);
   }
 
-  return response.json();
+  return safeJson(response, path);
 }
 
 async function deleteFile(env, path, sha, message) {
@@ -429,10 +441,8 @@ async function deleteFile(env, path, sha, message) {
     throw new Error(`GitHub delete failed for ${path}: ${error}`);
   }
 
-  return response.json();
+  return safeJson(response, path);
 }
-
-// ── Admin key verification ──────────────────────────────────────────────────
 
 function verifyAdminKey(request, env) {
   const adminKey = env.ADMIN_KEY;
@@ -451,7 +461,7 @@ async function listDirectory(env, path) {
     if (response.status === 404) return [];
     throw new Error(`GitHub list directory failed for ${path}: ${response.status}`);
   }
-  const result = await response.json();
+  const result = await safeJson(response, path);
   return Array.isArray(result) ? result : [];
 }
 
