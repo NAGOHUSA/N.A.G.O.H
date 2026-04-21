@@ -11,11 +11,12 @@ compatibility_date = "2026-01-01"
 pattern = "alerts.nagoh.xyz/*"
 zone_name = "nagoh.xyz"
 
+[[kv_namespaces]]
+binding = "LISTINGS"
+id = "95521058244f46d5aafdb79a8555f988"
+
 [vars]
-GITHUB_OWNER = "NAGOHUSA"
-GITHUB_REPO = "N.A.G.O.H"
 SITE_BASE_URL = "https://nagoh.xyz"
 # Set secrets via:
-#   wrangler secret put GITHUB_TOKEN
 #   wrangler secret put STRIPE_WEBHOOK_SECRET
 #   wrangler secret put ADMIN_KEY
