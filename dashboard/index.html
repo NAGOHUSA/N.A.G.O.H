@@ -715,8 +715,8 @@
                 <td style="font-size:0.65rem;color:var(--muted)">${submittedDate}</td>
                 <td style="text-align:right">
                   <div class="action-buttons">
-                    ${isPending ? `<button onclick="approveSubmission('${sub.id}', '${escapeHtml(sub.title).replace(/'/g, "\\'")}')" class="action-btn" style="border-color:rgba(82,220,180,0.3);color:var(--green)">✓ Approve</button>` : ''}
-                    ${isPending ? `<button onclick="rejectSubmission('${sub.id}', '${escapeHtml(sub.title).replace(/'/g, "\\'")}')" class="action-btn delete-btn">✗ Reject</button>` : ''}
+                    ${isPending ? `<button onclick="approveSubmission('${sub.id}')" class="action-btn" style="border-color:rgba(82,220,180,0.3);color:var(--green)">✓ Approve</button>` : ''}
+                    ${isPending ? `<button onclick="rejectSubmission('${sub.id}')" class="action-btn delete-btn">✗ Reject</button>` : ''}
                     ${!isPending ? `<span style="font-size:0.6rem;color:var(--muted)">${sub.status === 'approved' ? (sub.approvedAt ? new Date(sub.approvedAt).toLocaleDateString() : '—') : (sub.rejectedAt ? new Date(sub.rejectedAt).toLocaleDateString() : '—')}</span>` : ''}
                   </div>
                 </td>
@@ -729,8 +729,10 @@
     tableDiv.innerHTML = html;
   }
 
-  async function approveSubmission(id, title) {
+  async function approveSubmission(id) {
     if (!adminKey) { showToast('Admin key required', 'error'); return; }
+    const sub = allSubmissions.find(s => s.id === id);
+    const title = sub ? sub.title : id;
     if (!confirm(`Approve "${title}"?\n\nThis will publish the listing to the marketplace.`)) return;
 
     try {
@@ -751,8 +753,10 @@
     }
   }
 
-  async function rejectSubmission(id, title) {
+  async function rejectSubmission(id) {
     if (!adminKey) { showToast('Admin key required', 'error'); return; }
+    const sub = allSubmissions.find(s => s.id === id);
+    const title = sub ? sub.title : id;
     const reason = prompt(`Reject "${title}"?\n\nOptional: enter a reason (or leave blank):`);
     if (reason === null) return; // user cancelled
 
