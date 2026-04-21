@@ -25,13 +25,14 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
           workingDirectory: cloudflare-worker
+          # Push these env vars as Cloudflare Worker secrets on every deploy
+          secrets: |
+            GITHUB_TOKEN
+            STRIPE_WEBHOOK_SECRET
+            STRIPE_SECRET_KEY
+            ADMIN_KEY
         env:
-          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           GITHUB_TOKEN: ${{ secrets.APP_CODE_MARKET_GITHUB_TOKEN }}
-          GITHUB_OWNER: ${{ vars.GITHUB_OWNER || 'NAGOHUSA' }}
-          GITHUB_REPO: ${{ vars.GITHUB_REPO || 'N.A.G.O.H' }}
-          GITHUB_BRANCH: ${{ vars.GITHUB_BRANCH || 'main' }}
-          SITE_BASE_URL: ${{ vars.SITE_BASE_URL || 'https://nagoh.xyz' }}
-          LISTING_FEE_CENTS: ${{ vars.LISTING_FEE_CENTS || '500' }}
-          CURRENCY: ${{ vars.CURRENCY || 'usd' }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
