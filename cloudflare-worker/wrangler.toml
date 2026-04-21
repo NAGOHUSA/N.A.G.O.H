@@ -2,10 +2,16 @@ name = "appcodemarket-webhook"
 main = "index.js"
 compatibility_date = "2026-01-01"
 
+# Route all /api/* requests on the production domain to this worker.
+# Static HTML/CSS/JS files are served by GitHub Pages via Cloudflare CDN.
+[[routes]]
+pattern = "nagoh.xyz/api/*"
+zone_name = "nagoh.xyz"
+
 [vars]
 GITHUB_OWNER = "NAGOHUSA"
 GITHUB_REPO = "N.A.G.O.H"
 SITE_BASE_URL = "https://nagoh.xyz"
 LISTING_FEE_CENTS = "500"
 CURRENCY = "usd"
-# Set ADMIN_KEY as a secret via: wrangler secret put ADMIN_KEY
+# Set secrets via: wrangler secret put ADMIN_KEY / GITHUB_TOKEN / STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET

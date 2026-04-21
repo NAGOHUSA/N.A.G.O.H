@@ -1,17 +1,16 @@
-name = "nagoh-listings"
-main = "worker.js"
-compatibility_date = "2024-01-01"
+name = "appcodemarket-webhook"
+main = "../cloudflare-worker/index.js"
+compatibility_date = "2026-01-01"
 
-[[kv_namespaces]]
-binding = "LISTINGS_STORAGE"
-id = "LISTINGS"
+# Route all /api/* requests on the production domain to this worker.
+[[routes]]
+pattern = "nagoh.xyz/api/*"
+zone_name = "nagoh.xyz"
 
 [vars]
-ADMIN_API_KEY = "your-secure-random-key-here-change-this"
+GITHUB_OWNER = "NAGOHUSA"
+GITHUB_REPO = "N.A.G.O.H"
 SITE_BASE_URL = "https://nagoh.xyz"
-STRIPE_PAYMENT_LINK_URL = "https://buy.stripe.com/your-test-link"
-
-[env.production]
-[[env.production.kv_namespaces]]
-binding = "LISTINGS_STORAGE"
-id = "LISTINGS"
+LISTING_FEE_CENTS = "500"
+CURRENCY = "usd"
+# Set secrets via: wrangler secret put ADMIN_KEY / GITHUB_TOKEN / STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET
