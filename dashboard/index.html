@@ -6,366 +6,34 @@
   <title>N.A.G.O.H · Listing Manager</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
+    /* Styling remains consistent with your Nagoh theme */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     :root {
-      --bg: #05050f;
-      --surface: #0c0c18;
-      --surface2: #12122a;
-      --border: rgba(255,255,255,0.06);
-      --border-hi: rgba(138,120,255,0.35);
-      --accent: #8a78ff;
-      --accent-dim: rgba(138,120,255,0.12);
-      --green: #52dcb4;
-      --green-dim: rgba(82,220,180,0.1);
-      --red: #f06464;
-      --red-dim: rgba(240,100,100,0.1);
-      --amber: #f0b429;
-      --text: #eaeeff;
-      --muted: #6b7094;
-      --display: 'Syne', sans-serif;
-      --mono: 'DM Mono', monospace;
-      --radius: 14px;
-      --radius-lg: 20px;
+      --bg: #05050f; --surface: #0c0c18; --surface2: #12122a;
+      --border: rgba(255,255,255,0.06); --border-hi: rgba(138,120,255,0.35);
+      --accent: #8a78ff; --green: #52dcb4; --red: #f06464;
+      --text: #eaeeff; --muted: #6b7094; --display: 'Syne', sans-serif; --mono: 'DM Mono', monospace;
     }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
+    body { background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 13px; line-height: 1.5; }
     .container { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
-
-    /* Header */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    .logo {
-      font-family: var(--display);
-      font-size: 1.8rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #8a78ff, #52dcb4);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .logo span { color: #52dcb4; background: none; -webkit-text-fill-color: #52dcb4; }
-    .badge {
-      font-size: 0.65rem;
-      padding: 0.25rem 0.75rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 2rem;
-      color: var(--muted);
-    }
-    .header-actions { display: flex; gap: 0.75rem; align-items: center; }
-    .btn {
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 0.5rem 1rem;
-      border-radius: 2rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .btn:hover {
-      border-color: var(--border-hi);
-      color: var(--accent);
-      background: var(--accent-dim);
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #8a78ff, #52dcb4);
-      border: none;
-      color: #05050f;
-    }
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(138,120,255,0.3);
-      color: #05050f;
-    }
-    .btn-danger {
-      border-color: rgba(240,100,100,0.3);
-      color: var(--red);
-    }
-    .btn-danger:hover {
-      background: var(--red-dim);
-      border-color: var(--red);
-    }
-
-    /* Stats row */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.25rem;
-      transition: border-color 0.2s;
-    }
-    .stat-card:hover { border-color: var(--border-hi); }
-    .stat-label {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      margin-bottom: 0.5rem;
-    }
-    .stat-value {
-      font-family: var(--display);
-      font-size: 2rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #fff, #8a78ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .stat-sub { font-size: 0.65rem; color: var(--muted); margin-top: 0.25rem; }
-
-    /* Filter bar */
-    .filter-bar {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      padding: 0.75rem 0;
-    }
-    .filter-btn {
-      font-size: 0.65rem;
-      padding: 0.35rem 0.9rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 2rem;
-      cursor: pointer;
-      transition: all 0.15s;
-      color: var(--muted);
-    }
-    .filter-btn.active {
-      border-color: var(--border-hi);
-      color: var(--accent);
-      background: var(--accent-dim);
-    }
-    .search-input {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 2rem;
-      padding: 0.4rem 1rem;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      width: 200px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .search-input:focus { border-color: var(--border-hi); }
-
-    /* Listings table */
-    .listings-panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-    }
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-      gap: 0.75rem;
-    }
-    .panel-title {
-      font-family: var(--display);
-      font-size: 0.85rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .count-badge {
-      background: var(--surface2);
-      padding: 0.2rem 0.6rem;
-      border-radius: 2rem;
-      font-size: 0.65rem;
-      color: var(--muted);
-    }
-    .table-container { overflow-x: auto; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.75rem;
-    }
-    th {
-      text-align: left;
-      padding: 1rem 1rem;
-      color: var(--muted);
-      font-weight: 500;
-      text-transform: uppercase;
-      font-size: 0.6rem;
-      letter-spacing: 0.08em;
-      border-bottom: 1px solid var(--border);
-    }
-    td {
-      padding: 1rem 1rem;
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-      vertical-align: middle;
-    }
-    tr:hover { background: rgba(138,120,255,0.03); }
-    .listing-title {
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 0.2rem;
-    }
-    .listing-desc {
-      font-size: 0.65rem;
-      color: var(--muted);
-      max-width: 280px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .platform-badge {
-      display: inline-block;
-      padding: 0.2rem 0.6rem;
-      border-radius: 2rem;
-      font-size: 0.6rem;
-      font-weight: 500;
-    }
-    .platform-ios { background: rgba(90,180,255,0.15); color: #5ab4ff; }
-    .platform-android { background: rgba(82,220,180,0.15); color: #52dcb4; }
-    .platform-both { background: rgba(138,120,255,0.15); color: #8a78ff; }
-    .price {
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: 0.9rem;
-    }
-    .status-active { color: var(--green); }
-    .status-expired { color: var(--red); }
-    .action-buttons {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    .action-btn {
-      font-size: 0.6rem;
-      padding: 0.3rem 0.7rem;
-      border-radius: 1rem;
-      background: transparent;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: all 0.15s;
-      text-decoration: none;
-      color: var(--muted);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.2rem;
-    }
-    .action-btn:hover { border-color: var(--border-hi); color: var(--accent); }
-    .delete-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
-
-    .empty-state {
-      text-align: center;
-      padding: 3rem;
-      color: var(--muted);
-    }
-    .loading {
-      text-align: center;
-      padding: 3rem;
-      color: var(--muted);
-    }
-    .spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      background: var(--surface2);
-      border: 1px solid var(--border-hi);
-      border-radius: var(--radius);
-      padding: 0.75rem 1.25rem;
-      font-size: 0.7rem;
-      z-index: 1000;
-      animation: slideIn 0.3s ease;
-      max-width: 320px;
-    }
-    .toast.success { border-left: 3px solid var(--green); }
-    .toast.error { border-left: 3px solid var(--red); }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(100%); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(4px);
-      z-index: 1001;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal {
-      background: var(--surface);
-      border: 1px solid var(--border-hi);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      max-width: 400px;
-      width: 90%;
-    }
-    .modal h3 { margin-bottom: 1rem; font-family: var(--display); }
-    .modal input {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 0.6rem 1rem;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      margin: 0.5rem 0 1rem;
-    }
-    .modal-buttons { display: flex; gap: 0.75rem; justify-content: flex-end; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+    .logo { font-family: var(--display); font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, #8a78ff, #52dcb4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .logo span { color: #52dcb4; -webkit-text-fill-color: #52dcb4; }
+    .btn { font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.5rem 1rem; border-radius: 2rem; cursor: pointer; text-decoration: none; }
+    .btn-primary { background: linear-gradient(135deg, #8a78ff, #52dcb4); border: none; color: #05050f; font-weight: 600; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; }
+    .stat-value { font-family: var(--display); font-size: 2rem; font-weight: 700; color: #fff; }
+    .listings-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
+    .panel-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 1rem; color: var(--muted); font-size: 0.6rem; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .platform-badge { padding: 0.2rem 0.6rem; border-radius: 2rem; font-size: 0.6rem; font-weight: 600; }
+    .platform-ios { background: rgba(138,120,255,0.15); color: #8a78ff; }
+    .platform-macos { background: rgba(255,255,255,0.1); color: #fff; }
+    .platform-web { background: rgba(82,220,180,0.15); color: #52dcb4; }
+    .loading { padding: 3rem; text-align: center; color: var(--muted); }
   </style>
 </head>
 <body>
@@ -374,537 +42,113 @@
   <div class="header">
     <div>
       <div class="logo">N.A.G.O.H<span>.</span></div>
-      <div class="badge" style="margin-top: 0.5rem;">Listing Management · Live KV Storage</div>
+      <div style="font-size: 0.65rem; color: var(--muted); margin-top: 0.4rem;">SALES_STORAGE MANAGER</div>
     </div>
-    <div class="header-actions">
-      <a href="create-listing.html" class="btn btn-primary">+ New Listing</a>
+    <div style="display:flex; gap:0.75rem;">
+      <a href="create-listing.html" class="btn btn-primary">+ New Entry</a>
       <button class="btn" onclick="refreshListings()">⟳ Refresh</button>
-      <button class="btn" onclick="showAdminModal()">🔑 Admin</button>
     </div>
   </div>
 
-  <!-- Stats -->
-  <div class="stats" id="statsContainer">
-    <div class="stat-card"><div class="stat-label">Total Listings</div><div class="stat-value" id="totalListings">—</div><div class="stat-sub">active marketplace items</div></div>
-    <div class="stat-card"><div class="stat-label">iOS Apps</div><div class="stat-value" id="iosCount">—</div><div class="stat-sub">platform breakdown</div></div>
-    <div class="stat-card"><div class="stat-label">Android Apps</div><div class="stat-value" id="androidCount">—</div><div class="stat-sub">including cross-platform</div></div>
-    <div class="stat-card"><div class="stat-label">Avg. Price</div><div class="stat-value" id="avgPrice">—</div><div class="stat-sub">USD per listing</div></div>
-    <div class="stat-card" style="border-color:rgba(240,180,41,0.25)"><div class="stat-label">Pending Review</div><div class="stat-value" id="pendingCount" style="background:linear-gradient(135deg,#f0b429,#f06464);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">—</div><div class="stat-sub">awaiting approval</div></div>
+  <div class="stats">
+    <div class="stat-card">
+      <div style="font-size:0.6rem; color:var(--muted); text-transform:uppercase;">Active Records</div>
+      <div class="stat-value" id="stat-total">0</div>
+    </div>
+    <div class="stat-card">
+      <div style="font-size:0.6rem; color:var(--muted); text-transform:uppercase;">Latest Push</div>
+      <div id="stat-latest" style="font-size:0.8rem; margin-top:0.5rem; color:var(--green)">--</div>
+    </div>
   </div>
 
-  <!-- Tab navigation -->
-  <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0">
-    <button id="tab-listings" class="filter-btn active" style="border-radius:0.5rem 0.5rem 0 0;border-bottom:none;padding-bottom:0.75rem" onclick="switchTab('listings')">📋 Active Listings</button>
-    <button id="tab-submissions" class="filter-btn" style="border-radius:0.5rem 0.5rem 0 0;border-bottom:none;padding-bottom:0.75rem" onclick="switchTab('submissions')">📥 Pending Submissions <span id="pendingBadge" class="count-badge" style="background:rgba(240,180,41,0.15);color:var(--amber)">0</span></button>
-  </div>
-
-  <!-- Filter bar (listings only) -->
-  <div class="filter-bar" id="listingsFilterBar">
-    <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All</button>
-    <button class="filter-btn" data-filter="iOS" onclick="setFilter('iOS')">iOS</button>
-    <button class="filter-btn" data-filter="Android" onclick="setFilter('Android')">Android</button>
-    <button class="filter-btn" data-filter="iOS + Android" onclick="setFilter('iOS + Android')">Both</button>
-    <div style="flex:1"></div>
-    <input type="text" class="search-input" id="searchInput" placeholder="Search title, tech, description..." oninput="searchListings()">
-  </div>
-
-  <!-- Listings table -->
-  <div class="listings-panel" id="listingsPanel">
+  <div class="listings-panel">
     <div class="panel-header">
-      <div class="panel-title">
-        📋 Marketplace Listings
-        <span class="count-badge" id="listingsCount">0</span>
-      </div>
-      <div style="font-size:0.65rem; color:var(--muted)" id="kvStatus">KV: connected</div>
+      <div style="font-family:var(--display); font-size:0.8rem; font-weight:700;">📋 SALES KV EXPLORER</div>
+      <div id="kv-status" style="font-size:0.65rem; color:var(--muted)">Checking connection...</div>
     </div>
-    <div class="table-container" id="listingsTable">
-      <div class="loading"><div class="spinner"></div> Loading listings from KV...</div>
-    </div>
-  </div>
-
-  <!-- Submissions table -->
-  <div class="listings-panel" id="submissionsPanel" style="display:none">
-    <div class="panel-header">
-      <div class="panel-title">
-        📥 Pending Submissions
-        <span class="count-badge" id="submissionsCount">0</span>
-      </div>
-      <div style="display:flex;gap:0.5rem;align-items:center">
-        <div style="font-size:0.65rem; color:var(--muted)" id="submissionsStatus">Admin key required</div>
-        <button class="btn" onclick="loadSubmissions()">⟳ Refresh</button>
-      </div>
-    </div>
-    <div class="table-container" id="submissionsTable">
-      <div class="empty-state">🔑 Enter your admin key above to load submissions.</div>
-    </div>
-  </div>
-</div>
-
-<!-- Admin modal -->
-<div id="adminModal" style="display:none" class="modal-overlay">
-  <div class="modal">
-    <h3>Admin Authentication</h3>
-    <p style="font-size:0.7rem; color:var(--muted); margin-bottom:0.5rem">Enter admin key to delete listings</p>
-    <input type="password" id="adminKeyInput" placeholder="Admin API Key" autocomplete="off">
-    <div class="modal-buttons">
-      <button class="btn" onclick="closeAdminModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="authenticateAdmin()">Confirm</button>
+    <div id="listings-table-container">
+      <div class="loading">Initializing connection to alerts.nagoh.xyz...</div>
     </div>
   </div>
 </div>
 
 <script>
-  // Configuration
-  const API_BASE = window.NAGOH_WORKER_BASE || window.location.origin; // Set window.NAGOH_WORKER_BASE to override (e.g. workers.dev URL)
-  let allListings = [];
-  let allSubmissions = [];
-  let currentFilter = 'all';
-  let currentSearch = '';
-  let currentTab = 'listings';
-  let adminKey = localStorage.getItem('nagoh_admin_key') || null;
-  let pendingDeleteId = null;
+  const API_BASE = 'https://alerts.nagoh.xyz';
 
-  // Helper: Show toast notification
-  function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-  }
-
-  // Helper: parse JSON from a fetch response, with a clear error when the worker isn't reachable
-  async function safeParseJson(response) {
-    const ct = response.headers.get('content-type') || '';
-    if (!ct.includes('application/json')) {
-      const body = await response.text();
-      throw new Error(`Worker not reachable at ${API_BASE} — received non-JSON response (HTTP ${response.status}). Check that the Cloudflare Worker is deployed and the nagoh.xyz/api/* route is configured.\n\nRaw: ${body.slice(0, 200)}`);
-    }
-    return response.json();
-  }
-
-  // Fetch all listings
   async function refreshListings() {
-    const tableDiv = document.getElementById('listingsTable');
-    tableDiv.innerHTML = '<div class="loading"><div class="spinner"></div> Loading listings...</div>';
-
+    const container = document.getElementById('listings-table-container');
+    const kvStatus = document.getElementById('kv-status');
+    
     try {
       const response = await fetch(`${API_BASE}/api/listings`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await safeParseJson(response);
+      
+      const data = await response.json();
+      const listings = data.listings || [];
 
-      if (data.success && Array.isArray(data.listings)) {
-        allListings = data.listings;
-        document.getElementById('kvStatus').textContent = `Listings: ${data.count} records`;
-        updateStats();
-        applyFiltersAndRender();
+      // Update Stats
+      document.getElementById('stat-total').textContent = listings.length;
+      kvStatus.textContent = `Connected: ${listings.length} records found`;
+      
+      if (listings.length > 0) {
+        document.getElementById('stat-latest').textContent = new Date(listings[0].createdAt).toLocaleTimeString();
+        renderTable(listings);
       } else {
-        throw new Error(data.error || 'Invalid response');
+        container.innerHTML = '<div class="loading">No records found in SALES_STORAGE index.</div>';
       }
+
     } catch (error) {
       console.error('Fetch error:', error);
-      tableDiv.innerHTML = `<div class="empty-state">⚠️ Failed to load listings: ${error.message}<br><button class="btn" style="margin-top:1rem" onclick="refreshListings()">Try Again</button></div>`;
-      showToast('Failed to load listings', 'error');
+      container.innerHTML = `<div class="loading" style="color:var(--red)">⚠️ Error: ${error.message}</div>`;
+      kvStatus.textContent = 'Connection failed';
     }
   }
 
-  // Update statistics
-  function updateStats() {
-    const total = allListings.length;
-    const ios = allListings.filter(l => l.platform === 'iOS').length;
-    const android = allListings.filter(l => l.platform === 'Android' || l.platform === 'iOS + Android').length;
-    const avg = total > 0 ? (allListings.reduce((sum, l) => sum + (l.priceUsd || 0), 0) / total).toFixed(0) : 0;
+  function renderTable(listings) {
+    const container = document.getElementById('listings-table-container');
     
-    document.getElementById('totalListings').textContent = total;
-    document.getElementById('iosCount').textContent = ios;
-    document.getElementById('androidCount').textContent = android;
-    document.getElementById('avgPrice').textContent = `$${avg}`;
-    document.getElementById('listingsCount').textContent = total;
-  }
-
-  function updatePendingBadge() {
-    const pending = allSubmissions.filter(s => s.status === 'pending').length;
-    document.getElementById('pendingCount').textContent = pending;
-    document.getElementById('pendingBadge').textContent = pending;
-    document.getElementById('submissionsCount').textContent = allSubmissions.length;
-  }
-
-  // Tab switching
-  function switchTab(tab) {
-    currentTab = tab;
-    document.getElementById('tab-listings').classList.toggle('active', tab === 'listings');
-    document.getElementById('tab-submissions').classList.toggle('active', tab === 'submissions');
-    document.getElementById('listingsPanel').style.display = tab === 'listings' ? '' : 'none';
-    document.getElementById('listingsFilterBar').style.display = tab === 'listings' ? '' : 'none';
-    document.getElementById('submissionsPanel').style.display = tab === 'submissions' ? '' : 'none';
-    if (tab === 'submissions') {
-      loadSubmissions();
-    }
-  }
-
-  // Filter and search
-  function setFilter(filter) {
-    currentFilter = filter;
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.filter === filter);
-    });
-    applyFiltersAndRender();
-  }
-
-  function searchListings() {
-    currentSearch = document.getElementById('searchInput').value.toLowerCase();
-    applyFiltersAndRender();
-  }
-
-  function applyFiltersAndRender() {
-    let filtered = [...allListings];
-    
-    // Platform filter
-    if (currentFilter !== 'all') {
-      filtered = filtered.filter(l => l.platform === currentFilter);
-    }
-    
-    // Search
-    if (currentSearch) {
-      filtered = filtered.filter(l => 
-        (l.title || '').toLowerCase().includes(currentSearch) ||
-        (l.description || '').toLowerCase().includes(currentSearch) ||
-        (l.techStack || '').toLowerCase().includes(currentSearch) ||
-        (l.platform || '').toLowerCase().includes(currentSearch)
-      );
-    }
-    
-    renderListingsTable(filtered);
-  }
-
-  // Check if listing is expired
-  function isExpired(expiresAt) {
-    if (!expiresAt) return false;
-    return new Date(expiresAt) < new Date();
-  }
-
-  // Render table
-  function renderListingsTable(listings) {
-    const tableDiv = document.getElementById('listingsTable');
-    
-    if (!listings.length) {
-      tableDiv.innerHTML = `<div class="empty-state">📭 No listings found${currentFilter !== 'all' ? ' for this filter' : ''}.<br><a href="create-listing.html" class="btn" style="margin-top:1rem">+ Create your first listing</a></div>`;
-      return;
-    }
-    
-    const now = new Date();
-    const html = `
+    let html = `
       <table>
         <thead>
-          <tr><th>Project</th><th>Platform</th><th>Price</th><th>Status</th><th>Created</th><th>Expires</th><th style="text-align:right">Actions</th></tr>
+          <tr>
+            <th>Project</th>
+            <th>Platform</th>
+            <th>Email</th>
+            <th>Price</th>
+            <th>Date Created</th>
+          </tr>
         </thead>
         <tbody>
-          ${listings.map(listing => {
-            const expired = isExpired(listing.expiresAt);
-            const platformClass = listing.platform === 'iOS' ? 'platform-ios' : (listing.platform === 'Android' ? 'platform-android' : 'platform-both');
-            const createdDate = listing.createdAt ? new Date(listing.createdAt).toLocaleDateString() : '—';
-            const expiresDate = listing.expiresAt ? new Date(listing.expiresAt).toLocaleDateString() : '—';
-            
-            return `
-              <tr>
-                <td>
-                  <div class="listing-title">${escapeHtml(listing.title)}</div>
-                  <div class="listing-desc">${escapeHtml(listing.description?.substring(0, 80) || '')}${listing.description?.length > 80 ? '…' : ''}</div>
-                  ${listing.techStack ? `<div style="font-size:0.6rem; color:var(--muted); margin-top:0.2rem">⚙️ ${escapeHtml(listing.techStack.substring(0, 50))}</div>` : ''}
-                </td>
-                <td><span class="platform-badge ${platformClass}">${listing.platform || '—'}</span></td>
-                <td class="price">$${listing.priceUsd || 0}</td>
-                <td>${expired ? '<span class="status-expired">● Expired</span>' : '<span class="status-active">● Active</span>'}</td>
-                <td style="font-size:0.65rem; color:var(--muted)">${createdDate}</td>
-                <td style="font-size:0.65rem; color:var(--muted)">${expiresDate}</td>
-                <td style="text-align:right">
-                  <div class="action-buttons">
-                    <a href="listing.html?id=${listing.id}" target="_blank" class="action-btn">👁 View</a>
-                    <a href="edit-listing.html?id=${listing.id}" class="action-btn">✏ Edit</a>
-                    <button onclick="confirmDelete('${listing.id}', '${escapeHtml(listing.title).replace(/'/g, "\\'")}')" class="action-btn delete-btn">🗑 Delete</button>
-                  </div>
-                </td>
-              </tr>
-            `;
-          }).join('')}
-        </tbody>
-      </table>
     `;
-    tableDiv.innerHTML = html;
-  }
 
-  function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
+    listings.forEach(item => {
+      if (!item) return;
+      const platformClass = `platform-${(item.platform || 'web').toLowerCase()}`;
+      const date = item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '---';
+      
+      html += `
+        <tr>
+          <td>
+            <div style="font-weight:600; color:#fff">${item.title || 'Untitled'}</div>
+            <div style="font-size:0.65rem; color:var(--muted); max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.description || ''}</div>
+          </td>
+          <td><span class="platform-badge ${platformClass}">${item.platform || 'Web'}</span></td>
+          <td style="font-size:0.7rem; color:var(--muted)">${item.contactEmail || '---'}</td>
+          <td style="font-family:var(--display); font-weight:700">$${item.priceUsd || '0'}</td>
+          <td style="font-size:0.65rem; color:var(--muted)">${date}</td>
+        </tr>
+      `;
     });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
   }
 
-  // ── Submissions ────────────────────────────────────────────────────────────
-
-  async function loadSubmissions() {
-    if (!adminKey) {
-      document.getElementById('submissionsTable').innerHTML = '<div class="empty-state">🔑 Enter your admin key (click Admin button) to view submissions.</div>';
-      document.getElementById('submissionsStatus').textContent = 'Admin key required';
-      return;
-    }
-
-    const tableDiv = document.getElementById('submissionsTable');
-    tableDiv.innerHTML = '<div class="loading"><div class="spinner"></div> Loading submissions...</div>';
-
-    try {
-      const response = await fetch(`${API_BASE}/api/submissions`, {
-        headers: { 'X-Admin-Key': adminKey }
-      });
-
-      if (response.status === 401) {
-        tableDiv.innerHTML = '<div class="empty-state">🔒 Invalid admin key. Click Admin to re-enter.</div>';
-        document.getElementById('submissionsStatus').textContent = 'Auth failed';
-        adminKey = null;
-        localStorage.removeItem('nagoh_admin_key');
-        return;
-      }
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await safeParseJson(response);
-
-      if (data.success && Array.isArray(data.submissions)) {
-        allSubmissions = data.submissions;
-        document.getElementById('submissionsStatus').textContent = `${data.count} total`;
-        updatePendingBadge();
-        renderSubmissionsTable(allSubmissions);
-      } else {
-        throw new Error(data.error || 'Invalid response');
-      }
-    } catch (error) {
-      console.error('Submissions fetch error:', error);
-      tableDiv.innerHTML = `<div class="empty-state">⚠️ Failed to load submissions: ${error.message}<br><button class="btn" style="margin-top:1rem" onclick="loadSubmissions()">Try Again</button></div>`;
-      showToast('Failed to load submissions', 'error');
-    }
-  }
-
-  function renderSubmissionsTable(submissions) {
-    const tableDiv = document.getElementById('submissionsTable');
-
-    if (!submissions.length) {
-      tableDiv.innerHTML = '<div class="empty-state">📭 No submissions yet.</div>';
-      return;
-    }
-
-    const statusBadge = (s) => {
-      if (s.status === 'approved') return '<span style="color:var(--green);font-size:0.7rem">✓ Approved</span>';
-      if (s.status === 'rejected') return '<span style="color:var(--red);font-size:0.7rem">✗ Rejected</span>';
-      return '<span style="color:var(--amber);font-size:0.7rem">⏳ Pending</span>';
-    };
-
-    const html = `
-      <table>
-        <thead>
-          <tr><th>Project</th><th>Platform</th><th>Price</th><th>Status</th><th>Submitted</th><th style="text-align:right">Actions</th></tr>
-        </thead>
-        <tbody>
-          ${submissions.map(sub => {
-            const platformClass = sub.platform === 'iOS' ? 'platform-ios' : (sub.platform === 'Android' ? 'platform-android' : 'platform-both');
-            const submittedDate = sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString() : '—';
-            const isPending = sub.status === 'pending';
-
-            return `
-              <tr>
-                <td>
-                  <div class="listing-title">${escapeHtml(sub.title)}</div>
-                  <div class="listing-desc">${escapeHtml(sub.description?.substring(0, 80) || '')}${sub.description?.length > 80 ? '…' : ''}</div>
-                  ${sub.contactEmail ? `<div style="font-size:0.6rem;color:var(--muted);margin-top:0.2rem">✉ ${escapeHtml(sub.contactEmail)}</div>` : ''}
-                  ${sub.testMode ? '<div style="font-size:0.6rem;color:var(--amber);margin-top:0.1rem">🧪 test mode</div>' : ''}
-                </td>
-                <td><span class="platform-badge ${platformClass}">${sub.platform || '—'}</span></td>
-                <td class="price">$${sub.priceUsd || 0}</td>
-                <td>${statusBadge(sub)}</td>
-                <td style="font-size:0.65rem;color:var(--muted)">${submittedDate}</td>
-                <td style="text-align:right">
-                  <div class="action-buttons">
-                    ${isPending ? `<button onclick="approveSubmission('${sub.id}')" class="action-btn" style="border-color:rgba(82,220,180,0.3);color:var(--green)">✓ Approve</button>` : ''}
-                    ${isPending ? `<button onclick="rejectSubmission('${sub.id}')" class="action-btn delete-btn">✗ Reject</button>` : ''}
-                    ${!isPending ? `<span style="font-size:0.6rem;color:var(--muted)">${sub.status === 'approved' ? (sub.approvedAt ? new Date(sub.approvedAt).toLocaleDateString() : '—') : (sub.rejectedAt ? new Date(sub.rejectedAt).toLocaleDateString() : '—')}</span>` : ''}
-                  </div>
-                </td>
-              </tr>
-            `;
-          }).join('')}
-        </tbody>
-      </table>
-    `;
-    tableDiv.innerHTML = html;
-  }
-
-  async function approveSubmission(id) {
-    if (!adminKey) { showToast('Admin key required', 'error'); return; }
-    const sub = allSubmissions.find(s => s.id === id);
-    const title = sub ? sub.title : id;
-    if (!confirm(`Approve "${title}"?\n\nThis will publish the listing to the marketplace.`)) return;
-
-    try {
-      const response = await fetch(`${API_BASE}/api/submissions/${id}/approve`, {
-        method: 'POST',
-        headers: { 'X-Admin-Key': adminKey }
-      });
-      const data = await safeParseJson(response);
-      if (response.ok && data.success) {
-        showToast(`✓ "${title}" approved and published!`, 'success');
-        await Promise.all([loadSubmissions(), refreshListings()]);
-      } else {
-        showToast(data.error || 'Approval failed', 'error');
-        if (response.status === 401) { adminKey = null; localStorage.removeItem('nagoh_admin_key'); }
-      }
-    } catch (error) {
-      showToast('Approve error: ' + error.message, 'error');
-    }
-  }
-
-  async function rejectSubmission(id) {
-    if (!adminKey) { showToast('Admin key required', 'error'); return; }
-    const sub = allSubmissions.find(s => s.id === id);
-    const title = sub ? sub.title : id;
-    const reason = prompt(`Reject "${title}"?\n\nOptional: enter a reason (or leave blank):`);
-    if (reason === null) return; // user cancelled
-
-    try {
-      const response = await fetch(`${API_BASE}/api/submissions/${id}/reject`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
-        body: JSON.stringify({ reason })
-      });
-      const data = await safeParseJson(response);
-      if (response.ok && data.success) {
-        showToast(`✗ "${title}" rejected.`, 'success');
-        loadSubmissions();
-      } else {
-        showToast(data.error || 'Rejection failed', 'error');
-        if (response.status === 401) { adminKey = null; localStorage.removeItem('nagoh_admin_key'); }
-      }
-    } catch (error) {
-      showToast('Reject error: ' + error.message, 'error');
-    }
-  }
-  async function confirmDelete(id, title) {
-    pendingDeleteId = id;
-
-    if (adminKey) {
-      // Direct delete with stored admin key
-      await performDelete(id);
-    } else {
-      // Show admin modal
-      document.getElementById('adminModal').style.display = 'flex';
-      document.getElementById('adminKeyInput').value = '';
-      document.getElementById('adminKeyInput').focus();
-      // Store the title for the modal message
-      document.getElementById('adminModal').dataset.listingTitle = title;
-    }
-  }
-
-  async function performDelete(id) {
-    if (!adminKey) {
-      showToast('Admin key required', 'error');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_BASE}/api/listings/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Key': adminKey
-        }
-      });
-
-      const data = await safeParseJson(response);
-      if (response.ok && data.success) {
-        showToast('Listing deleted successfully', 'success');
-        refreshListings();
-      } else {
-        showToast(data.error || 'Delete failed', 'error');
-        // If admin key is invalid, clear it
-        if (response.status === 401) {
-          adminKey = null;
-          localStorage.removeItem('nagoh_admin_key');
-          showToast('Admin key invalid, please re-enter', 'error');
-        }
-      }
-    } catch (error) {
-      showToast('Delete error: ' + error.message, 'error');
-    }
-    pendingDeleteId = null;
-  }
-  
-  // Admin modal functions
-  function showAdminModal() {
-    document.getElementById('adminModal').style.display = 'flex';
-    document.getElementById('adminKeyInput').value = '';
-    pendingDeleteId = null;
-  }
-  
-  function closeAdminModal() {
-    document.getElementById('adminModal').style.display = 'none';
-    pendingDeleteId = null;
-  }
-  
-  async function authenticateAdmin() {
-    const key = document.getElementById('adminKeyInput').value.trim();
-    if (!key) {
-      showToast('Please enter admin key', 'error');
-      return;
-    }
-    
-    // Test the key by attempting to delete a dummy? Better: just store and if delete fails, prompt again
-    adminKey = key;
-    localStorage.setItem('nagoh_admin_key', adminKey);
-    closeAdminModal();
-    
-    if (pendingDeleteId) {
-      await performDelete(pendingDeleteId);
-    } else {
-      showToast('Admin key saved', 'success');
-      refreshListings();
-      if (currentTab === 'submissions') loadSubmissions();
-    }
-  }
-  
-  // Check URL params for Stripe payment return (session_id)
-  function checkPaymentReturn() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get('session_id');
-    const canceled = urlParams.get('canceled');
-    
-    if (canceled === '1') {
-      showToast('Payment was canceled. You can try again.', 'error');
-      // Clean URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (sessionId) {
-      // Store session ID in localStorage for the create-listing page to use
-      localStorage.setItem('stripe_payment_session_id', sessionId);
-      showToast('✓ Payment successful! You can now create your listing.', 'success');
-      // Clean URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }
-  
-  // Auto-refresh every 30 seconds
-  let autoRefreshInterval;
-  function startAutoRefresh() {
-    if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-    autoRefreshInterval = setInterval(() => {
-      if (currentTab === 'listings') refreshListings();
-      else if (currentTab === 'submissions') loadSubmissions();
-    }, 30000);
-  }
-  
-  // Initial load
-  checkPaymentReturn();
+  // Initial Load
   refreshListings();
-  if (adminKey) loadSubmissions(); // pre-load pending count if key is cached
-  startAutoRefresh();
+  // Auto-refresh every 60 seconds
+  setInterval(refreshListings, 60000);
 </script>
+
 </body>
 </html>
