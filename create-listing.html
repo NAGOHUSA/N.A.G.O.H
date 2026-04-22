@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Submit Listing</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Listing • N.A.G.O.H (Live KV)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     * {
       margin: 0;
@@ -14,313 +17,546 @@
     body {
       background: #05050A;
       color: #EAEAFF;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
-      padding: 2rem;
+      font-family: 'DM Mono', monospace;
       line-height: 1.5;
     }
 
+    :root {
+      --bg: #05050A;
+      --surface: #0F0F1A;
+      --surface-hover: #18182A;
+      --border: #252540;
+      --text: #EAEAFF;
+      --muted: #8F8FAA;
+      --accent-primary: #8a78ff;
+      --accent-secondary: #52dcb4;
+      --display: 'Syne', sans-serif;
+    }
+
     .container {
-      max-width: 600px;
+      max-width: 1280px;
       margin: 0 auto;
+      padding: 0 2rem;
     }
 
-    .card {
-      background: #0F0F1A;
-      border: 1px solid #252540;
-      border-radius: 1rem;
-      padding: 2rem;
-      margin-bottom: 1rem;
+    .nav {
+      border-bottom: 1px solid var(--border);
+      background: rgba(5,5,10,0.8);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
-
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 0.5rem;
+    .nav-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-logo {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 1.5rem;
       background: linear-gradient(135deg, #8a78ff, #52dcb4);
       -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.02em;
     }
+    .nav-logo span { color: #52dcb4; background: none; -webkit-text-fill-color: #52dcb4; }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent-primary); }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .card:hover { border-color: #3a3a60; }
+    .page-header {
+      margin: 2rem 0 2rem 0;
+    }
+    .back-link {
+      color: var(--accent-primary);
+      text-decoration: none;
+      font-size: 0.8rem;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-family: var(--display);
+      font-size: 2.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #FFFFFF, #b4a9ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.02em;
+    }
+    h3 { font-family: var(--display); font-weight: 600; color: white; }
+    .muted { color: var(--muted); font-size: 0.8rem; }
 
     label {
       display: block;
-      font-size: 0.75rem;
-      font-weight: 600;
+      font-size: 0.7rem;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #8F8FAA;
+      letter-spacing: 0.06em;
+      font-weight: 500;
+      color: var(--muted);
       margin-top: 1rem;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.4rem;
     }
-
-    input, textarea, select {
+    input, select, textarea {
       width: 100%;
       background: #0A0A12;
-      border: 1px solid #252540;
-      border-radius: 0.5rem;
-      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
       color: white;
-      font-size: 0.9rem;
-      font-family: inherit;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      transition: 0.2s;
     }
-
-    input:focus, textarea:focus, select:focus {
+    input:focus, select:focus, textarea:focus {
       outline: none;
-      border-color: #8a78ff;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(138,120,255,0.2);
     }
-
-    button {
+    textarea { min-height: 90px; resize: vertical; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 0.7rem 1.3rem;
+      border-radius: 2rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+      text-decoration: none;
+      color: white;
+    }
+    .btn-solid {
       background: linear-gradient(135deg, #8a78ff, #52dcb4);
       border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 2rem;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-      margin-top: 1.5rem;
-      width: 100%;
       color: #05050A;
+      font-weight: 600;
     }
-
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(138,120,255,0.3);
+    .btn-solid:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(138,120,255,0.3);
     }
-
+    .btn-ghost {
+      border-color: var(--border);
+      background: transparent;
+    }
+    .btn-ghost:hover { border-color: var(--accent-primary); background: rgba(138,120,255,0.05); }
     .status {
       margin-top: 1rem;
       padding: 0.75rem;
-      border-radius: 0.5rem;
-      font-size: 0.85rem;
-      display: none;
+      border-radius: 0.75rem;
+      font-size: 0.75rem;
+      font-family: monospace;
+      background: #0e0e18;
+      border-left: 3px solid var(--accent-secondary);
+      white-space: pre-wrap;
+      word-break: break-word;
     }
-
-    .status.show {
-      display: block;
+    .status.error { border-left-color: #f06464; color: #ffb8c4; }
+    .status.success { border-left-color: #52dcb4; color: #c0ffea; }
+    .hidden { display: none; }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2rem 0;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
-
-    .success {
-      background: #0a1a1a;
-      border-left: 3px solid #52dcb4;
-      color: #52dcb4;
+    .footer-logo {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 1.2rem;
+      background: linear-gradient(135deg, #8a78ff, #52dcb4);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
-
-    .error {
-      background: #1a0a0a;
-      border-left: 3px solid #f06464;
-      color: #f06464;
-    }
-
-    .info {
-      background: #0a0a1a;
-      border-left: 3px solid #8a78ff;
-      color: #8a78ff;
-    }
-
-    .demo-btn {
-      background: transparent;
-      border: 1px solid #252540;
-      color: #8F8FAA;
-      margin-top: 0.5rem;
-    }
-
-    .demo-btn:hover {
-      border-color: #8a78ff;
-      color: #8a78ff;
-      transform: none;
-      box-shadow: none;
-    }
-
-    hr {
-      border-color: #252540;
-      margin: 1rem 0;
-    }
-
-    .badge {
+    .section-sm { margin-top: 3rem; }
+    .payment-badge {
       display: inline-block;
-      background: #1a2a2a;
-      color: #52dcb4;
+      background: rgba(82,220,180,0.12);
+      border-radius: 2rem;
+      padding: 0.25rem 0.7rem;
       font-size: 0.7rem;
-      padding: 0.2rem 0.5rem;
+      margin-left: 0.75rem;
+      color: #52dcb4;
+      border: 0.5px solid rgba(82,220,180,0.3);
+      font-weight: 400;
+    }
+    .test-note {
+      background: rgba(138,120,255,0.08);
       border-radius: 1rem;
-      margin-left: 0.5rem;
+      padding: 0.6rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.75rem;
+      border: 1px dashed var(--accent-primary);
+      color: #cdc6ff;
+    }
+    .demo-badge {
+      background: rgba(82,220,180,0.08);
+      border: 1px solid rgba(82,220,180,0.2);
+      border-radius: 1rem;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.65rem;
+      color: var(--accent-secondary);
+    }
+    @media (max-width: 780px) {
+      .container { padding: 0 1rem; }
+      div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <h1>List Your Project <span class="badge">LIVE</span></h1>
-      <p style="color: #8F8FAA; margin-bottom: 1.5rem; font-size: 0.85rem;">
-        Submit your project directly to the marketplace. Admin approval bypassed.
-      </p>
 
-      <div id="status" class="status"></div>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="dashboard.html" class="nav-logo" style="text-decoration:none">N.A.G.O.H<span>.</span></a>
+    <ul class="nav-links">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="#">Marketplace</a></li>
+      <li><a href="#">Support</a></li>
+    </ul>
+  </div>
+</nav>
 
-      <form id="listingForm">
-        <label>Project Name *</label>
-        <input type="text" name="title" required placeholder="e.g., SwiftWallet AI">
-
-        <label>Short Description *</label>
-        <textarea name="description" required rows="3" placeholder="Describe your project..."></textarea>
-
-        <label>Platform *</label>
-        <select name="platform" required>
-          <option value="iOS">iOS</option>
-          <option value="Android">Android</option>
-          <option value="iOS + Android">iOS + Android</option>
-        </select>
-
-        <label>GitHub Repository *</label>
-        <input type="url" name="repoUrl" required placeholder="https://github.com/username/repo">
-
-        <label>Purchase/Payment Link *</label>
-        <input type="url" name="sellerPaymentLink" required placeholder="https://buy.stripe.com/...">
-
-        <label>Price (USD) *</label>
-        <input type="number" name="priceUsd" required min="1" step="1" placeholder="499">
-
-        <label>Tech Stack</label>
-        <input type="text" name="techStack" placeholder="SwiftUI, Firebase, CoreML">
-
-        <label>Icon URL (optional)</label>
-        <input type="url" name="iconUrl" placeholder="https://example.com/icon.png">
-
-        <label>Contact Email *</label>
-        <input type="email" name="contactEmail" required placeholder="you@example.com">
-
-        <label>Listing Duration (days) *</label>
-        <input type="number" name="expiresInDays" required min="1" max="90" value="30">
-
-        <button type="submit">✨ Submit Listing</button>
-        <button type="button" id="demoBtn" class="demo-btn">⚡ Fill Demo Data</button>
-      </form>
-    </div>
+<main class="container">
+  <div class="page-header">
+    <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+    <h1>List Your Project <span class="payment-badge">LIVE KV MODE</span></h1>
+    <p class="muted" style="margin-top:0.5rem;font-size:0.88rem">✅ Payment bypass enabled for testing. Listings are written directly to Cloudflare KV and appear instantly in the dashboard.</p>
   </div>
 
-  <script>
-    // Your Cloudflare Worker URL
-    const WORKER_URL = 'https://nagoh-relay-v2.gregoryhogan.workers.dev';
+  <div style="display:grid;gap:1.5rem;grid-template-columns:1fr 320px;align-items:start">
+
+    <div style="display:flex;flex-direction:column;gap:1.5rem">
+
+      <!-- Step 1 - Bypassed payment -->
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem">
+          <span style="font-family:var(--display);font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#8a78ff,#52dcb4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">01</span>
+          <h3 style="font-size:1rem">Pay Listing Fee <span style="background:#1e2a2a; color:#52dcb4; font-size:0.7rem; padding:2px 8px; border-radius:20px; margin-left:8px;">BYPASSED</span></h3>
+        </div>
+        <p class="muted" style="font-size:0.82rem;margin-bottom:1.25rem">🔓 Test mode active. Click below to simulate payment and unlock the listing form. Listings will be saved to KV.</p>
+        <button id="mockPayButton" class="btn btn-solid">✅ Simulate Payment & Unlock Listing</button>
+        <div id="paymentSimulationStatus" class="status hidden"></div>
+      </div>
+
+      <!-- Step 2 - Submit Listing Details -->
+      <div class="card" id="listingFormCard" style="opacity:0.6; pointer-events:none">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.25rem">
+          <span style="font-family:var(--display);font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#8a78ff,#52dcb4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">02</span>
+          <h3 style="font-size:1rem">Submit Listing Details</h3>
+          <span class="demo-badge" id="demoBadge" style="display:none">Demo ready</span>
+        </div>
+        <form id="createForm">
+          <label>Project name <span class="muted">*</span><input required name="title" id="titleInput" placeholder="e.g. FinTrack Pro" /></label>
+          <label>Short description <span class="muted">*</span><textarea required name="description" placeholder="Describe what the app does, what's been built, and what's missing…"></textarea></label>
+          <label>Platform <span class="muted">*</span>
+            <select name="platform" required>
+              <option value="iOS">iOS</option>
+              <option value="Android">Android</option>
+              <option value="iOS + Android">iOS + Android</option>
+            </select>
+          </label>
+          <label>GitHub repository URL <span class="muted">*</span><input required name="repoUrl" type="url" placeholder="https://github.com/yourname/yourrepo" /></label>
+          <label>Seller purchase / payment link <span class="muted">*</span><input required name="sellerPaymentLink" type="url" placeholder="https://buy.stripe.com/…" /></label>
+          <label>Listing price (USD) <span class="muted">*</span><input required name="priceUsd" type="number" min="1" step="1" placeholder="e.g. 499" /></label>
+          <label>Tech stack<input name="techStack" placeholder="SwiftUI, Kotlin, Firebase…" /></label>
+          <label>App icon URL <span class="muted">(optional)</span><input name="iconUrl" type="url" placeholder="https://…/icon.png" /></label>
+          <label>Contact email <span class="muted">*</span><input required name="contactEmail" type="email" placeholder="you@example.com" /></label>
+          <label>Listing duration (days) <span class="muted">*</span><input required name="expiresInDays" type="number" min="1" max="90" value="30" /></label>
+          <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+            <button type="button" id="demoFillBtn" class="btn btn-ghost" style="flex:1; justify-content:center">⚡ Fill Demo Data</button>
+            <button type="submit" class="btn btn-solid" style="flex:1; justify-content:center">Create Listing →</button>
+          </div>
+        </form>
+        <pre id="createStatus" class="status hidden"></pre>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem">
+      <div class="card">
+        <div class="test-note">
+          🧪 <strong>Live KV Mode</strong><br>
+          • Payment bypassed for testing<br>
+          • Listings go directly to Cloudflare KV<br>
+          • View them instantly in the dashboard<br>
+          • Demo data available for quick testing
+        </div>
+        <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem">What Happens Next</div>
+        <div style="font-size:0.8rem;color:var(--muted);line-height:1.8">
+          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;<strong>Pay the listing fee</strong> <span style="color:#52dcb4;">(simulated)</span></div>
+          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;Fill in your project details</div>
+          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;<strong>Written to KV database</strong> — instantly live</div>
+          <div style="padding:0.5rem 0;border-bottom:1px solid var(--border)">✓ &nbsp;View in dashboard immediately</div>
+          <div style="padding:0.5rem 0">✓ &nbsp;Buyers contact you directly</div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem">API Status</div>
+        <div id="apiStatus" style="font-size:0.7rem; color:var(--green);">✓ Ready to write to KV</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="section-sm" style="margin-top:4rem;position:relative">
+  <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(138,120,255,0.2),rgba(82,220,180,0.12),transparent)"></div>
+  <div class="container">
+    <div class="footer">
+      <div class="footer-logo">N.A.G.O.H<span>.</span></div>
+      <small style="color:var(--muted)">Listings are stored in Cloudflare KV and appear instantly in the marketplace.</small>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function() {
+    const API_BASE = window.location.origin;
+    let paymentCompleted = false;
+    let fakeSessionId = null;
     
-    const form = document.getElementById('listingForm');
-    const statusDiv = document.getElementById('status');
-    
-    function showStatus(message, type = 'info') {
-      statusDiv.textContent = message;
-      statusDiv.className = `status show ${type}`;
+    const listingCard = document.getElementById('listingFormCard');
+    const mockPayBtn = document.getElementById('mockPayButton');
+    const paymentStatusDiv = document.getElementById('paymentSimulationStatus');
+    const createStatusPre = document.getElementById('createStatus');
+    const form = document.getElementById('createForm');
+    const apiStatusSpan = document.getElementById('apiStatus');
+
+    function showStatus(element, message, isError = false) {
+      if (!element) return;
+      element.textContent = message;
+      element.classList.remove('hidden');
+      element.classList.remove('error', 'success');
+      element.classList.add(isError ? 'error' : 'success');
       
-      // Auto-hide success/error after 5 seconds
-      if (type !== 'info') {
+      if (!isError) {
         setTimeout(() => {
-          statusDiv.classList.remove('show');
-        }, 5000);
+          if (element && !element.matches(':hover')) {
+            // keep visible but user can see
+          }
+        }, 8000);
       }
     }
-    
-    // Demo data
-    document.getElementById('demoBtn').addEventListener('click', () => {
-      form.querySelector('[name="title"]').value = 'SwiftWallet - AI Finance Tracker';
-      form.querySelector('[name="description"]').value = 'Fully functional iOS app with SwiftUI, CoreData, and real-time expense tracking. Built for investors seeking a proven fintech solution.';
-      form.querySelector('[name="platform"]').value = 'iOS';
-      form.querySelector('[name="repoUrl"]').value = 'https://github.com/demo/swiftwallet';
-      form.querySelector('[name="sellerPaymentLink"]').value = 'https://buy.stripe.com/test_123';
-      form.querySelector('[name="priceUsd"]').value = '349';
-      form.querySelector('[name="techStack"]').value = 'SwiftUI, Combine, Firebase, CoreML';
-      form.querySelector('[name="iconUrl"]').value = 'https://placehold.co/256x256/8a78ff/white?text=SW';
-      form.querySelector('[name="contactEmail"]').value = 'founder@swiftwallet.io';
-      form.querySelector('[name="expiresInDays"]').value = '45';
+
+    async function testAPIConnection() {
+      try {
+        const response = await fetch(`${API_BASE}/api/listings`);
+        if (response.ok) {
+          apiStatusSpan.innerHTML = '✓ KV connected · Ready to create listings';
+          apiStatusSpan.style.color = '#52dcb4';
+        } else {
+          apiStatusSpan.innerHTML = '⚠ API available but check worker';
+          apiStatusSpan.style.color = '#f0b429';
+        }
+      } catch (err) {
+        apiStatusSpan.innerHTML = '✗ Cannot reach API. Make sure worker is deployed.';
+        apiStatusSpan.style.color = '#f06464';
+        console.error('API test failed:', err);
+      }
+    }
+
+    function unlockForm() {
+      if (paymentCompleted) return;
+      paymentCompleted = true;
+      fakeSessionId = 'bypass_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+      sessionStorage.setItem('nagoh_payment_session', fakeSessionId);
       
-      showStatus('✅ Demo data filled! Review and submit.', 'success');
+      listingCard.style.opacity = '1';
+      listingCard.style.pointerEvents = 'auto';
+      mockPayBtn.disabled = true;
+      mockPayBtn.textContent = '✓ Payment Simulated Successfully';
+      mockPayBtn.style.opacity = '0.7';
+      mockPayBtn.style.cursor = 'default';
+      
+      showStatus(paymentStatusDiv, '✅ Payment simulation complete! You can now create a listing that will be saved to KV.', false);
+      
+      const stepOneBadge = document.querySelector('.card:first-child h3 span');
+      if (stepOneBadge) stepOneBadge.textContent = 'PAID (TEST)';
+    }
+
+    mockPayBtn.addEventListener('click', () => {
+      if (paymentCompleted) {
+        showStatus(paymentStatusDiv, '⚠️ Payment already simulated. You can now submit the listing.', false);
+        return;
+      }
+      unlockForm();
     });
-    
-    // Form submission
+
+    // Demo data
+    function setDemoPlaceholders() {
+      const demoValues = {
+        title: "SwiftWallet - AI Finance Tracker",
+        description: "Fully functional iOS app with SwiftUI, CoreData, and real-time expense tracking. Missing push notifications and final icon set. Built for investors.",
+        repoUrl: "https://github.com/demo/swiftwallet",
+        sellerPaymentLink: "https://buy.stripe.com/test_7sI4iw9abc",
+        priceUsd: "349",
+        techStack: "SwiftUI, Combine, Firebase, CoreML",
+        iconUrl: "https://placehold.co/256x256/8a78ff/white?text=SW",
+        contactEmail: "founder@swiftwallet.io",
+        expiresInDays: "45"
+      };
+      for (const [name, value] of Object.entries(demoValues)) {
+        const field = form.querySelector(`[name="${name}"]`);
+        if (field) field.value = value;
+      }
+      document.getElementById('demoBadge').style.display = 'inline-block';
+      setTimeout(() => {
+        document.getElementById('demoBadge').style.opacity = '0.5';
+      }, 2000);
+    }
+
+    document.getElementById('demoFillBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!paymentCompleted) {
+        showStatus(createStatusPre, '🔓 Please simulate payment first before filling demo data.', true);
+        return;
+      }
+      setDemoPlaceholders();
+      showStatus(createStatusPre, '🧪 Demo data filled! Review and submit to save to KV.', false);
+    });
+
+    // Submit to live KV via Worker API
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      // Show loading
-      showStatus('⏳ Submitting to marketplace...', 'info');
+      if (!paymentCompleted) {
+        showStatus(createStatusPre, '❌ Payment required: please click "Simulate Payment & Unlock Listing" first.', true);
+        createStatusPre.classList.remove('hidden');
+        return;
+      }
       
-      // Collect form data
       const formData = new FormData(form);
-      const listing = {
-        title: formData.get('title').trim(),
-        description: formData.get('description').trim(),
-        platform: formData.get('platform'),
-        repoUrl: formData.get('repoUrl').trim(),
-        sellerPaymentLink: formData.get('sellerPaymentLink').trim(),
-        priceUsd: parseInt(formData.get('priceUsd')),
-        techStack: formData.get('techStack')?.trim() || '',
-        iconUrl: formData.get('iconUrl')?.trim() || '',
-        contactEmail: formData.get('contactEmail').trim(),
-        expiresInDays: parseInt(formData.get('expiresInDays')),
-        status: 'approved', // Bypass admin approval
-        submittedAt: new Date().toISOString()
+      const listingData = {};
+      for (let [key, value] of formData.entries()) {
+        listingData[key] = value.trim();
+      }
+      
+      // Validation
+      const requiredFields = ['title', 'description', 'platform', 'repoUrl', 'sellerPaymentLink', 'priceUsd', 'contactEmail', 'expiresInDays'];
+      for (let field of requiredFields) {
+        if (!listingData[field]) {
+          showStatus(createStatusPre, `⛔ Missing field: ${field}. Please fill out all required fields.`, true);
+          return;
+        }
+      }
+      
+      const price = parseFloat(listingData.priceUsd);
+      if (isNaN(price) || price < 1) {
+        showStatus(createStatusPre, '❌ Price must be a positive number.', true);
+        return;
+      }
+      
+      const days = parseInt(listingData.expiresInDays);
+      if (isNaN(days) || days < 1 || days > 90) {
+        showStatus(createStatusPre, '❌ Duration must be between 1 and 90 days.', true);
+        return;
+      }
+      
+      // Prepare payload for worker
+      const payload = {
+        ...listingData,
+        priceUsd: price,
+        expiresInDays: days,
+        paymentSessionId: fakeSessionId,
+        skipPayment: true  // bypass flag for test mode
       };
       
-      // Validate
-      if (!listing.title || !listing.description || !listing.repoUrl || !listing.sellerPaymentLink || !listing.contactEmail) {
-        showStatus('❌ Please fill in all required fields.', 'error');
-        return;
-      }
-      
-      if (isNaN(listing.priceUsd) || listing.priceUsd < 1) {
-        showStatus('❌ Price must be a positive number.', 'error');
-        return;
-      }
+      showStatus(createStatusPre, '⏳ Creating listing and saving to KV...', false);
+      createStatusPre.classList.remove('hidden');
       
       try {
-        // Submit to worker
-        const response = await fetch(`${WORKER_URL}/api/listings`, {
+        const response = await fetch(`${API_BASE}/api/listings`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(listing)
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
         
         const result = await response.json();
         
         if (response.ok && result.success) {
-          showStatus(
-            `✅ SUCCESS! Your project "${listing.title}" has been listed on the marketplace.\n\n` +
-            `Listing ID: ${result.id}\n` +
-            `Price: $${listing.priceUsd}\n` +
-            `View it on the marketplace shortly.`,
-            'success'
-          );
-          form.reset();
+          // Success - listing saved to KV
+          const successMsg = `🎉 LISTING SAVED TO KV!\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nProject: ${listingData.title}\nPlatform: ${listingData.platform}\nPrice: $${price}\nContact: ${listingData.contactEmail}\nListing ID: ${result.id}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n✨ View it instantly in the dashboard! ✨\n\nEdit URL: ${result.editUrl || 'use dashboard'}`;
+          showStatus(createStatusPre, successMsg, false);
+          
+          // Reset form or offer to create another
+          setTimeout(() => {
+            if (confirm('Listing created successfully! Would you like to create another?')) {
+              form.reset();
+              // Keep payment bypass active
+            } else {
+              window.location.href = 'dashboard.html';
+            }
+          }, 1000);
         } else {
-          throw new Error(result.error || 'Submission failed');
+          throw new Error(result.error || 'Failed to save to KV');
         }
       } catch (error) {
-        console.error('Submission error:', error);
-        showStatus(
-          `❌ Failed to submit: ${error.message}\n\n` +
-          `Make sure the worker is deployed and CORS is enabled.`,
-          'error'
-        );
+        console.error('Create listing error:', error);
+        showStatus(createStatusPre, `❌ Failed to save to KV: ${error.message}\n\nMake sure your worker is deployed and LISTINGS_STORAGE KV binding is configured.`, true);
       }
     });
     
-    // Test connection on load
-    async function testConnection() {
-      try {
-        const response = await fetch(`${WORKER_URL}/health`);
-        if (response.ok) {
-          console.log('✅ Worker connected');
-        }
-      } catch (error) {
-        console.warn('Worker connection test failed:', error);
-        showStatus(
-          '⚠️ Unable to reach worker. Check your internet connection or worker status.\n\n' +
-          'Your listing will still be submitted when you click submit.',
-          'info'
-        );
-        setTimeout(() => {
-          statusDiv.classList.remove('show');
-        }, 8000);
-      }
+    // Check URL for auto-unlock (bypass param)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('bypass') === 'true' && !paymentCompleted) {
+      unlockForm();
+      showStatus(paymentStatusDiv, '🔓 Auto-unlocked via URL parameter. Ready to create listings.', false);
     }
     
-    testConnection();
-  </script>
+    // Check if returning from Stripe (real payment)
+    const sessionId = urlParams.get('session_id');
+    if (sessionId && !paymentCompleted) {
+      fakeSessionId = sessionId;
+      unlockForm();
+      showStatus(paymentStatusDiv, '✅ Payment detected! You can now create your listing.', false);
+    }
+    
+    // Test API connection on load
+    testAPIConnection();
+    
+    // Initial state
+    if (!paymentCompleted) {
+      listingCard.style.opacity = '0.6';
+      listingCard.style.pointerEvents = 'none';
+    }
+    
+    const stepOneDiv = document.querySelector('.card:first-child p.muted');
+    if (stepOneDiv) {
+      stepOneDiv.innerHTML = '🔓 <strong>Test mode:</strong> Payment bypassed. Click simulate, then submit — your listing goes straight to KV.';
+    }
+    
+    console.log('N.A.G.O.H Create Listing — Live KV Mode. Listings will be saved to Cloudflare KV.');
+  })();
+</script>
 </body>
 </html>
