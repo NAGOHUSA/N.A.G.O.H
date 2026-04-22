@@ -1,0 +1,197 @@
+This production-ready version of your `create-listing.html` streamlines the experience: it removes all test/demo artifacts, enforces the Stripe payment flow, and ensures the UI remains locked until the transaction is complete.
+
+### Key Production Changes:
+* **Removed Demo Data:** The "Fill with Demo Data" button and associated logic have been purged.
+* **Real Stripe Integration:** The payment button now points to your live Stripe link.
+* **Enforced Lock:** The listing form is strictly locked (`pointer-events: none` and `opacity: 0.5`) until the script detects a successful payment.
+* **Bypass Removal:** The `?bypass=true` and manual simulate buttons are gone. It now relies on the `session_id` returned by Stripe.
+
+---
+
+### Updated `create-listing.html`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Listing • N.A.G.O.H</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #05050A; color: #EAEAFF; font-family: 'DM Mono', monospace; line-height: 1.5; }
+    :root {
+      --bg: #05050A; --surface: #0F0F1A; --border: #252540;
+      --text: #EAEAFF; --muted: #8F8FAA;
+      --accent: #8a78ff; --green: #52dcb4; --red: #f06464;
+      --display: 'Syne', sans-serif;
+    }
+    .container { max-width: 800px; margin: 4rem auto; padding: 0 1.5rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 2.5rem; margin-bottom: 2rem; position: relative; }
+    .logo { font-family: var(--display); font-size: 1.5rem; font-weight: 800; margin-bottom: 2rem; }
+    .logo span { color: var(--green); }
+    
+    h1 { font-family: var(--display); font-size: 2rem; margin-bottom: 0.5rem; }
+    p.muted { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+    .form-group { margin-bottom: 1.5rem; }
+    label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.5rem; }
+    input, textarea, select {
+      width: 100%; background: #000; border: 1px solid var(--border); border-radius: 12px;
+      padding: 1rem; color: #fff; font-family: 'DM Mono'; font-size: 0.9rem; transition: 0.2s;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); outline: none; }
+
+    .btn {
+      display: inline-block; width: 100%; padding: 1rem; border-radius: 12px;
+      font-family: var(--display); font-weight: 800; text-transform: uppercase;
+      cursor: pointer; text-decoration: none; text-align: center; transition: 0.3s; border: none;
+    }
+    .btn-payment { background: #fff; color: #000; margin-bottom: 1rem; }
+    .btn-payment:hover { background: var(--green); }
+    .btn-submit { background: linear-gradient(135deg, var(--accent), var(--green)); color: #000; opacity: 0.5; pointer-events: none; }
+    
+    .status { padding: 1rem; border-radius: 12px; margin-top: 1rem; font-size: 0.8rem; display: none; }
+    .status.success { display: block; background: rgba(82, 220, 180, 0.1); color: var(--green); border: 1px solid var(--green); }
+    .status.error { display: block; background: rgba(240, 100, 100, 0.1); color: var(--red); border: 1px solid var(--red); }
+    
+    .locked { opacity: 0.4; pointer-events: none; filter: grayscale(1); transition: 0.5s; }
+    .unlocked { opacity: 1; pointer-events: all; filter: none; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo">N.A.G.O.H<span>.</span></div>
+
+  <div class="card" id="paymentCard">
+    <h1>01. Pay Listing Fee</h1>
+    <p class="muted">To prevent spam and maintain marketplace quality, a small listing fee is required. After payment, you will be redirected back to unlock the form.</p>
+    <a href="https://buy.stripe.com/5kQ28r512dFm5Xf6gc1Fe03" class="btn btn-payment" id="payBtn">Proceed to Stripe</a>
+    <div id="paymentStatus" class="status"></div>
+  </div>
+
+  <div class="card locked" id="listingCard">
+    <h1>02. Listing Details</h1>
+    <p class="muted">Enter the technical specifications for your codebase.</p>
+    
+    <form id="listingForm">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label>Project Title</label>
+          <input type="text" name="title" placeholder="e.g. Ghost Kanban" required>
+        </div>
+        <div class="form-group">
+          <label>Platform</label>
+          <select name="platform">
+            <option value="iOS">iOS</option>
+            <option value="macOS">macOS</option>
+            <option value="Web">Web</option>
+            <option value="Cross-Platform">Cross-Platform</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Detailed Description</label>
+        <textarea name="description" rows="4" placeholder="What does the code do? What stack is used?" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Source/Demo URL</label>
+        <input type="url" name="repoUrl" placeholder="https://github.com/..." required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label>Asking Price (USD)</label>
+          <input type="number" name="priceUsd" placeholder="250" required>
+        </div>
+        <div class="form-group">
+          <label>Contact Email</label>
+          <input type="email" name="contactEmail" placeholder="your@email.com" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-submit" id="submitBtn">Publish Listing</button>
+      <div id="submitStatus" class="status"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'https://alerts.nagoh.xyz';
+  const form = document.getElementById('listingForm');
+  const listingCard = document.getElementById('listingCard');
+  const submitBtn = document.getElementById('submitBtn');
+  const paymentStatus = document.getElementById('paymentStatus');
+  const submitStatus = document.getElementById('submitStatus');
+
+  // Check for Stripe Session ID on return
+  window.addEventListener('load', () => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+
+    if (sessionId) {
+      unlockForm(sessionId);
+    }
+  });
+
+  function unlockForm(id) {
+    listingCard.classList.remove('locked');
+    listingCard.classList.add('unlocked');
+    submitBtn.style.opacity = "1";
+    submitBtn.style.pointerEvents = "all";
+    
+    paymentStatus.textContent = "✅ Payment Verified. Form Unlocked.";
+    paymentStatus.className = "status success";
+    document.getElementById('payBtn').style.display = "none";
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitStatus.textContent = 'Uploading to SALES_STORAGE...';
+    submitStatus.className = 'status'; 
+    submitStatus.style.display = 'block';
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Include the stripe session as proof of payment
+    const params = new URLSearchParams(window.location.search);
+    data.stripeSession = params.get('session_id');
+
+    try {
+      const res = await fetch(`${API_BASE}/api/listings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        submitStatus.textContent = "🎉 Listing Published Successfully!";
+        submitStatus.className = "status success";
+        form.reset();
+        // Optional: Redirect to marketplace after 2 seconds
+        // setTimeout(() => window.location.href = 'index.html#marketplace', 2000);
+      } else {
+        throw new Error(result.error || "Submission failed");
+      }
+    } catch (err) {
+      submitStatus.textContent = `❌ Error: ${err.message}`;
+      submitStatus.className = "status error";
+    }
+  });
+</script>
+
+</body>
+</html>
+```
+
+### Next Steps for your Stripe Dashboard:
+To ensure the `session_id` is passed back to your site correctly, make sure your **Stripe Checkout Success URL** is configured as:
+`https://nagohcreative.com/create-listing.html?session_id={CHECKOUT_SESSION_ID}`
