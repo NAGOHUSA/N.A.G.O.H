@@ -1,36 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Create Listing • N.A.G.O.H</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=Syne:wght@800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #05050A; color: #EAEAFF; font-family: 'DM Mono', monospace; line-height: 1.6; padding: 2rem; }
-    .container { max-width: 800px; margin: 0 auto; }
-    .card { background: #0F0F1A; border: 1px solid #252540; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    h1 { font-family: 'Syne', sans-serif; font-size: 2.5rem; margin-bottom: 1rem; background: linear-gradient(135deg, #fff, #8a78ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    label { display: block; font-size: 0.75rem; text-transform: uppercase; color: #8F8FAA; margin-top: 1.5rem; margin-bottom: 0.5rem; }
-    input, textarea, select { width: 100%; background: #0A0A12; border: 1px solid #252540; border-radius: 0.75rem; padding: 0.8rem; color: #fff; font-family: inherit; }
-    input:focus { border-color: #8a78ff; outline: none; }
-    .btn { background: linear-gradient(135deg, #8a78ff, #52dcb4); border: none; padding: 1rem 2rem; border-radius: 2rem; color: #05050A; font-weight: 700; cursor: pointer; margin-top: 2rem; width: 100%; transition: transform 0.2s; }
-    .btn:hover { transform: translateY(-2px); }
-    #status { margin-top: 1rem; padding: 1rem; border-radius: 0.5rem; display: none; font-size: 0.85rem; }
-    .success { background: rgba(82, 220, 180, 0.1); color: #52dcb4; border: 1px solid #52dcb4; }
-    .error { background: rgba(240, 100, 100, 0.1); color: #ffb8c4; border: 1px solid #f06464; }
+    body { background: #05050A; color: #EAEAFF; font-family: 'DM Mono', monospace; padding: 2rem; }
+    .container { max-width: 600px; margin: 0 auto; }
+    .card { background: #0F0F1A; border: 1px solid #252540; border-radius: 1.5rem; padding: 2rem; }
+    h1 { font-family: 'Syne', sans-serif; font-size: 2rem; margin-bottom: 1.5rem; color: #fff; }
+    label { display: block; font-size: 0.7rem; text-transform: uppercase; color: #8F8FAA; margin-top: 1rem; margin-bottom: 0.5rem; }
+    input, textarea, select { width: 100%; background: #0A0A12; border: 1px solid #252540; border-radius: 0.5rem; padding: 0.8rem; color: #fff; font-family: inherit; }
+    .btn { width: 100%; background: linear-gradient(135deg, #8a78ff, #52dcb4); border: none; padding: 1rem; border-radius: 2rem; color: #05050A; font-weight: 700; margin-top: 2rem; cursor: pointer; }
+    #status { margin-top: 1rem; padding: 1rem; border-radius: 0.5rem; display: none; font-size: 0.8rem; border-left: 4px solid; }
+    .success { background: #10201a; color: #52dcb4; border-color: #52dcb4; }
+    .error { background: #201010; color: #ffb8c4; border-color: #f06464; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>List Your Project<span>.</span></h1>
+    <h1>Create Listing<span>.</span></h1>
     <div class="card">
-      <form id="listingForm">
-        <label>Project Name</label>
-        <input type="text" name="title" required placeholder="e.g. Ghost Kanban">
-        
-        <label>Description</label>
-        <textarea name="description" rows="4" required placeholder="Briefly explain your app..."></textarea>
+      <form id="listForm">
+        <label>App Name</label>
+        <input type="text" name="title" required placeholder="e.g. Daily Crumb">
         
         <label>Platform</label>
         <select name="platform">
@@ -39,54 +34,49 @@
           <option value="Web">Web</option>
         </select>
 
-        <label>GitHub Repository URL</label>
-        <input type="url" name="repoUrl" required placeholder="https://github.com/...">
+        <label>Description</label>
+        <textarea name="description" rows="3" required></textarea>
 
-        <label>Price (USD)</label>
-        <input type="number" name="priceUsd" required placeholder="500">
+        <label>GitHub/URL</label>
+        <input type="url" name="url" required>
 
-        <label>Contact Email</label>
-        <input type="email" name="contactEmail" required placeholder="you@example.com">
-
-        <button type="submit" class="btn">Create Listing →</button>
+        <button type="submit" class="btn">Push to KV →</button>
       </form>
       <div id="status"></div>
     </div>
   </div>
 
   <script>
-    const API_URL = 'https://alerts.nagoh.xyz/api/listings';
-    const form = document.getElementById('listingForm');
-    const statusDiv = document.getElementById('status');
+    const API_BASE = 'https://alerts.nagoh.xyz';
+    const form = document.getElementById('listForm');
+    const status = document.getElementById('status');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      statusDiv.style.display = 'block';
-      statusDiv.className = '';
-      statusDiv.textContent = 'Processing...';
+      status.style.display = 'block';
+      status.className = '';
+      status.textContent = 'Communicating with KV_BINDING...';
 
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
+      const data = Object.fromEntries(new FormData(form).entries());
 
       try {
-        const response = await fetch(API_URL, {
+        const res = await fetch(`${API_BASE}/api/listings`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          statusDiv.className = 'success';
-          statusDiv.textContent = 'Listing Created! ID: ' + result.id;
+        
+        const result = await res.json();
+        if (res.ok) {
+          status.className = 'success';
+          status.textContent = `Success! Entry created: ${result.id}`;
           form.reset();
         } else {
-          throw new Error(result.error || 'Submission failed');
+          throw new Error(result.error || 'Server error');
         }
       } catch (err) {
-        statusDiv.className = 'error';
-        statusDiv.textContent = 'Error: ' + err.message;
+        status.className = 'error';
+        status.textContent = `Error: ${err.message}`;
       }
     });
   </script>
