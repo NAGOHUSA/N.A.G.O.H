@@ -1,62 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Listing • N.A.G.O.H (SALES STORAGE)</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=Syne:wght@800&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Listing • N.A.G.O.H (Sales Storage)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #05050A; color: #EAEAFF; font-family: 'DM Mono', monospace; padding: 2rem; }
-    .container { max-width: 600px; margin: 0 auto; }
-    .card { background: #0F0F1A; border: 1px solid #252540; border-radius: 1.5rem; padding: 2rem; }
-    h1 { font-family: 'Syne', sans-serif; font-size: 2.1rem; margin-bottom: 1.5rem; color: #fff; }
-    label { display: block; font-size: 0.7rem; text-transform: uppercase; color: #8F8FAA; margin-top: 1rem; margin-bottom: 0.5rem; }
-    input, textarea, select { width: 100%; background: #0A0A12; border: 1px solid #252540; border-radius: 0.5rem; padding: 0.8rem; color: #fff; font-family: inherit; }
-    .btn { width: 100%; background: linear-gradient(135deg, #8a78ff, #52dcb4); border: none; padding: 1rem; border-radius: 2rem; color: #05050A; font-weight: 700; margin-top: 2rem; cursor: pointer; }
-    #status { margin-top: 1rem; padding: 1rem; border-radius: 0.5rem; display: none; font-size: 0.8rem; border-left: 4px solid; }
-    .success { background: #10201a; color: #52dcb4; border-color: #52dcb4; }
-    .error { background: #201010; color: #ffb8c4; border-color: #f06464; }
+    body { background: #05050A; color: #EAEAFF; font-family: 'DM Mono', monospace; line-height: 1.5; }
+    :root {
+      --bg: #05050A; --surface: #0F0F1A; --border: #252540;
+      --text: #EAEAFF; --muted: #8F8FAA;
+      --accent-primary: #8a78ff; --accent-secondary: #52dcb4;
+      --display: 'Syne', sans-serif;
+    }
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+    .nav { border-bottom: 1px solid var(--border); background: rgba(5,5,10,0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10; }
+    .nav-inner { max-width: 1280px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .nav-logo { font-family: var(--display); font-weight: 800; font-size: 1.5rem; background: linear-gradient(135deg, #8a78ff, #52dcb4); -webkit-background-clip: text; background-clip: text; color: transparent; text-decoration: none; }
+    .nav-logo span { color: #52dcb4; -webkit-text-fill-color: #52dcb4; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 1.5rem; padding: 1.5rem; }
+    .page-header { margin: 2rem 0; }
+    h1 { font-family: var(--display); font-size: 2.2rem; font-weight: 700; background: linear-gradient(135deg, #FFFFFF, #b4a9ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 1rem; margin-bottom: 0.4rem; }
+    input, select, textarea { width: 100%; background: #0A0A12; border: 1px solid var(--border); border-radius: 0.75rem; padding: 0.75rem 1rem; color: white; font-family: 'DM Mono', monospace; font-size: 0.85rem; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 2px rgba(138,120,255,0.2); }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border); padding: 0.7rem 1.3rem; border-radius: 2rem; font-family: 'DM Mono', monospace; font-size: 0.8rem; cursor: pointer; transition: 0.2s; text-decoration: none; color: white; }
+    .btn-solid { background: linear-gradient(135deg, #8a78ff, #52dcb4); border: none; color: #05050A; font-weight: 600; }
+    .btn-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(138,120,255,0.3); }
+    .btn-ghost { border-color: var(--border); }
+    .btn-ghost:hover { border-color: var(--accent-primary); background: rgba(138,120,255,0.05); }
+    .status { margin-top: 1rem; padding: 0.75rem; border-radius: 0.75rem; font-size: 0.75rem; font-family: monospace; background: #0e0e18; border-left: 3px solid var(--accent-secondary); white-space: pre-wrap; word-break: break-word; }
+    .status.error { border-left-color: #f06464; color: #ffb8c4; }
+    .status.success { border-left-color: #52dcb4; color: #c0ffea; }
+    .hidden { display: none; }
+    .test-note { background: rgba(138,120,255,0.08); border-radius: 1rem; padding: 0.6rem 1rem; margin-bottom: 1rem; font-size: 0.75rem; border: 1px dashed var(--accent-primary); color: #cdc6ff; }
+    @media (max-width: 780px) { .container { padding: 0 1rem; } }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>List Your Project<span>.</span></h1>
-    <div class="card">
-      <form id="listForm">
-        <label>App Name</label>
-        <input type="text" name="title" required placeholder="e.g. Ghost Kanban">
-        
-        <label>Platform</label>
-        <select name="platform">
-          <option value="iOS">iOS</option>
-          <option value="macOS">macOS</option>
-          <option value="Web">Web</option>
-        </select>
 
-        <label>Description</label>
-        <textarea name="description" rows="3" required></textarea>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">N.A.G.O.H<span>.</span></a>
+  </div>
+</nav>
 
-        <label>GitHub/URL</label>
-        <input type="url" name="url" required>
-
-        <button type="submit" class="btn">Push to Sales KV →</button>
-      </form>
-      <div id="status"></div>
-    </div>
+<main class="container">
+  <div class="page-header">
+    <h1>List Your Project <span style="background:#1e2a2a; color:#52dcb4; font-size:0.7rem; padding:4px 12px; border-radius:20px; vertical-align:middle; margin-left:10px;">SALES STORAGE</span></h1>
+    <p style="color:var(--muted); margin-top:0.5rem;">Direct submission to Cloudflare KV. Payment bypass active for testing.</p>
   </div>
 
-  <script>
-    const API_BASE = 'https://alerts.nagoh.xyz';
-    const form = document.getElementById('listForm');
-    const status = document.getElementById('status');
+  <div style="display:grid; gap:1.5rem; grid-template-columns: 1fr 320px;">
+    <div style="display:flex; flex-direction:column; gap:1.5rem">
+      
+      <div class="card">
+        <h3 style="font-size:1rem; margin-bottom:1rem">01. Simulation Control</h3>
+        <button id="mockPayButton" class="btn btn-solid">✅ Simulate Payment & Unlock Form</button>
+        <div id="paymentStatus" class="status hidden"></div>
+      </div>
 
+      <div class="card" id="formCard" style="opacity:0.5; pointer-events:none">
+        <h3 style="font-size:1rem; margin-bottom:1rem">02. Project Details</h3>
+        <form id="createForm">
+          <label>Project Name *<input required name="title" placeholder="e.g. Ghost Kanban"></label>
+          <label>Platform *
+            <select name="platform">
+              <option value="iOS">iOS</option>
+              <option value="macOS">macOS</option>
+              <option value="Web">Web</option>
+            </select>
+          </label>
+          <label>Description *<textarea required name="description" placeholder="Describe the project..."></textarea></label>
+          <label>Repository/URL *<input required name="repoUrl" type="url" placeholder="https://github.com/..."></label>
+          <label>Price (USD) *<input required name="priceUsd" type="number" placeholder="499"></label>
+          <label>Contact Email *<input required name="contactEmail" type="email" placeholder="you@example.com"></label>
+          
+          <div style="display:flex; gap:0.75rem; margin-top:1.5rem">
+            <button type="button" id="demoFillBtn" class="btn btn-ghost" style="flex:1; justify-content:center">⚡ Demo Data</button>
+            <button type="submit" class="btn btn-solid" style="flex:1; justify-content:center">Push to Sales KV →</button>
+          </div>
+        </form>
+        <div id="submitStatus" class="status hidden"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="test-note">
+        <strong>Storage Target: SALES</strong><br>
+        • Writes to SALES_STORAGE<br>
+        • Binding: env.SALES<br>
+        • Endpoint: alerts.nagoh.xyz
+      </div>
+      <div id="apiStatus" style="font-size:0.7rem; color:var(--muted)">Checking connection...</div>
+    </div>
+  </div>
+</main>
+
+<script>
+  (function() {
+    const API_BASE = 'https://alerts.nagoh.xyz';
+    let unlocked = false;
+
+    const mockPayBtn = document.getElementById('mockPayButton');
+    const formCard = document.getElementById('formCard');
+    const paymentStatus = document.getElementById('paymentStatus');
+    const submitStatus = document.getElementById('submitStatus');
+    const apiStatus = document.getElementById('apiStatus');
+    const form = document.getElementById('createForm');
+
+    // Health Check
+    async function checkStatus() {
+      try {
+        const res = await fetch(`${API_BASE}/health`);
+        if(res.ok) {
+          apiStatus.textContent = '● Worker Online (SALES STORAGE)';
+          apiStatus.style.color = '#52dcb4';
+        }
+      } catch(e) {
+        apiStatus.textContent = '○ Worker Offline';
+        apiStatus.style.color = '#f06464';
+      }
+    }
+    checkStatus();
+
+    // Unlock logic
+    mockPayBtn.addEventListener('click', () => {
+      unlocked = true;
+      formCard.style.opacity = '1';
+      formCard.style.pointerEvents = 'auto';
+      mockPayBtn.textContent = '✓ Payment Bypassed';
+      mockPayBtn.disabled = true;
+      paymentStatus.textContent = 'Form unlocked. Ready for Sales KV write.';
+      paymentStatus.classList.remove('hidden');
+      paymentStatus.className = 'status success';
+    });
+
+    // Demo Data
+    document.getElementById('demoFillBtn').addEventListener('click', () => {
+      form.title.value = "SEC_CORE Flashcards";
+      form.description.value = "Educational app for Security+ SY0-701 certification studying.";
+      form.repoUrl.value = "https://nagoh.xyz/sec-core";
+      form.priceUsd.value = "199";
+      form.contactEmail.value = "dev@nagoh.xyz";
+    });
+
+    // Form Submission
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      status.style.display = 'block';
-      status.className = '';
-      status.textContent = 'Writing to SALES_STORAGE...';
-
+      submitStatus.textContent = 'Sending to env.SALES...';
+      submitStatus.classList.remove('hidden', 'error', 'success');
+      
       const data = Object.fromEntries(new FormData(form).entries());
 
       try {
@@ -67,18 +164,19 @@
         });
         
         const result = await res.json();
-        if (res.ok) {
-          status.className = 'success';
-          status.textContent = `Success! Entry created in Sales: ${result.id}`;
+        if(res.ok) {
+          submitStatus.textContent = `🎉 Success! Listing saved to Sales KV.\nID: ${result.id}`;
+          submitStatus.className = 'status success';
           form.reset();
         } else {
-          throw new Error(result.error || 'Server error');
+          throw new Error(result.error || 'Failed to save');
         }
-      } catch (err) {
-        status.className = 'error';
-        status.textContent = `Error: ${err.message}`;
+      } catch(err) {
+        submitStatus.textContent = `Error: ${err.message}`;
+        submitStatus.className = 'status error';
       }
     });
-  </script>
+  })();
+</script>
 </body>
 </html>
