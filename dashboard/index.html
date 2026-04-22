@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>N.A.G.O.H · Listing Manager</title>
+  <title>N.A.G.O.H · Advanced Listing Manager</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -20,18 +20,20 @@
     .btn { font-family: var(--mono); font-size: 0.7rem; background: transparent; border: 1px solid var(--border); color: var(--text); padding: 0.5rem 1rem; border-radius: 2rem; cursor: pointer; text-decoration: none; transition: 0.2s; }
     .btn-primary { background: linear-gradient(135deg, #8a78ff, #52dcb4); border: none; color: #05050f; font-weight: 600; }
     .btn-danger { color: var(--red); border-color: rgba(240,100,100,0.2); }
-    .btn-danger:hover { background: rgba(240,100,100,0.1); }
 
     .listings-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
     table { width: 100%; border-collapse: collapse; }
     th { text-align: left; padding: 1rem; color: var(--muted); font-size: 0.6rem; text-transform: uppercase; border-bottom: 1px solid var(--border); }
-    td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: top; }
     
-    /* Edit Modal */
-    #editModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; align-items: center; justify-content: center; }
-    .modal-content { background: var(--surface); border: 1px solid var(--border); padding: 2rem; border-radius: 20px; width: 100%; max-width: 500px; }
-    input, textarea { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; font-family: var(--mono); }
-    label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 0.3rem; }
+    /* Edit Modal Overlay */
+    #editModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; overflow-y: auto; padding: 2rem; }
+    .modal-content { background: var(--surface); border: 1px solid var(--border); padding: 2.5rem; border-radius: 24px; width: 100%; max-width: 600px; }
+    
+    .form-group { margin-bottom: 1.2rem; }
+    label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
+    input, textarea, select { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 0.8rem; border-radius: 12px; font-family: var(--mono); font-size: 0.9rem; }
+    input:focus, textarea:focus { border-color: var(--accent); outline: none; }
   </style>
 </head>
 <body>
@@ -40,31 +42,63 @@
   <div class="header">
     <div class="logo">N.A.G.O.H<span>.</span></div>
     <div style="display:flex; gap:0.75rem;">
-      <a href="create-listing.html" class="btn btn-primary">+ New Entry</a>
+      <a href="index.html" class="btn">View Site</a>
       <button class="btn" onclick="refreshListings()">⟳ Refresh</button>
     </div>
   </div>
 
   <div class="listings-panel">
     <div id="listings-table-container">
-      <div style="padding: 3rem; text-align: center; color: var(--muted);">Connecting to SALES_STORAGE...</div>
+      <div style="padding: 4rem; text-align: center; color: var(--muted);">Syncing with SALES_STORAGE...</div>
     </div>
   </div>
 </div>
 
 <div id="editModal">
   <div class="modal-content">
-    <h2 style="font-family: var(--display); margin-bottom: 1.5rem;">Edit Listing</h2>
+    <h2 style="font-family: var(--display); margin-bottom: 2rem; font-size: 1.5rem;">Edit Metadata<span>.</span></h2>
     <form id="editForm">
       <input type="hidden" id="editId">
-      <label>Title</label>
-      <input type="text" id="editTitle" required>
-      <label>Price (USD)</label>
-      <input type="number" id="editPrice" required>
-      <label>Description</label>
-      <textarea id="editDesc" rows="4"></textarea>
-      <div style="display: flex; gap: 1rem;">
-        <button type="submit" class="btn btn-primary" style="flex: 1;">Save Changes</button>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label>Project Title</label>
+          <input type="text" id="editTitle" required>
+        </div>
+        <div class="form-group">
+          <label>Platform</label>
+          <select id="editPlatform">
+            <option value="iOS">iOS</option>
+            <option value="macOS">macOS</option>
+            <option value="Web">Web</option>
+            <option value="Cross-Platform">Cross-Platform</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="editDesc" rows="4" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Repository URL</label>
+        <input type="url" id="editRepo" required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label>Price (USD)</label>
+          <input type="number" id="editPrice" required>
+        </div>
+        <div class="form-group">
+          <label>Contact Email</label>
+          <input type="email" id="editEmail" required>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+        <button type="submit" class="btn btn-primary" style="flex: 2; padding: 1rem;">Update Listing</button>
         <button type="button" class="btn" onclick="closeModal()" style="flex: 1;">Cancel</button>
       </div>
     </form>
@@ -79,28 +113,43 @@
     try {
       const res = await fetch(`${API_BASE}/api/listings`);
       const data = await res.json();
-      const listings = data.listings || [];
-      renderTable(listings);
+      renderTable(data.listings || []);
     } catch (e) {
-      container.innerHTML = `<div style="padding:3rem; color:var(--red)">Failed to load: ${e.message}</div>`;
+      container.innerHTML = `<div style="padding:4rem; text-align:center; color:var(--red)">Connection Error: ${e.message}</div>`;
     }
   }
 
   function renderTable(listings) {
     const container = document.getElementById('listings-table-container');
-    let html = `<table><thead><tr><th>Project</th><th>Price</th><th>Actions</th></tr></thead><tbody>`;
+    if (listings.length === 0) {
+      container.innerHTML = '<div style="padding:4rem; text-align:center; color:var(--muted)">No listings found in KV.</div>';
+      return;
+    }
+
+    let html = `<table><thead><tr><th>Project Detail</th><th>Contact</th><th>Price</th><th>Actions</th></tr></thead><tbody>`;
 
     listings.forEach(item => {
+      // Escape strings for the onclick function to prevent JS errors
+      const escapedDesc = (item.description || "").replace(/`/g, '\\`').replace(/'/g, "\\'");
+      
       html += `
         <tr>
-          <td>
-            <div style="font-weight:600; color:#fff">${item.title}</div>
-            <div style="font-size:0.65rem; color:var(--muted)">${item.platform}</div>
+          <td style="max-width: 400px;">
+            <div style="font-weight:700; color:#fff; font-size: 1rem;">${item.title}</div>
+            <div style="font-size:0.6rem; color:var(--accent); margin-bottom: 4px;">${item.platform}</div>
+            <div style="font-size:0.75rem; color:var(--muted); line-height: 1.3;">${item.description}</div>
+            <div style="font-size:0.65rem; color:var(--green); margin-top: 8px;">${item.repoUrl}</div>
           </td>
-          <td style="font-weight:700">$${item.priceUsd}</td>
           <td>
-            <button class="btn" onclick="openEdit('${item.id}', '${item.title}', '${item.priceUsd}', \`${item.description}\`)">Edit</button>
-            <button class="btn btn-danger" onclick="deleteListing('${item.id}')">Delete</button>
+            <div style="font-size:0.8rem; color:#fff">${item.contactEmail}</div>
+            <div style="font-size:0.6rem; color:var(--muted)">Created: ${new Date(item.createdAt).toLocaleDateString()}</div>
+          </td>
+          <td style="font-family:var(--display); font-weight:800; font-size: 1.1rem; color:var(--green)">$${item.priceUsd}</td>
+          <td>
+            <div style="display:flex; flex-direction:column; gap:0.5rem;">
+              <button class="btn" onclick="openEdit('${item.id}', '${item.title}', '${item.priceUsd}', \`${escapedDesc}\`, '${item.repoUrl}', '${item.platform}', '${item.contactEmail}')">Edit All</button>
+              <button class="btn btn-danger" onclick="deleteListing('${item.id}')">Delete</button>
+            </div>
           </td>
         </tr>
       `;
@@ -108,19 +157,14 @@
     container.innerHTML = html + `</tbody></table>`;
   }
 
-  async function deleteListing(id) {
-    if (!confirm('Are you sure you want to delete this listing from SALES_STORAGE?')) return;
-    try {
-      const res = await fetch(`${API_BASE}/api/listings/${id}`, { method: 'DELETE' });
-      if (res.ok) refreshListings();
-    } catch (e) { alert('Delete failed'); }
-  }
-
-  function openEdit(id, title, price, desc) {
+  function openEdit(id, title, price, desc, repo, platform, email) {
     document.getElementById('editId').value = id;
     document.getElementById('editTitle').value = title;
     document.getElementById('editPrice').value = price;
     document.getElementById('editDesc').value = desc;
+    document.getElementById('editRepo').value = repo;
+    document.getElementById('editPlatform').value = platform;
+    document.getElementById('editEmail').value = email;
     document.getElementById('editModal').style.display = 'flex';
   }
 
@@ -132,7 +176,10 @@
     const body = {
       title: document.getElementById('editTitle').value,
       priceUsd: document.getElementById('editPrice').value,
-      description: document.getElementById('editDesc').value
+      description: document.getElementById('editDesc').value,
+      repoUrl: document.getElementById('editRepo').value,
+      platform: document.getElementById('editPlatform').value,
+      contactEmail: document.getElementById('editEmail').value
     };
 
     try {
@@ -142,8 +189,17 @@
         body: JSON.stringify(body)
       });
       if (res.ok) { closeModal(); refreshListings(); }
-    } catch (e) { alert('Update failed'); }
+      else { alert('Update failed on server.'); }
+    } catch (e) { alert('Network error during update.'); }
   };
+
+  async function deleteListing(id) {
+    if (!confirm('Permanent Delete from SALES_STORAGE? This cannot be undone.')) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/listings/${id}`, { method: 'DELETE' });
+      if (res.ok) refreshListings();
+    } catch (e) { alert('Delete failed.'); }
+  }
 
   refreshListings();
 </script>
