@@ -4,237 +4,217 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>N.A.G.O.H — App Code Marketplace</title>
-  <meta name="description" content="Buy and sell unfinished iOS/Android app source code. Give your project a second life on the N.A.G.O.H marketplace." />
+  <meta name="description" content="Buy and sell unfinished app source code. Give your project a second life on the N.A.G.O.H marketplace." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    /* Core Styles from Nagoh Design System */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #05050A; --surface: #0F0F1A; --border: #252540;
+      --text: #EAEAFF; --muted: #8F8FAA;
+      --accent-primary: #8a78ff; --accent-secondary: #52dcb4;
+      --display: 'Syne', sans-serif; --mono: 'DM Mono', monospace;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--mono); line-height: 1.6; overflow-x: hidden; }
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+    .section { padding: 80px 0; }
+    
+    /* Navigation */
+    .nav { border-bottom: 1px solid var(--border); background: rgba(5,5,10,0.8); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100; }
+    .nav-inner { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 0; }
+    .nav-logo { font-family: var(--display); font-weight: 800; font-size: 1.5rem; color: #fff; text-decoration: none; }
+    .nav-logo span { color: var(--accent-secondary); }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; transition: 0.2s; }
+    .nav-links a:hover { color: var(--accent-primary); }
+
+    /* Hero */
+    .hero { text-align: center; padding: 120px 0 80px; }
+    .hero h1 { font-family: var(--display); font-size: clamp(2.5rem, 8vw, 4.5rem); line-height: 1.1; font-weight: 800; margin-bottom: 1.5rem; }
+    .hero p { max-width: 600px; margin: 0 auto 2.5rem; color: var(--muted); font-size: 1.1rem; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border); padding: 0.8rem 1.8rem; border-radius: 2rem; font-family: var(--mono); font-size: 0.85rem; cursor: pointer; transition: 0.2s; text-decoration: none; color: #fff; }
+    .btn-solid { background: linear-gradient(135deg, #8a78ff, #52dcb4); border: none; color: #05050A; font-weight: 700; }
+    .btn-solid:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(138,120,255,0.3); }
+    .btn-ghost:hover { border-color: var(--accent-primary); background: rgba(138,120,255,0.05); }
+
+    /* Grid & Cards */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 1.5rem; padding: 2rem; display: flex; flex-direction: column; transition: 0.3s; }
+    .card:hover { border-color: var(--accent-primary); transform: translateY(-4px); }
+    
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .price-tag { font-family: var(--display); font-weight: 800; color: var(--accent-secondary); font-size: 1.25rem; }
+
+    /* Utilities */
+    .muted { color: var(--muted); }
+    .status-dot { width: 8px; height: 8px; background: var(--accent-secondary); border-radius: 50%; display: inline-block; margin-right: 6px; box-shadow: 0 0 8px var(--accent-secondary); }
+  </style>
 </head>
 <body>
 
-  <!-- ── Navigation ─────────────────────────────────── -->
   <nav class="nav">
-    <div class="nav-inner">
-      <a href="index.html" class="nav-logo" style="text-decoration:none">N.A.G.O.H<span>.</span></a>
-      <ul class="nav-links">
-        <li><a href="#marketplace">Marketplace</a></li>
-        <li><a href="#why">Why NAGOH</a></li>
-        <li><a href="#how-it-works">How It Works</a></li>
-        <li><a href="#contact">Support</a></li>
-      </ul>
-      <a class="btn btn-solid" href="create-listing.html">List Your App</a>
+    <div class="container">
+      <div class="nav-inner">
+        <a href="index.html" class="nav-logo">N.A.G.O.H<span>.</span></a>
+        <ul class="nav-links">
+          <li><a href="#marketplace">Marketplace</a></li>
+          <li><a href="#how-it-works">How It Works</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+        </ul>
+        <a href="create-listing.html" class="btn btn-solid">List Project</a>
+      </div>
     </div>
   </nav>
 
-  <!-- ── Hero ───────────────────────────────────────── -->
-  <section class="hero">
+  <header class="hero">
     <div class="container">
-      <div class="hero-eyebrow">
-        <span class="section-label">✦ &nbsp;App Code Marketplace</span>
+      <div class="badge" style="background: rgba(138,120,255,0.1); color: var(--accent-primary); margin-bottom: 1rem; border: 1px solid rgba(138,120,255,0.2);">
+        Developer-to-Developer Exchange
       </div>
-      <h1>Give your app project<br /><em>a second chance</em></h1>
-      <p class="hero-sub">
-        N.A.G.O.H connects developers sitting on unfinished or shelved iOS &amp; Android projects
-        with buyers ready to take them to market. Stop letting great code collect dust.
-      </p>
-      <div class="hero-actions">
-        <a class="btn btn-solid" href="#marketplace">Browse Listings</a>
-        <a class="btn btn-ghost" href="create-listing.html">Sell Your Project →</a>
+      <h1>Revive Your<br><span style="color:var(--accent-primary)">Abandoned</span> Code.</h1>
+      <p>Turn your unfinished side projects into capital. N.A.G.O.H is the marketplace for high-quality, pre-built application source code.</p>
+      <div style="display:flex; gap:1rem; justify-content:center">
+        <a href="#marketplace" class="btn btn-ghost">Browse Items</a>
+        <a href="create-listing.html" class="btn btn-solid">Start Selling</a>
       </div>
     </div>
-  </section>
+  </header>
 
-  <!-- ── Why NAGOH ──────────────────────────────────── -->
-  <section class="section" id="why">
+  <section id="marketplace" class="section">
     <div class="container">
-      <div class="text-center" style="margin-bottom:0.5rem">
-        <span class="section-label">Why NAGOH</span>
-      </div>
-      <h2 class="text-center">Why every stalled project<br />deserves a new owner</h2>
-      <div class="why-grid">
-        <div class="why-card animate-in" style="animation-delay:0.05s">
-          <span class="why-icon">🚀</span>
-          <div class="why-title">Unlock Hidden Value</div>
-          <p class="why-desc">
-            Your half-built app has real value — working auth flows, polished UI screens, battle-tested data models.
-            Don't write it off. Monetise it.
-          </p>
-        </div>
-        <div class="why-card animate-in" style="animation-delay:0.10s">
-          <span class="why-icon">⚡</span>
-          <div class="why-title">Jump-Start Development</div>
-          <p class="why-desc">
-            Buyers skip months of boilerplate and get straight to building the features that matter.
-            Existing codebases cut time-to-market dramatically.
-          </p>
-        </div>
-        <div class="why-card animate-in" style="animation-delay:0.15s">
-          <span class="why-icon">🎯</span>
-          <div class="why-title">Right Fit, Right Price</div>
-          <p class="why-desc">
-            Sellers set their own price and describe exactly what's included. Buyers know what they're
-            getting before committing — no surprise scope.
-          </p>
-        </div>
-        <div class="why-card animate-in" style="animation-delay:0.20s">
-          <span class="why-icon">🌍</span>
-          <div class="why-title">Market-Ready Reach</div>
-          <p class="why-desc">
-            Projects that couldn't find their market through traditional channels get a second shot
-            in front of a developer audience actively looking to buy.
-          </p>
-        </div>
-        <div class="why-card animate-in" style="animation-delay:0.25s">
-          <span class="why-icon">🔒</span>
-          <div class="why-title">Transparent Listings</div>
-          <p class="why-desc">
-            Every listing shows platform, tech stack, repository link, and direct seller contact.
-            Admin-reviewed listings keep the marketplace clean and trustworthy.
-          </p>
-        </div>
-        <div class="why-card animate-in" style="animation-delay:0.30s">
-          <span class="why-icon">💡</span>
-          <div class="why-title">Ideas Find New Life</div>
-          <p class="why-desc">
-            A pivot, a shutdown, a change of heart — whatever the reason, NAGOH gives innovative
-            ideas a path forward with someone who believes in them.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <hr class="divider" />
-
-  <!-- ── Marketplace ────────────────────────────────── -->
-  <section class="section" id="marketplace">
-    <div class="container">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem;">
         <div>
-          <span class="section-label">Live Listings</span>
-          <h2 style="margin-top:0.5rem">Available Projects</h2>
+          <h2 style="font-family:var(--display); font-size:2rem">The Marketplace<span>.</span></h2>
+          <p class="muted">Fresh listings directly from SALES_STORAGE.</p>
         </div>
-        <a class="btn btn-solid" href="create-listing.html">+ List Your App</a>
-      </div>
-      <div id="listings" class="grid"></div>
-      <p id="emptyState" class="muted hidden" style="text-align:center;padding:3rem 0;font-size:0.85rem">
-        No listings available right now — check back soon or <a href="create-listing.html">list your own project</a>.
-      </p>
-    </div>
-  </section>
-
-  <hr class="divider" />
-
-  <!-- ── How It Works ───────────────────────────────── -->
-  <section class="section" id="how-it-works">
-    <div class="container">
-      <div class="text-center" style="margin-bottom:0.5rem">
-        <span class="section-label">How It Works</span>
-      </div>
-      <h2 class="text-center">Simple process, real results</h2>
-
-      <p class="text-center muted" style="margin-top:0.75rem;margin-bottom:2.5rem;font-size:0.85rem;max-width:520px;margin-left:auto;margin-right:auto">
-        Whether you're selling an unfinished project or buying one, the process is designed to be
-        clear, fast, and fair for everyone involved.
-      </p>
-
-      <div style="margin-bottom:3rem">
-        <h3 style="font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1.25rem">For Sellers</h3>
-        <div class="steps-grid">
-          <div class="step-card">
-            <div class="step-num">01</div>
-            <div class="step-title">Pay the Listing Fee</div>
-            <p class="step-desc">A small one-time fee keeps the marketplace spam-free and ensures only serious sellers list their projects.</p>
-          </div>
-          <div class="step-card">
-            <div class="step-num">02</div>
-            <div class="step-title">Submit Your Project</div>
-            <p class="step-desc">Fill in your project details — title, description, platform, tech stack, price, and your seller payment link.</p>
-          </div>
-          <div class="step-card">
-            <div class="step-num">03</div>
-            <div class="step-title">Admin Review</div>
-            <p class="step-desc">Our team reviews each submission to ensure quality and relevance before it goes live on the marketplace.</p>
-          </div>
-          <div class="step-card">
-            <div class="step-num">04</div>
-            <div class="step-title">Get Discovered</div>
-            <p class="step-desc">Your listing is published and developers actively looking to buy browse and contact you directly to purchase.</p>
-          </div>
+        <div id="connection-status" style="font-size:0.7rem; color:var(--muted)">
+          <span class="status-dot"></span> LIVE NETWORK
         </div>
       </div>
 
-      <div>
-        <h3 style="font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1.25rem">For Buyers</h3>
-        <div class="steps-grid">
-          <div class="step-card">
-            <div class="step-num">01</div>
-            <div class="step-title">Browse Listings</div>
-            <p class="step-desc">Filter by platform or tech stack and explore curated projects that match what you're looking to build.</p>
-          </div>
-          <div class="step-card">
-            <div class="step-num">02</div>
-            <div class="step-title">Review the Details</div>
-            <p class="step-desc">Each listing includes a description, platform, tech stack, and a link to the code repository for due diligence.</p>
-          </div>
-          <div class="step-card">
-            <div class="step-num">03</div>
-            <div class="step-title">Buy Directly from Seller</div>
-            <p class="step-desc">Click "Buy from Seller" to go to the seller's own payment page. Transactions happen directly between buyer and seller.</p>
-          </div>
-          <div class="step-card">
-            <div class="step-num">04</div>
-            <div class="step-title">Take Ownership</div>
-            <p class="step-desc">Once paid, work with the seller to transfer the repository and any assets. You now own the project outright.</p>
-          </div>
+      <div id="marketplace-grid" class="grid">
+        <div style="grid-column:1/-1; text-align:center; padding:5rem 0;">
+          <p class="muted">Fetching projects from the NAGOH network...</p>
         </div>
       </div>
     </div>
   </section>
 
-  <hr class="divider" />
-
-  <!-- ── Contact / Support ──────────────────────────── -->
-  <section class="section" id="contact">
-    <div class="container">
-      <div class="text-center" style="margin-bottom:0.5rem">
-        <span class="section-label">Support</span>
-      </div>
-      <h2 class="text-center">We're here to help</h2>
-      <div class="contact-box">
-        <h3>Get in touch with our team</h3>
-        <p>Have a question about a listing, need help with the process, or want to report an issue?
-          Reach out and we'll get back to you as quickly as possible.</p>
-        <a class="contact-email" href="mailto:support@nagohcreative.com">support@nagohcreative.com</a>
-        <br />
-        <a class="btn btn-solid" href="mailto:support@nagohcreative.com">Send Us a Message</a>
-        <p style="margin-top:1.5rem;font-size:0.72rem;color:var(--muted)">
-          Typical response time: within 1–2 business days.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── Footer ─────────────────────────────────────── -->
-  <footer class="section-sm" style="position:relative">
-    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(138,120,255,0.2),rgba(82,220,180,0.12),transparent)"></div>
-    <div class="container">
-      <div class="footer">
+  <section id="how-it-works" class="section" style="background: rgba(138,120,255,0.02)">
+    <div class="container" style="text-align:center">
+      <h2 style="font-family:var(--display); font-size:2rem; margin-bottom:3rem">Simple Exchange.</h2>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:2.5rem">
         <div>
-          <div class="footer-logo">N.A.G.O.H<span>.</span></div>
-          <p style="font-size:0.7rem;color:var(--muted);margin-top:4px">Not Another Graveyard Of Hopes</p>
+          <div style="font-size:1.5rem; margin-bottom:1rem">📦</div>
+          <h4 style="margin-bottom:0.5rem">List</h4>
+          <p class="muted" style="font-size:0.85rem">Upload your project details, price, and repository link to our KV storage.</p>
         </div>
-        <div style="display:flex;gap:2rem;flex-wrap:wrap">
-          <a href="#marketplace" style="font-size:0.7rem;color:var(--muted)">Marketplace</a>
-          <a href="#how-it-works" style="font-size:0.7rem;color:var(--muted)">How It Works</a>
-          <a href="create-listing.html" style="font-size:0.7rem;color:var(--muted)">List a Project</a>
-          <a href="#contact" style="font-size:0.7rem;color:var(--muted)">Support</a>
+        <div>
+          <div style="font-size:1.5rem; margin-bottom:1rem">🤝</div>
+          <h4 style="margin-bottom:0.5rem">Connect</h4>
+          <p class="muted" style="font-size:0.85rem">Interested buyers reach out directly via your verified contact email.</p>
         </div>
-        <small style="color:var(--muted)">N.A.G.O.H does not process transactions between buyer and seller.</small>
+        <div>
+          <div style="font-size:1.5rem; margin-bottom:1rem">🚀</div>
+          <h4 style="margin-bottom:0.5rem">Transfer</h4>
+          <p class="muted" style="font-size:0.85rem">Complete the transaction and transfer the source code to its new home.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="section" style="border-top: 1px solid var(--border); padding: 40px 0;">
+    <div class="container" style="display:flex; justify-content:space-between; align-items:center">
+      <div style="font-size:0.75rem; color:var(--muted)">
+        © 2026 N.A.G.O.H Creative. Built for developers.
+      </div>
+      <div style="display:flex; gap:1.5rem">
+        <a href="#" class="muted" style="font-size:0.75rem; text-decoration:none">Privacy</a>
+        <a href="#" class="muted" style="font-size:0.75rem; text-decoration:none">Terms</a>
       </div>
     </div>
   </footer>
 
-  <script src="assets/js/main.js"></script>
+  <script>
+    (function() {
+      const API_URL = 'https://alerts.nagoh.xyz/api/listings';
+      const grid = document.getElementById('marketplace-grid');
+      const statusText = document.getElementById('connection-status');
+
+      async function fetchMarketplace() {
+        try {
+          const response = await fetch(API_URL);
+          if (!response.ok) throw new Error('API Unavailable');
+          
+          const data = await response.json();
+          const listings = data.listings || [];
+
+          if (listings.length === 0) {
+            grid.innerHTML = `
+              <div style="grid-column:1/-1; text-align:center; padding:5rem 2rem; border:1px dashed var(--border); border-radius:2rem;">
+                <p class="muted">The marketplace is currently waiting for its first listing.</p>
+                <a href="create-listing.html" class="btn btn-solid" style="margin-top:1.5rem;">List Your First App</a>
+              </div>
+            `;
+            return;
+          }
+
+          grid.innerHTML = listings.map(item => {
+            const platform = item.platform || 'Web';
+            return `
+              <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem;">
+                  <span class="badge" style="background:rgba(138,120,255,0.1); color:var(--accent-primary); border:1px solid rgba(138,120,255,0.2)">
+                    ${platform}
+                  </span>
+                  <div class="price-tag">$${item.priceUsd || '---'}</div>
+                </div>
+                
+                <h3 style="font-family:var(--display); font-size:1.3rem; margin-bottom:0.75rem; color:#fff">${item.title}</h3>
+                <p class="muted" style="font-size:0.85rem; margin-bottom:2rem; flex-grow:1; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">
+                  ${item.description}
+                </p>
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
+                  <a href="${item.repoUrl || '#'}" target="_blank" class="btn btn-ghost" style="padding:0.6rem; justify-content:center; font-size:0.7rem;">Source Code</a>
+                  <a href="mailto:${item.contactEmail}" class="btn btn-solid" style="padding:0.6rem; justify-content:center; font-size:0.7rem;">Buy Now</a>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+        } catch (err) {
+          console.error('Fetch error:', err);
+          statusText.innerHTML = '<span class="status-dot" style="background:#f06464; box-shadow:0 0 8px #f06464"></span> CONNECTION ERROR';
+          grid.innerHTML = `
+            <div style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--accent-primary)">
+              <p>Failed to sync with the NAGOH network. Please refresh the page.</p>
+            </div>
+          `;
+        }
+      }
+
+      // Initial Fetch
+      fetchMarketplace();
+
+      // Smooth scroll for anchors
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            window.scrollTo({
+              top: target.offsetTop - 90,
+              behavior: 'smooth'
+            });
+          }
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
