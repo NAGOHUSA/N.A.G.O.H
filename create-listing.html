@@ -1,53 +1,25 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Create Listing • N.A.G.O.H</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #05050A; color: #EAEAFF; font-family: 'DM Mono', monospace; line-height: 1.5; }
-    :root {
-      --bg: #05050A; --surface: #0F0F1A; --border: #252540;
-      --text: #EAEAFF; --muted: #8F8FAA;
-      --accent: #8a78ff; --green: #52dcb4; --red: #f06464;
-      --display: 'Syne', sans-serif;
-    }
+    :root { --bg: #05050A; --surface: #0F0F1A; --border: #252540; --accent: #8a78ff; --green: #52dcb4; --red: #f06464; }
     .container { max-width: 800px; margin: 4rem auto; padding: 0 1.5rem; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 2.5rem; margin-bottom: 2rem; position: relative; }
-    .logo { font-family: var(--display); font-size: 1.5rem; font-weight: 800; margin-bottom: 2rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 2.5rem; margin-bottom: 2rem; }
+    .logo { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 2rem; }
     .logo span { color: var(--green); }
-    
-    h1 { font-family: var(--display); font-size: 2rem; margin-bottom: 0.5rem; }
-    p.muted { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
-
-    .form-group { margin-bottom: 1.5rem; }
-    label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.5rem; }
-    input, textarea, select {
-      width: 100%; background: #000; border: 1px solid var(--border); border-radius: 12px;
-      padding: 1rem; color: #fff; font-family: 'DM Mono'; font-size: 0.9rem; transition: 0.2s;
-    }
-    input:focus, textarea:focus { border-color: var(--accent); outline: none; }
-
-    .btn {
-      display: inline-block; width: 100%; padding: 1rem; border-radius: 12px;
-      font-family: var(--display); font-weight: 800; text-transform: uppercase;
-      cursor: pointer; text-decoration: none; text-align: center; transition: 0.3s; border: none;
-    }
-    .btn-payment { background: #fff; color: #000; margin-bottom: 1rem; }
-    .btn-payment:hover { background: var(--green); }
-    .btn-submit { background: linear-gradient(135deg, var(--accent), var(--green)); color: #000; opacity: 0.5; pointer-events: none; }
-    
-    .status { padding: 1rem; border-radius: 12px; margin-top: 1rem; font-size: 0.8rem; display: none; }
-    .status.success { display: block; background: rgba(82, 220, 180, 0.1); color: var(--green); border: 1px solid var(--green); }
-    .status.error { display: block; background: rgba(240, 100, 100, 0.1); color: var(--red); border: 1px solid var(--red); }
-    
-    .locked { opacity: 0.4; pointer-events: none; filter: grayscale(1); transition: 0.5s; }
-    .unlocked { opacity: 1; pointer-events: all; filter: none; }
+    .btn { display: block; width: 100%; padding: 1rem; border-radius: 12px; font-family: 'Syne'; font-weight: 800; text-transform: uppercase; cursor: pointer; text-decoration: none; text-align: center; border: none; transition: 0.3s; }
+    .btn-payment { background: #fff; color: #000; }
+    .btn-submit { background: linear-gradient(135deg, var(--accent), var(--green)); color: #000; margin-top: 1rem; }
+    .locked { opacity: 0.25; pointer-events: none; filter: grayscale(1); }
+    input, textarea, select { width: 100%; background: #000; border: 1px solid var(--border); border-radius: 12px; padding: 1rem; color: #fff; font-family: 'DM Mono'; margin-bottom: 1.2rem; }
+    label { font-size: 0.65rem; color: #8F8FAA; text-transform: uppercase; display: block; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
+    .status { padding: 1rem; border-radius: 12px; margin-top: 1rem; font-size: 0.85rem; display: none; }
   </style>
 </head>
 <body>
@@ -55,56 +27,47 @@
 <div class="container">
   <div class="logo">N.A.G.O.H<span>.</span></div>
 
-  <div class="card" id="paymentCard">
-    <h1>01. Pay Listing Fee</h1>
-    <p class="muted">To prevent spam and maintain marketplace quality, a small listing fee is required. After payment, you will be redirected back to unlock the form.</p>
-    <a href="https://buy.stripe.com/5kQ28r512dFm5Xf6gc1Fe03" class="btn btn-payment" id="payBtn">Proceed to Stripe</a>
-    <div id="paymentStatus" class="status"></div>
+  <div class="card" id="payStep">
+    <h2 style="font-family:'Syne'; margin-bottom:1rem">01. Listing Fee</h2>
+    <p style="color:#8F8FAA; font-size:0.9rem; margin-bottom:1.5rem">To keep the marketplace high-quality, we require a small fee per listing. Pay via Stripe to unlock the submission form.</p>
+    <a href="https://buy.stripe.com/5kQ28r512dFm5Xf6gc1Fe03" class="btn btn-payment" id="stripeBtn">Secure Payment with Stripe</a>
+    <div id="paymentStatus" class="status" style="display:block; background:rgba(255,255,255,0.03); color:#8F8FAA; border:1px solid var(--border); margin-top:1.5rem; text-align:center;">
+      Awaiting payment detection...
+    </div>
   </div>
 
-  <div class="card locked" id="listingCard">
-    <h1>02. Listing Details</h1>
-    <p class="muted">Enter the technical specifications for your codebase.</p>
-    
+  <div class="card locked" id="formStep">
+    <h2 style="font-family:'Syne'; margin-bottom:1.5rem">02. Listing Details</h2>
     <form id="listingForm">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-        <div class="form-group">
-          <label>Project Title</label>
-          <input type="text" name="title" placeholder="e.g. Ghost Kanban" required>
-        </div>
-        <div class="form-group">
-          <label>Platform</label>
-          <select name="platform">
-            <option value="iOS">iOS</option>
-            <option value="macOS">macOS</option>
-            <option value="Web">Web</option>
-            <option value="Cross-Platform">Cross-Platform</option>
-          </select>
-        </div>
-      </div>
+      <label>Project Title</label>
+      <input type="text" name="title" placeholder="e.g. Ghost Kanban" required>
+      
+      <label>Target Platform</label>
+      <select name="platform">
+        <option value="iOS">iOS</option>
+        <option value="macOS">macOS</option>
+        <option value="Web">Web</option>
+        <option value="Cross-Platform">Cross-Platform</option>
+      </select>
 
-      <div class="form-group">
-        <label>Detailed Description</label>
-        <textarea name="description" rows="4" placeholder="What does the code do? What stack is used?" required></textarea>
-      </div>
+      <label>Technical Description</label>
+      <textarea name="description" rows="5" placeholder="Detail the features, tech stack, and state of the code..." required></textarea>
+      
+      <label>Source Code / Demo URL</label>
+      <input type="url" name="repoUrl" placeholder="https://github.com/your-username/repo" required>
 
-      <div class="form-group">
-        <label>Source/Demo URL</label>
-        <input type="url" name="repoUrl" placeholder="https://github.com/..." required>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-        <div class="form-group">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div>
           <label>Asking Price (USD)</label>
           <input type="number" name="priceUsd" placeholder="250" required>
         </div>
-        <div class="form-group">
+        <div>
           <label>Contact Email</label>
-          <input type="email" name="contactEmail" placeholder="your@email.com" required>
+          <input type="email" name="contactEmail" placeholder="developer@example.com" required>
         </div>
       </div>
 
-      <button type="submit" class="btn btn-submit" id="submitBtn">Publish Listing</button>
+      <button type="submit" class="btn btn-submit">Publish to Marketplace</button>
       <div id="submitStatus" class="status"></div>
     </form>
   </div>
@@ -112,45 +75,29 @@
 
 <script>
   const API_BASE = 'https://alerts.nagoh.xyz';
-  const form = document.getElementById('listingForm');
-  const listingCard = document.getElementById('listingCard');
-  const submitBtn = document.getElementById('submitBtn');
-  const paymentStatus = document.getElementById('paymentStatus');
-  const submitStatus = document.getElementById('submitStatus');
+  const urlParams = new URLSearchParams(window.location.search);
+  const sessionId = urlParams.get('session_id');
 
-  // Check for Stripe Session ID on return
-  window.addEventListener('load', () => {
-    const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get('session_id');
-
-    if (sessionId) {
-      unlockForm(sessionId);
-    }
-  });
-
-  function unlockForm(id) {
-    listingCard.classList.remove('locked');
-    listingCard.classList.add('unlocked');
-    submitBtn.style.opacity = "1";
-    submitBtn.style.pointerEvents = "all";
-    
-    paymentStatus.textContent = "✅ Payment Verified. Form Unlocked.";
-    paymentStatus.className = "status success";
-    document.getElementById('payBtn').style.display = "none";
+  // Logic to unlock form upon return from Stripe
+  if (sessionId) {
+    document.getElementById('formStep').classList.remove('locked');
+    document.getElementById('stripeBtn').style.display = 'none';
+    const payStatus = document.getElementById('paymentStatus');
+    payStatus.innerHTML = "✅ Payment Confirmed. Form Unlocked.";
+    payStatus.style.borderColor = "var(--green)";
+    payStatus.style.color = "var(--green)";
   }
 
-  form.addEventListener('submit', async (e) => {
+  document.getElementById('listingForm').onsubmit = async (e) => {
     e.preventDefault();
-    submitStatus.textContent = 'Uploading to SALES_STORAGE...';
-    submitStatus.className = 'status'; 
-    submitStatus.style.display = 'block';
+    const status = document.getElementById('submitStatus');
+    status.style.display = 'block';
+    status.style.background = "rgba(255,255,255,0.05)";
+    status.style.color = "#fff";
+    status.textContent = "Publishing to SALES_STORAGE...";
 
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-    
-    // Include the stripe session as proof of payment
-    const params = new URLSearchParams(window.location.search);
-    data.stripeSession = params.get('session_id');
+    const data = Object.fromEntries(new FormData(e.target).entries());
+    data.stripeSession = sessionId; // Pass the real ID for worker verification
 
     try {
       const res = await fetch(`${API_BASE}/api/listings`, {
@@ -159,22 +106,21 @@
         body: JSON.stringify(data)
       });
 
-      const result = await res.json();
       if (res.ok) {
-        submitStatus.textContent = "🎉 Listing Published Successfully!";
-        submitStatus.className = "status success";
-        form.reset();
-        // Optional: Redirect to marketplace after 2 seconds
-        // setTimeout(() => window.location.href = 'index.html#marketplace', 2000);
+        status.textContent = "🎉 Listing successfully published to the marketplace!";
+        status.style.color = "var(--green)";
+        status.style.border = "1px solid var(--green)";
+        e.target.reset();
       } else {
-        throw new Error(result.error || "Submission failed");
+        const errData = await res.json();
+        throw new Error(errData.error || "Submission failed");
       }
     } catch (err) {
-      submitStatus.textContent = `❌ Error: ${err.message}`;
-      submitStatus.className = "status error";
+      status.textContent = "❌ Error: " + err.message;
+      status.style.color = "var(--red)";
+      status.style.border = "1px solid var(--red)";
     }
-  });
+  };
 </script>
-
 </body>
 </html>
