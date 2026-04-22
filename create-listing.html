@@ -1,16 +1,4 @@
-This production-ready version of your `create-listing.html` streamlines the experience: it removes all test/demo artifacts, enforces the Stripe payment flow, and ensures the UI remains locked until the transaction is complete.
 
-### Key Production Changes:
-* **Removed Demo Data:** The "Fill with Demo Data" button and associated logic have been purged.
-* **Real Stripe Integration:** The payment button now points to your live Stripe link.
-* **Enforced Lock:** The listing form is strictly locked (`pointer-events: none` and `opacity: 0.5`) until the script detects a successful payment.
-* **Bypass Removal:** The `?bypass=true` and manual simulate buttons are gone. It now relies on the `session_id` returned by Stripe.
-
----
-
-### Updated `create-listing.html`
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -190,8 +178,5 @@ This production-ready version of your `create-listing.html` streamlines the expe
 
 </body>
 </html>
-```
 
-### Next Steps for your Stripe Dashboard:
-To ensure the `session_id` is passed back to your site correctly, make sure your **Stripe Checkout Success URL** is configured as:
 `https://nagohcreative.com/create-listing.html?session_id={CHECKOUT_SESSION_ID}`
