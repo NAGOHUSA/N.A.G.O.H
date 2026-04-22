@@ -3,19 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Listing • N.A.G.O.H</title>
+  <title>Submit Listing</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       background: #05050A;
       color: #EAEAFF;
-      font-family: 'Courier New', monospace;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
       padding: 2rem;
+      line-height: 1.5;
     }
+
     .container {
-      max-width: 800px;
+      max-width: 600px;
       margin: 0 auto;
     }
+
     .card {
       background: #0F0F1A;
       border: 1px solid #252540;
@@ -23,69 +31,116 @@
       padding: 2rem;
       margin-bottom: 1rem;
     }
+
     h1 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
       background: linear-gradient(135deg, #8a78ff, #52dcb4);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
+
     label {
       display: block;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
+      font-weight: 600;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
       color: #8F8FAA;
       margin-top: 1rem;
       margin-bottom: 0.25rem;
     }
-    input, select, textarea {
+
+    input, textarea, select {
       width: 100%;
       background: #0A0A12;
       border: 1px solid #252540;
       border-radius: 0.5rem;
       padding: 0.75rem;
       color: white;
-      font-family: monospace;
+      font-size: 0.9rem;
+      font-family: inherit;
     }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #8a78ff;
+    }
+
     button {
       background: linear-gradient(135deg, #8a78ff, #52dcb4);
       border: none;
       padding: 0.75rem 1.5rem;
       border-radius: 2rem;
       font-weight: bold;
+      font-size: 1rem;
       cursor: pointer;
-      margin-top: 1rem;
-      margin-right: 0.5rem;
+      margin-top: 1.5rem;
+      width: 100%;
+      color: #05050A;
     }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(138,120,255,0.3);
+    }
+
     .status {
       margin-top: 1rem;
       padding: 0.75rem;
       border-radius: 0.5rem;
-      font-size: 0.8rem;
-      white-space: pre-wrap;
+      font-size: 0.85rem;
+      display: none;
     }
-    .status.success {
+
+    .status.show {
+      display: block;
+    }
+
+    .success {
       background: #0a1a1a;
       border-left: 3px solid #52dcb4;
-      color: #c0ffea;
+      color: #52dcb4;
     }
-    .status.error {
+
+    .error {
       background: #1a0a0a;
       border-left: 3px solid #f06464;
-      color: #ffb8c4;
+      color: #f06464;
     }
-    .status.info {
+
+    .info {
       background: #0a0a1a;
       border-left: 3px solid #8a78ff;
-      color: #cdc6ff;
+      color: #8a78ff;
     }
-    .hidden { display: none; }
+
+    .demo-btn {
+      background: transparent;
+      border: 1px solid #252540;
+      color: #8F8FAA;
+      margin-top: 0.5rem;
+    }
+
+    .demo-btn:hover {
+      border-color: #8a78ff;
+      color: #8a78ff;
+      transform: none;
+      box-shadow: none;
+    }
+
+    hr {
+      border-color: #252540;
+      margin: 1rem 0;
+    }
+
     .badge {
       display: inline-block;
-      background: rgba(82,220,180,0.2);
-      border-radius: 1rem;
-      padding: 0.2rem 0.6rem;
+      background: #1a2a2a;
+      color: #52dcb4;
       font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 1rem;
       margin-left: 0.5rem;
     }
   </style>
@@ -93,150 +148,178 @@
 <body>
   <div class="container">
     <div class="card">
-      <h1>Create Listing 🚀</h1>
-      
-      <div id="status" class="status info">🔍 Checking worker connection...</div>
-      
+      <h1>List Your Project <span class="badge">LIVE</span></h1>
+      <p style="color: #8F8FAA; margin-bottom: 1.5rem; font-size: 0.85rem;">
+        Submit your project directly to the marketplace. Admin approval bypassed.
+      </p>
+
+      <div id="status" class="status"></div>
+
       <form id="listingForm">
-        <label>Project name *</label>
-        <input type="text" name="title" required placeholder="e.g. SwiftWallet">
-        
-        <label>Description *</label>
-        <textarea name="description" required placeholder="Describe your project..."></textarea>
-        
+        <label>Project Name *</label>
+        <input type="text" name="title" required placeholder="e.g., SwiftWallet AI">
+
+        <label>Short Description *</label>
+        <textarea name="description" required rows="3" placeholder="Describe your project..."></textarea>
+
         <label>Platform *</label>
         <select name="platform" required>
           <option value="iOS">iOS</option>
           <option value="Android">Android</option>
           <option value="iOS + Android">iOS + Android</option>
         </select>
-        
-        <label>GitHub URL *</label>
-        <input type="url" name="repoUrl" required placeholder="https://github.com/...">
-        
-        <label>Payment Link *</label>
+
+        <label>GitHub Repository *</label>
+        <input type="url" name="repoUrl" required placeholder="https://github.com/username/repo">
+
+        <label>Purchase/Payment Link *</label>
         <input type="url" name="sellerPaymentLink" required placeholder="https://buy.stripe.com/...">
-        
+
         <label>Price (USD) *</label>
-        <input type="number" name="priceUsd" required min="1" placeholder="499">
-        
+        <input type="number" name="priceUsd" required min="1" step="1" placeholder="499">
+
         <label>Tech Stack</label>
-        <input type="text" name="techStack" placeholder="SwiftUI, Firebase, ...">
-        
-        <label>Icon URL</label>
-        <input type="url" name="iconUrl" placeholder="https://...">
-        
+        <input type="text" name="techStack" placeholder="SwiftUI, Firebase, CoreML">
+
+        <label>Icon URL (optional)</label>
+        <input type="url" name="iconUrl" placeholder="https://example.com/icon.png">
+
         <label>Contact Email *</label>
         <input type="email" name="contactEmail" required placeholder="you@example.com">
-        
-        <label>Duration (days) *</label>
+
+        <label>Listing Duration (days) *</label>
         <input type="number" name="expiresInDays" required min="1" max="90" value="30">
-        
-        <button type="button" id="demoBtn">⚡ Fill Demo Data</button>
-        <button type="submit">✨ Create Listing</button>
+
+        <button type="submit">✨ Submit Listing</button>
+        <button type="button" id="demoBtn" class="demo-btn">⚡ Fill Demo Data</button>
       </form>
-      
-      <div id="result" class="status hidden"></div>
     </div>
   </div>
 
   <script>
+    // Your Cloudflare Worker URL
     const WORKER_URL = 'https://nagoh-relay-v2.gregoryhogan.workers.dev';
     
-    const statusDiv = document.getElementById('status');
-    const resultDiv = document.getElementById('result');
     const form = document.getElementById('listingForm');
+    const statusDiv = document.getElementById('status');
     
-    async function testConnection() {
-      statusDiv.classList.remove('hidden');
-      statusDiv.className = 'status info';
-      statusDiv.textContent = '🔍 Testing worker connection...';
+    function showStatus(message, type = 'info') {
+      statusDiv.textContent = message;
+      statusDiv.className = `status show ${type}`;
       
-      try {
-        const response = await fetch(`${WORKER_URL}/health`);
-        if (response.ok) {
-          const data = await response.json();
-          statusDiv.className = 'status success';
-          statusDiv.textContent = '✅ Worker connected! Ready to create listings.';
-          return true;
-        } else {
-          throw new Error(`HTTP ${response.status}`);
-        }
-      } catch (error) {
-        statusDiv.className = 'status error';
-        statusDiv.textContent = `❌ Cannot reach worker: ${error.message}\n\nMake sure you're not blocking CORS and the worker is deployed.`;
-        return false;
+      // Auto-hide success/error after 5 seconds
+      if (type !== 'info') {
+        setTimeout(() => {
+          statusDiv.classList.remove('show');
+        }, 5000);
       }
     }
     
     // Demo data
     document.getElementById('demoBtn').addEventListener('click', () => {
       form.querySelector('[name="title"]').value = 'SwiftWallet - AI Finance Tracker';
-      form.querySelector('[name="description"]').value = 'Fully functional iOS app with SwiftUI, CoreData, and real-time expense tracking. Missing push notifications.';
+      form.querySelector('[name="description"]').value = 'Fully functional iOS app with SwiftUI, CoreData, and real-time expense tracking. Built for investors seeking a proven fintech solution.';
+      form.querySelector('[name="platform"]').value = 'iOS';
       form.querySelector('[name="repoUrl"]').value = 'https://github.com/demo/swiftwallet';
       form.querySelector('[name="sellerPaymentLink"]').value = 'https://buy.stripe.com/test_123';
       form.querySelector('[name="priceUsd"]').value = '349';
-      form.querySelector('[name="techStack"]').value = 'SwiftUI, Combine, Firebase';
+      form.querySelector('[name="techStack"]').value = 'SwiftUI, Combine, Firebase, CoreML';
       form.querySelector('[name="iconUrl"]').value = 'https://placehold.co/256x256/8a78ff/white?text=SW';
       form.querySelector('[name="contactEmail"]').value = 'founder@swiftwallet.io';
       form.querySelector('[name="expiresInDays"]').value = '45';
       
-      resultDiv.className = 'status success';
-      resultDiv.textContent = '✅ Demo data filled! Review and submit.';
-      resultDiv.classList.remove('hidden');
-      
-      setTimeout(() => {
-        resultDiv.classList.add('hidden');
-      }, 3000);
+      showStatus('✅ Demo data filled! Review and submit.', 'success');
     });
     
-    // Submit form
+    // Form submission
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      resultDiv.classList.remove('hidden');
-      resultDiv.className = 'status info';
-      resultDiv.textContent = '⏳ Submitting...';
+      // Show loading
+      showStatus('⏳ Submitting to marketplace...', 'info');
       
+      // Collect form data
       const formData = new FormData(form);
-      const payload = {
-        title: formData.get('title'),
-        description: formData.get('description'),
+      const listing = {
+        title: formData.get('title').trim(),
+        description: formData.get('description').trim(),
         platform: formData.get('platform'),
-        repoUrl: formData.get('repoUrl'),
-        sellerPaymentLink: formData.get('sellerPaymentLink'),
+        repoUrl: formData.get('repoUrl').trim(),
+        sellerPaymentLink: formData.get('sellerPaymentLink').trim(),
         priceUsd: parseInt(formData.get('priceUsd')),
-        techStack: formData.get('techStack') || '',
-        iconUrl: formData.get('iconUrl') || '',
-        contactEmail: formData.get('contactEmail'),
+        techStack: formData.get('techStack')?.trim() || '',
+        iconUrl: formData.get('iconUrl')?.trim() || '',
+        contactEmail: formData.get('contactEmail').trim(),
         expiresInDays: parseInt(formData.get('expiresInDays')),
-        skipPayment: true
+        status: 'approved', // Bypass admin approval
+        submittedAt: new Date().toISOString()
       };
       
+      // Validate
+      if (!listing.title || !listing.description || !listing.repoUrl || !listing.sellerPaymentLink || !listing.contactEmail) {
+        showStatus('❌ Please fill in all required fields.', 'error');
+        return;
+      }
+      
+      if (isNaN(listing.priceUsd) || listing.priceUsd < 1) {
+        showStatus('❌ Price must be a positive number.', 'error');
+        return;
+      }
+      
       try {
+        // Submit to worker
         const response = await fetch(`${WORKER_URL}/api/listings`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(listing)
         });
         
-        const data = await response.json();
+        const result = await response.json();
         
-        if (response.ok && data.success) {
-          resultDiv.className = 'status success';
-          resultDiv.textContent = `✅ SUCCESS!\n\nProject: ${payload.title}\nID: ${data.id}\nStatus: Pending Review\n\n${data.editUrl ? 'Edit URL: ' + data.editUrl : ''}`;
+        if (response.ok && result.success) {
+          showStatus(
+            `✅ SUCCESS! Your project "${listing.title}" has been listed on the marketplace.\n\n` +
+            `Listing ID: ${result.id}\n` +
+            `Price: $${listing.priceUsd}\n` +
+            `View it on the marketplace shortly.`,
+            'success'
+          );
           form.reset();
         } else {
-          throw new Error(data.error || 'Submission failed');
+          throw new Error(result.error || 'Submission failed');
         }
       } catch (error) {
-        resultDiv.className = 'status error';
-        resultDiv.textContent = `❌ Error: ${error.message}\n\nTry:\n1. Open browser console (F12) for details\n2. Check if worker is deployed\n3. Verify KV binding is configured`;
         console.error('Submission error:', error);
+        showStatus(
+          `❌ Failed to submit: ${error.message}\n\n` +
+          `Make sure the worker is deployed and CORS is enabled.`,
+          'error'
+        );
       }
     });
     
     // Test connection on load
+    async function testConnection() {
+      try {
+        const response = await fetch(`${WORKER_URL}/health`);
+        if (response.ok) {
+          console.log('✅ Worker connected');
+        }
+      } catch (error) {
+        console.warn('Worker connection test failed:', error);
+        showStatus(
+          '⚠️ Unable to reach worker. Check your internet connection or worker status.\n\n' +
+          'Your listing will still be submitted when you click submit.',
+          'info'
+        );
+        setTimeout(() => {
+          statusDiv.classList.remove('show');
+        }, 8000);
+      }
+    }
+    
     testConnection();
   </script>
 </body>
