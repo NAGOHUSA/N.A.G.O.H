@@ -2,84 +2,121 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>N.A.G.O.H · Advanced Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>N.A.G.O.H · Nexus Control & Analytics</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
       --bg: #05050f; --surface: #0c0c18; --border: rgba(255,255,255,0.06);
-      --accent: #8a78ff; --green: #52dcb4; --red: #f06464;
+      --accent: #8a78ff; --green: #52dcb4; --red: #f06464; --amber: #ffb347;
       --text: #eaeeff; --muted: #6b7094; --display: 'Syne', sans-serif; --mono: 'DM Mono', monospace;
     }
     body { background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 13px; line-height: 1.5; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; }
-    .logo { font-family: var(--display); font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--green)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .logo span { color: var(--green); -webkit-text-fill-color: var(--green); }
-    
-    .btn { font-family: var(--mono); font-size: 0.7rem; background: transparent; border: 1px solid var(--border); color: var(--text); padding: 0.5rem 1rem; border-radius: 2rem; cursor: pointer; transition: 0.2s; text-decoration: none; }
-    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--green)); border: none; color: #000; font-weight: 700; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1.2rem; }
+    .logo { font-family: var(--display); font-size: 1.7rem; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--green)); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -0.02em; }
+    .toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .btn { font-family: var(--mono); font-size: 0.7rem; background: transparent; border: 1px solid var(--border); color: var(--text); padding: 0.5rem 1rem; border-radius: 2rem; cursor: pointer; transition: 0.2s; backdrop-filter: blur(4px); font-weight: 500; }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--green)); border: none; color: #000; font-weight: 700; box-shadow: 0 0 8px rgba(138,120,255,0.2); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-danger { color: var(--red); border-color: rgba(240,100,100,0.2); }
-
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .btn-danger { color: var(--red); border-color: rgba(240,100,100,0.3); }
+    .btn-warning { color: var(--amber); border-color: rgba(255,180,71,0.3); }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.2rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 1.2rem 1rem; backdrop-filter: blur(2px); transition: all 0.2s; }
+    .stat-value { font-family: var(--display); font-size: 2rem; font-weight: 800; color: var(--green); letter-spacing: -0.02em; }
+    .stat-label { font-size: 0.65rem; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; margin-top: 0.4rem; }
+    .dual-chart { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+    .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 1rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; overflow: hidden; margin-bottom: 2rem; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 0.8rem; }
+    .section-title { font-family: var(--display); font-weight: 700; font-size: 1.1rem; letter-spacing: -0.2px; }
     table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; padding: 1rem; color: var(--muted); font-size: 0.6rem; text-transform: uppercase; border-bottom: 1px solid var(--border); }
-    td { padding: 1.2rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.02); }
-
+    th { text-align: left; padding: 1rem; color: var(--muted); font-size: 0.6rem; text-transform: uppercase; border-bottom: 1px solid var(--border); letter-spacing: 1px; }
+    td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.02); vertical-align: middle; }
+    .badge { background: rgba(138,120,255,0.15); border-radius: 40px; padding: 0.2rem 0.6rem; font-size: 0.7rem; color: var(--accent); }
+    .filter-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+    input, select { background: #000; border: 1px solid var(--border); color: #fff; padding: 0.5rem 0.8rem; border-radius: 32px; font-family: var(--mono); font-size: 0.75rem; }
     #editModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
-    .modal-content { background: var(--surface); border: 1px solid var(--border); padding: 2rem; border-radius: 24px; width: 100%; max-width: 600px; }
+    .modal-content { background: var(--surface); border: 1px solid var(--border); padding: 2rem; border-radius: 32px; width: 100%; max-width: 600px; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
     label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 0.4rem; }
-    input, textarea, select { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 0.7rem; border-radius: 8px; font-family: var(--mono); margin-bottom: 1rem; }
-    input:focus, textarea:focus { border-color: var(--accent); outline: none; }
+    .search-export { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: space-between; width: 100%; }
+    @media (max-width: 720px) { .dual-chart { grid-template-columns: 1fr; } .container { padding: 1rem; } }
   </style>
 </head>
 <body>
 
 <div class="container">
   <div class="header">
-    <div class="logo">N.A.G.O.H<span>.</span> MANAGER</div>
-    <div style="display:flex; gap:10px;">
-      <button class="btn" onclick="logout()">Logout</button>
+    <div class="logo">⚡ N.A.G.O.H · QUANTUM DASH</div>
+    <div class="toolbar">
+      <button class="btn" onclick="exportCSV()">📎 Export CSV</button>
+      <button class="btn" onclick="quickAddDemo()">➕ Quick Demo</button>
       <button class="btn btn-primary" onclick="refreshListings()">⟳ Sync KV</button>
+      <button class="btn" onclick="logout()">Logout</button>
     </div>
   </div>
 
+  <!-- KPI CARDS: advanced metrics -->
+  <div class="stats-grid" id="kpiGrid">
+    <div class="stat-card"><div class="stat-value" id="totalRevenue">$0</div><div class="stat-label">Total revenue (USD)</div></div>
+    <div class="stat-card"><div class="stat-value" id="avgPrice">$0</div><div class="stat-label">Average listing price</div></div>
+    <div class="stat-card"><div class="stat-value" id="totalListings">0</div><div class="stat-label">Active listings</div></div>
+    <div class="stat-card"><div class="stat-value" id="platformCount">—</div><div class="stat-label">Platforms diversity</div></div>
+  </div>
+
+  <!-- Charts area: price distribution + platform share -->
+  <div class="dual-chart">
+    <div class="chart-card"><canvas id="priceHistogram" width="400" height="200" style="max-height:200px; width:100%"></canvas><div style="text-align:center; margin-top:8px; font-size:0.65rem; color:var(--muted)">💰 Price distribution</div></div>
+    <div class="chart-card"><canvas id="platformPieChart" width="400" height="200" style="max-height:200px; width:100%"></canvas><div style="text-align:center; margin-top:8px; font-size:0.65rem; color:var(--muted)">📱 Platform share</div></div>
+  </div>
+
+  <!-- ADVANCED TOOLS: Filter + Search + Bulk actions -->
   <div class="card">
-    <div id="table-container">
-      <div style="padding:4rem; text-align:center; color:var(--muted)">Loading SALES_STORAGE...</div>
+    <div class="card-header">
+      <span class="section-title">📋 Master Inventory · Manage & Audit</span>
+      <div class="search-export">
+        <input type="text" id="searchInput" placeholder="🔍 Search title / email / platform..." style="width:220px;">
+        <select id="platformFilter"><option value="">All platforms</option><option>iOS</option><option>macOS</option><option>Web</option><option>Cross-Platform</option></select>
+        <button class="btn" onclick="applyFilters()">Apply filters</button>
+        <button class="btn btn-warning" onclick="bulkDeleteByPlatform()">🗑️ Delete by platform</button>
+      </div>
+    </div>
+    <div id="table-container" style="overflow-x:auto;">
+      <div style="padding:4rem; text-align:center; color:var(--muted)">Loading inventory & analytics...</div>
+    </div>
+  </div>
+
+  <!-- REPORT section: additional insights -->
+  <div class="card">
+    <div class="card-header">
+      <span class="section-title">📈 Advanced Reports & Health</span>
+      <button class="btn" onclick="generateReportSnapshot()">Generate snapshot report</button>
+    </div>
+    <div id="reportArea" style="padding: 1rem 1.5rem; font-size:0.75rem; background: rgba(0,0,0,0.3); border-radius: 16px; margin: 0 1rem 1rem 1rem; color: var(--muted);">
+      Click "Generate snapshot" to see real-time analytics summary.
     </div>
   </div>
 </div>
 
 <div id="editModal">
   <div class="modal-content">
-    <h2 style="font-family: var(--display); margin-bottom: 1.5rem;">Edit Metadata</h2>
+    <h2 style="font-family: var(--display); margin-bottom: 1rem;">✎ Edit Metadata</h2>
     <form id="editForm">
       <input type="hidden" id="editId">
       <div class="form-grid">
         <div><label>Title</label><input type="text" id="editTitle" required></div>
-        <div><label>Platform</label>
-          <select id="editPlatform">
-            <option value="iOS">iOS</option><option value="macOS">macOS</option>
-            <option value="Web">Web</option><option value="Cross-Platform">Cross-Platform</option>
-          </select>
-        </div>
+        <div><label>Platform</label><select id="editPlatform"><option>iOS</option><option>macOS</option><option>Web</option><option>Cross-Platform</option></select></div>
       </div>
-      <label>Description</label>
-      <textarea id="editDesc" rows="3" required></textarea>
-      <label>Repository URL</label>
-      <input type="url" id="editRepo" required>
+      <label>Description</label><textarea id="editDesc" rows="2" required></textarea>
+      <label>Repository URL</label><input type="url" id="editRepo" required>
       <div class="form-grid">
-        <div><label>Price (USD)</label><input type="number" id="editPrice" required></div>
+        <div><label>Price (USD)</label><input type="number" id="editPrice" step="0.01" required></div>
         <div><label>Contact Email</label><input type="email" id="editEmail" required></div>
       </div>
-      <div style="display:flex; gap:1rem;">
-        <button type="submit" id="saveBtn" class="btn btn-primary" style="flex:2">Save Changes</button>
-        <button type="button" class="btn" onclick="closeModal()" style="flex:1">Cancel</button>
-      </div>
+      <div style="display:flex; gap:1rem; margin-top:1rem;"><button type="submit" id="saveBtn" class="btn btn-primary" style="flex:2">Save Changes</button><button type="button" class="btn" onclick="closeModal()">Cancel</button></div>
     </form>
   </div>
 </div>
@@ -87,31 +124,21 @@
 <script>
   const API_BASE = 'https://alerts.nagoh.xyz';
   let token = localStorage.getItem('nagoh_auth');
+  let allListings = [];            // cache of original listings
+  let filteredListings = [];
+  let priceChart, platformChart;
 
+  // Authentication + helpers
   async function checkAuth() {
-    if (!token) {
-      token = prompt("Enter Management Password:");
-      if (!token) return;
-      localStorage.setItem('nagoh_auth', token);
-    }
+    if (!token) { token = prompt("Enter Management Password:"); if (!token) return false; localStorage.setItem('nagoh_auth', token); }
     try {
-      const res = await fetch(`${API_BASE}/api/admin-verify`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.status === 401) {
-        localStorage.removeItem('nagoh_auth');
-        alert("Invalid Password");
-        location.reload();
-      }
-    } catch(e) {
-      console.error("Auth check failed", e);
-    }
+      const res = await fetch(`${API_BASE}/api/admin-verify`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.status === 401) { localStorage.removeItem('nagoh_auth'); alert("Invalid Password"); location.reload(); return false; }
+      return true;
+    } catch(e) { console.error("Auth fail", e); return true; } // fallback for local dev
   }
 
-  function logout() {
-    localStorage.removeItem('nagoh_auth');
-    location.reload();
-  }
+  function logout() { localStorage.removeItem('nagoh_auth'); location.reload(); }
 
   async function refreshListings() {
     await checkAuth();
@@ -119,44 +146,100 @@
     try {
       const res = await fetch(`${API_BASE}/api/listings`);
       const data = await res.json();
-      renderTable(data.listings || []);
-    } catch (e) { 
-      container.innerHTML = `<div style="padding:4rem; color:var(--red)">Sync Failed: ${e.message}</div>`; 
+      allListings = data.listings || [];
+      applyFilters();      // updates filteredListings, table, KPIs & charts
+    } catch (e) { container.innerHTML = `<div style="padding:4rem; color:var(--red)">⚠️ Sync Failed: ${e.message}</div>`; }
+  }
+
+  // advanced KPI & chart update based on filtered OR full dataset (use filtered for table, but KPIs from allListings)
+  function updateKPIsAndCharts(listings) {
+    if (!listings.length) {
+      document.getElementById('totalRevenue').innerText = '$0';
+      document.getElementById('avgPrice').innerText = '$0';
+      document.getElementById('totalListings').innerText = '0';
+      document.getElementById('platformCount').innerText = '—';
+      updateCharts(listings);
+      return;
     }
+    const totalRev = listings.reduce((sum, l) => sum + (parseFloat(l.priceUsd) || 0), 0);
+    const avg = totalRev / listings.length;
+    const uniquePlatforms = new Set(listings.map(l => l.platform));
+    document.getElementById('totalRevenue').innerText = `$${totalRev.toFixed(2)}`;
+    document.getElementById('avgPrice').innerText = `$${avg.toFixed(2)}`;
+    document.getElementById('totalListings').innerText = listings.length;
+    document.getElementById('platformCount').innerHTML = `${uniquePlatforms.size} types`;
+    updateCharts(listings);
+  }
+
+  function updateCharts(listings) {
+    // Price histogram (buckets)
+    const prices = listings.map(l => parseFloat(l.priceUsd) || 0).filter(p => p >= 0);
+    const maxPrice = prices.length ? Math.max(...prices, 50) : 100;
+    const binCount = 6;
+    const bins = Array(binCount).fill(0);
+    const step = maxPrice / binCount;
+    prices.forEach(price => {
+      let idx = Math.min(Math.floor(price / step), binCount-1);
+      if (idx < 0) idx = 0;
+      bins[idx]++;
+    });
+    const labels = bins.map((_, i) => `$${(i*step).toFixed(0)}-${((i+1)*step).toFixed(0)}`);
+    
+    if (priceChart) priceChart.destroy();
+    const ctxPrice = document.getElementById('priceHistogram').getContext('2d');
+    priceChart = new Chart(ctxPrice, { type: 'bar', data: { labels, datasets: [{ label: 'Listings count', data: bins, backgroundColor: '#8a78ff', borderRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { color: '#eaeeff' } } } } });
+
+    // Platform pie
+    const platformMap = new Map();
+    listings.forEach(l => { platformMap.set(l.platform, (platformMap.get(l.platform) || 0) + 1); });
+    const platLabels = [...platformMap.keys()];
+    const platData = [...platformMap.values()];
+    if (platformChart) platformChart.destroy();
+    const ctxPie = document.getElementById('platformPieChart').getContext('2d');
+    platformChart = new Chart(ctxPie, { type: 'pie', data: { labels: platLabels, datasets: [{ data: platData, backgroundColor: ['#8a78ff', '#52dcb4', '#ffb347', '#f06464'] }] }, options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#eaeeff' } } } } });
   }
 
   function renderTable(listings) {
     const container = document.getElementById('table-container');
-    let html = `<table><thead><tr><th>Listing</th><th>Price</th><th>Actions</th></tr></thead><tbody>`;
-    
-    if (listings.length === 0) {
-      html += `<tr><td colspan="3" style="text-align:center; color:var(--muted); padding:3rem;">No active records found.</td></tr>`;
-    }
-
+    let html = `<div style="overflow-x:auto;"><table><thead><tr><th>Listing details</th><th>Price</th><th>Platform</th><th>Contact</th><th>Actions</th></tr></thead><tbody>`;
+    if (listings.length === 0) html += `<tr><td colspan="5" style="text-align:center; padding:3rem;">✨ No listings match filters or database is empty. Add demo items using "Quick Demo".</td></tr>`;
     listings.forEach(item => {
-      // Safely escape description for the onclick string
       const safeDesc = b64EncodeUnicode(item.description || "");
       html += `<tr>
-        <td>
-          <div style="font-weight:700; color:#fff">${item.title}</div>
-          <div style="font-size:0.7rem; color:var(--muted)">${item.platform} • ${item.contactEmail}</div>
-        </td>
-        <td style="color:var(--green); font-weight:700">$${item.priceUsd}</td>
-        <td>
-          <button class="btn" onclick="openEdit('${item.id}', '${item.title}', '${item.priceUsd}', '${safeDesc}', '${item.repoUrl}', '${item.platform}', '${item.contactEmail}')">Edit</button>
-          <button class="btn btn-danger" onclick="deleteListing('${item.id}')">Delete</button>
-        </td>
+        <td><div style="font-weight:700;">${escapeHtml(item.title)}</div><div style="font-size:0.65rem; color:var(--muted); max-width:280px;">${escapeHtml(item.description?.substring(0,60)||'')}</div></td>
+        <td style="color:var(--green); font-weight:700;">$${parseFloat(item.priceUsd).toFixed(2)}</td>
+        <td><span class="badge">${escapeHtml(item.platform)}</span></td>
+        <td style="font-size:0.7rem;">${escapeHtml(item.contactEmail)}</td>
+        <td><button class="btn" onclick="openEdit('${item.id}', '${escapeHtml(item.title)}', '${item.priceUsd}', '${safeDesc}', '${escapeHtml(item.repoUrl)}', '${escapeHtml(item.platform)}', '${escapeHtml(item.contactEmail)}')">✎ Edit</button>
+        <button class="btn btn-danger" onclick="deleteListing('${item.id}')">🗑 Del</button></td>
       </tr>`;
     });
-    container.innerHTML = html + `</tbody></table>`;
+    container.innerHTML = html + `</tbody></table></div>`;
   }
 
-  // Helper to handle special characters in descriptions
-  function b64EncodeUnicode(str) {
-    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+  function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m) { if(m === '&') return '&amp;'; if(m === '<') return '&lt;'; if(m === '>') return '&gt;'; return m;}); }
+  function b64EncodeUnicode(str) { return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m,p1)=> String.fromCharCode('0x'+p1))); }
+  function b64DecodeUnicode(str) { try { return decodeURIComponent(atob(str).split('').map(c => '%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')); } catch(e) { return str; } }
+
+  function applyFilters() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const platformVal = document.getElementById('platformFilter').value;
+    let filtered = [...allListings];
+    if (searchTerm) filtered = filtered.filter(l => l.title.toLowerCase().includes(searchTerm) || l.contactEmail.toLowerCase().includes(searchTerm) || (l.platform && l.platform.toLowerCase().includes(searchTerm)));
+    if (platformVal) filtered = filtered.filter(l => l.platform === platformVal);
+    filteredListings = filtered;
+    renderTable(filteredListings);
+    updateKPIsAndCharts(allListings);   // overall KPIs based on full dataset (global health)
+    // Additional report area refresh optional
   }
-  function b64DecodeUnicode(str) {
-    return decodeURIComponent(atob(str).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+
+  async function deleteListing(id) {
+    if (!confirm('⚠️ Permanently delete this listing?')) return;
+    await checkAuth();
+    try {
+      const res = await fetch(`${API_BASE}/api/listings/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.ok) { refreshListings(); } else { alert("Delete failed."); }
+    } catch(e) { alert("Network error."); }
   }
 
   function openEdit(id, title, price, safeDesc, repo, platform, email) {
@@ -169,66 +252,90 @@
     document.getElementById('editEmail').value = email;
     document.getElementById('editModal').style.display = 'flex';
   }
-
   function closeModal() { document.getElementById('editModal').style.display = 'none'; }
 
   document.getElementById('editForm').onsubmit = async (e) => {
     e.preventDefault();
     const id = document.getElementById('editId').value;
     const saveBtn = document.getElementById('saveBtn');
-    
-    saveBtn.textContent = "Saving...";
-    saveBtn.disabled = true;
-
+    saveBtn.textContent = "Updating..."; saveBtn.disabled = true;
     const body = {
       title: document.getElementById('editTitle').value,
-      priceUsd: document.getElementById('editPrice').value,
+      priceUsd: parseFloat(document.getElementById('editPrice').value),
       description: document.getElementById('editDesc').value,
       repoUrl: document.getElementById('editRepo').value,
       platform: document.getElementById('editPlatform').value,
       contactEmail: document.getElementById('editEmail').value
     };
-
     try {
-      const res = await fetch(`${API_BASE}/api/listings/${id}`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json', 
-          'Authorization': `Bearer ${token}` 
-        },
-        body: JSON.stringify(body)
-      });
-
-      if (res.ok) {
-        closeModal();
-        await refreshListings();
-      } else {
-        const err = await res.json();
-        alert(`Save Failed: ${err.error || res.statusText}`);
-      }
-    } catch (err) {
-      alert(`Network Error: ${err.message}`);
-    } finally {
-      saveBtn.textContent = "Save Changes";
-      saveBtn.disabled = false;
-    }
+      const res = await fetch(`${API_BASE}/api/listings/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(body) });
+      if (res.ok) { closeModal(); refreshListings(); } else { const err = await res.json(); alert(`Save error: ${err.error || res.statusText}`); }
+    } catch(err) { alert(`Network: ${err.message}`); } finally { saveBtn.textContent = "Save Changes"; saveBtn.disabled = false; }
   };
 
-  async function deleteListing(id) {
-    if (!confirm('Permanent Delete?')) return;
-    try {
-      const res = await fetch(`${API_BASE}/api/listings/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        refreshListings();
-      } else {
-        alert("Delete failed.");
-      }
-    } catch(e) { alert("Network error during delete."); }
+  // Bulk delete by platform (advanced tool)
+  async function bulkDeleteByPlatform() {
+    const platform = prompt("⚠️ Enter platform to delete ALL listings (iOS, macOS, Web, Cross-Platform):");
+    if (!platform) return;
+    const toDelete = allListings.filter(l => l.platform.toLowerCase() === platform.toLowerCase());
+    if (toDelete.length === 0) { alert(`No listings found for platform: ${platform}`); return; }
+    if (!confirm(`Delete ${toDelete.length} listings from "${platform}"? This action is irreversible.`)) return;
+    await checkAuth();
+    let failed = 0;
+    for (let item of toDelete) {
+      try {
+        await fetch(`${API_BASE}/api/listings/${item.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+      } catch(e) { failed++; }
+    }
+    if (failed) alert(`Deleted ${toDelete.length - failed} items, ${failed} errors.`);
+    refreshListings();
   }
 
+  // quick demo insertion (adds 2-3 example entries to enrich tools)
+  async function quickAddDemo() {
+    await checkAuth();
+    const demos = [
+      { title: "AI Code Assistant", priceUsd: 49.99, description: "Next-gen AI pair programming", repoUrl: "https://github.com/nagoh/ai-code", platform: "Cross-Platform", contactEmail: "ai@nagoh.xyz" },
+      { title: "Secure Vault Pro", priceUsd: 19.99, description: "Encrypted password manager", repoUrl: "https://github.com/nagoh/vault", platform: "iOS", contactEmail: "vault@nagoh.xyz" },
+      { title: "Dev Metrics Dashboard", priceUsd: 89.00, description: "Real-time analytics suite", repoUrl: "https://github.com/nagoh/metrics", platform: "Web", contactEmail: "dev@nagoh.xyz" }
+    ];
+    for (let demo of demos) {
+      try {
+        await fetch(`${API_BASE}/api/listings`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(demo) });
+      } catch(e) { console.warn(e); }
+    }
+    refreshListings();
+    alert("✅ 3 demo products added (refresh may take a second).");
+  }
+
+  // CSV export: advanced reporting tool
+  function exportCSV() {
+    if (!allListings.length) { alert("No data to export."); return; }
+    let csvRows = [["ID","Title","Platform","Price USD","Contact Email","Repo URL","Description"]];
+    for (let l of allListings) {
+      csvRows.push([l.id, `"${l.title.replace(/"/g, '""')}"`, l.platform, l.priceUsd, l.contactEmail, l.repoUrl, `"${(l.description || "").replace(/"/g, '""')}"`]);
+    }
+    const csvContent = csvRows.map(row => row.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `nagoh_export_${new Date().toISOString().slice(0,19)}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  async function generateReportSnapshot() {
+    const listings = allListings;
+    if (!listings.length) { document.getElementById('reportArea').innerHTML = "⛔ No listings available. Add some items first."; return; }
+    const totalValue = listings.reduce((s,l)=> s+ (parseFloat(l.priceUsd)||0),0);
+    const platformGroups = [...new Map(listings.map(l=>[l.platform, listings.filter(x=>x.platform===l.platform).length])).entries()];
+    const topPrice = [...listings].sort((a,b)=> parseFloat(b.priceUsd)-parseFloat(a.priceUsd))[0];
+    const reportHtml = `<div style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:space-between;"><div><strong>📊 TOTAL INVENTORY VALUE:</strong> $${totalValue.toFixed(2)}<br><strong>📌 AVG PRICE:</strong> $${(totalValue/listings.length).toFixed(2)}<br><strong>🏆 TOP PRODUCT:</strong> ${topPrice?.title || '—'} ($${topPrice?.priceUsd})</div>
+    <div><strong>📱 PLATFORM BREAKDOWN:</strong> ${platformGroups.map(([p,c])=> `${p}:${c}`).join(' · ')}<br><strong>🔗 HEALTHY LISTINGS:</strong> ${listings.filter(l=>l.repoUrl && l.repoUrl.startsWith('http')).length}/${listings.length}</div></div>`;
+    document.getElementById('reportArea').innerHTML = reportHtml;
+  }
+
+  // Initial load
   refreshListings();
 </script>
 </body>
