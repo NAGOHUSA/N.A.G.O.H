@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>N.A.G.O.H · Demo Listing Studio (KV Direct)</title>
+  <title>N.A.G.O.H · Demo Listing (Payment Bypass + KV Test)</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -20,7 +20,7 @@
     .badge { background: rgba(82,220,180,0.12); border-radius: 60px; padding: 0.2rem 0.8rem; font-size: 0.7rem; color: var(--green); border: 1px solid rgba(82,220,180,0.2); }
     .grid-2col { display: grid; grid-template-columns: 2fr 1.2fr; gap: 2rem; }
     @media (max-width: 880px) { .grid-2col { grid-template-columns: 1fr; } .container { padding: 1rem; } }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; overflow: hidden; backdrop-filter: blur(2px); transition: all 0.2s; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; overflow: hidden; backdrop-filter: blur(2px); }
     .card-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; background: rgba(0,0,0,0.2); }
     .card-header h3 { font-family: var(--display); font-size: 1.15rem; letter-spacing: -0.2px; }
     .card-body { padding: 1.5rem; }
@@ -43,108 +43,120 @@
     .info-panel { background: #06060E; border-radius: 24px; padding: 1rem 1.3rem; margin-bottom: 1.2rem; border: 1px solid var(--border); }
     .info-panel .title { font-size: 0.6rem; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; }
     .info-value { font-family: var(--display); font-weight: 700; font-size: 1rem; margin-top: 0.2rem; }
-    .kv-preview { background: #00000030; border-radius: 20px; padding: 0.8rem; font-size: 0.7rem; max-height: 200px; overflow-y: auto; }
-    hr { border-color: var(--border); margin: 1rem 0; }
+    .kv-preview { background: #00000030; border-radius: 20px; padding: 0.8rem; font-size: 0.7rem; max-height: 250px; overflow-y: auto; }
+    .locked-overlay { opacity: 0.5; pointer-events: none; position: relative; }
+    .unlock-btn { width: 100%; margin-bottom: 1rem; }
+    hr { margin: 1rem 0; border-color: var(--border); }
   </style>
 </head>
 <body>
 
 <div class="container">
   <div class="header">
-    <div class="logo">⚡ N.A.G.O.H · KV STUDIO <span class="badge" style="margin-left: 12px;">DEMO MODE · BYPASS PAYMENT</span></div>
+    <div class="logo">⚡ N.A.G.O.H · DEMO LISTING STUDIO <span class="badge" style="margin-left: 12px;">TEST MODE</span></div>
     <div>
-      <button class="btn" id="syncPreviewBtn">⟳ Sync Latest Listings</button>
-      <button class="btn btn-primary" id="quickResetDemoBtn">🧪 Add Demo Pack</button>
+      <button class="btn" id="refreshPreviewBtn">⟳ Refresh Listings</button>
+      <button class="btn btn-primary" id="quickDemoPackBtn">🎲 Add Demo Pack (3 items)</button>
     </div>
   </div>
 
   <div class="grid-2col">
-    <!-- CREATE / DEMO LISTING FORM ( fully functional, no payment wall ) -->
+    <!-- MAIN FORM (locked until simulated payment) -->
     <div class="card">
       <div class="card-header">
-        <h3>📦 Create Demo Listing → SALES_STORAGE</h3>
-        <span style="font-size:0.65rem; background:#00000055; padding:4px 12px; border-radius:40px;">Direct KV Injection</span>
+        <h3>📦 Create Listing → SALES_STORAGE</h3>
+        <span style="font-size:0.65rem; background:#00000055; padding:4px 12px; border-radius:40px;">Requires Payment Unlock</span>
       </div>
       <div class="card-body">
-        <div class="demo-grid">
-          <span class="demo-preset" data-demo="flash">📱 Flashcards App</span>
-          <span class="demo-preset" data-demo="ai">🤖 AI Analytics Tool</span>
-          <span class="demo-preset" data-demo="vault">🔐 Secure Vault Pro</span>
-          <span class="demo-preset" data-demo="devops">⚙️ DevOps Dashboard</span>
+        <!-- Payment Simulation Section (like original but uses mock session) -->
+        <div id="paySection">
+          <div class="info-panel" style="background: linear-gradient(135deg, #1a1a2e, #0a0a14); margin-bottom: 1.2rem;">
+            <div class="title">💳 LISTING FEE (SIMULATED)</div>
+            <div class="info-value" style="font-size: 1.2rem;">$5.00</div>
+            <div style="font-size:0.7rem; margin-top:8px;">Demo bypass: click "Simulate Payment" to unlock form (mimics Stripe callback with session_id)</div>
+            <button id="simulatePayBtn" class="btn btn-primary" style="margin-top: 1rem; width:100%;">✅ Simulate Payment & Unlock Form</button>
+          </div>
+          <div id="paymentStatus" class="status-bubble" style="display: block; background: rgba(255,255,255,0.03); color: #8F8FAA; text-align: center;">
+            ⚡ Awaiting payment simulation...
+          </div>
         </div>
-        
-        <form id="demoCreateForm">
-          <label>Project Title *</label>
-          <input type="text" id="title" name="title" placeholder="e.g. SwiftUI Crypto Tracker" required>
-          
-          <div class="row-2col">
-            <div>
-              <label>Platform *</label>
-              <select id="platform" name="platform">
-                <option value="iOS">iOS</option>
-                <option value="macOS">macOS</option>
-                <option value="Web">Web</option>
-                <option value="Cross-Platform">Cross-Platform</option>
-              </select>
-            </div>
-            <div>
-              <label>Price (USD) *</label>
-              <input type="number" id="priceUsd" name="priceUsd" step="0.01" placeholder="299" required>
-            </div>
+
+        <!-- Form Section (initially locked) -->
+        <div id="formSection" style="display: none;">
+          <div class="demo-grid">
+            <span class="demo-preset" data-demo="flash">📱 Flashcards App</span>
+            <span class="demo-preset" data-demo="ai">🤖 AI Analytics Tool</span>
+            <span class="demo-preset" data-demo="vault">🔐 Secure Vault Pro</span>
+            <span class="demo-preset" data-demo="devops">⚙️ DevOps Dashboard</span>
           </div>
           
-          <label>Description *</label>
-          <textarea id="description" name="description" rows="3" placeholder="Full feature list, tech stack, unique selling points..." required></textarea>
-          
-          <label>Repository / Demo URL *</label>
-          <input type="url" id="repoUrl" name="repoUrl" placeholder="https://github.com/your-repo" required>
-          
-          <label>Contact Email *</label>
-          <input type="email" id="contactEmail" name="contactEmail" placeholder="seller@nagoh.xyz" required>
-          
-          <div style="display: flex; gap: 1rem; margin-top: 1.8rem;">
-            <button type="button" id="clearFormBtn" class="btn">Clear</button>
-            <button type="submit" id="submitListingBtn" class="btn btn-primary" style="flex: 2">🚀 Publish to SALES KV (No Payment)</button>
-          </div>
-          <div id="submitFeedback" class="status-bubble"></div>
-        </form>
+          <form id="demoCreateForm">
+            <label>Project Title *</label>
+            <input type="text" id="title" name="title" placeholder="e.g. SwiftUI Crypto Tracker" required>
+            
+            <div class="row-2col">
+              <div>
+                <label>Platform *</label>
+                <select id="platform" name="platform">
+                  <option value="iOS">iOS</option>
+                  <option value="macOS">macOS</option>
+                  <option value="Web">Web</option>
+                  <option value="Cross-Platform">Cross-Platform</option>
+                </select>
+              </div>
+              <div>
+                <label>Price (USD) *</label>
+                <input type="number" id="priceUsd" name="priceUsd" step="0.01" placeholder="299" required>
+              </div>
+            </div>
+            
+            <label>Description *</label>
+            <textarea id="description" name="description" rows="3" placeholder="Full feature list, tech stack, unique selling points..." required></textarea>
+            
+            <label>Repository / Demo URL *</label>
+            <input type="url" id="repoUrl" name="repoUrl" placeholder="https://github.com/your-repo" required>
+            
+            <label>Contact Email *</label>
+            <input type="email" id="contactEmail" name="contactEmail" placeholder="seller@nagoh.xyz" required>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 1.8rem;">
+              <button type="button" id="clearFormBtn" class="btn">Clear</button>
+              <button type="submit" id="submitListingBtn" class="btn btn-primary" style="flex: 2">🚀 Publish to SALES KV</button>
+            </div>
+            <div id="submitFeedback" class="status-bubble"></div>
+          </form>
+        </div>
       </div>
     </div>
 
-    <!-- RIGHT PANEL: Info + Recent preview + direct KV debug -->
+    <!-- RIGHT PANEL: Info + KV Preview -->
     <div style="display: flex; flex-direction: column; gap: 1.5rem;">
       <div class="card">
         <div class="card-header">
-          <h3>📡 KV Connection & Bypass Mode</h3>
+          <h3>📡 Connection Status</h3>
           <span id="healthDot" style="width:10px;height:10px;border-radius:50%;background:#f06464;display:inline-block;"></span>
         </div>
         <div class="card-body">
           <div class="info-panel">
-            <div class="title">⚡ PAYMENT BYPASS</div>
-            <div class="info-value" style="color:var(--green);">ACTIVE · DEMO MODE</div>
-            <div style="font-size:0.7rem; margin-top:6px;">All submissions go directly to <strong>env.SALES (KV namespace)</strong>. No Stripe verification required for testing.</div>
+            <div class="title">🎯 TARGET</div>
+            <div class="info-value">SALES_STORAGE (KV)</div>
+            <div style="font-size:0.7rem; margin-top:4px;">Endpoint: alerts.nagoh.xyz/api/listings</div>
           </div>
-          <div class="info-panel">
-            <div class="title">🎯 TARGET NAMESPACE</div>
-            <div class="info-value">SALES_STORAGE · /api/listings</div>
-            <div style="font-size:0.7rem; margin-top:4px;">Endpoint: alerts.nagoh.xyz/api/listings [POST]</div>
-          </div>
-          <button id="manualHealthCheck" class="btn" style="width:100%; margin-top:0.5rem;">🔄 Verify Worker Health</button>
+          <button id="manualHealthCheck" class="btn" style="width:100%;">🔄 Check Worker Health</button>
         </div>
       </div>
       
       <div class="card">
         <div class="card-header">
-          <h3>📋 Recent Listings Preview</h3>
-          <button id="refreshPreviewBtn" class="btn" style="padding: 0.2rem 0.8rem;">↻ Refresh</button>
+          <h3>📋 KV Preview (Recent Listings)</h3>
+          <button id="refreshPreviewBtn2" class="btn" style="padding: 0.2rem 0.8rem;">↻</button>
         </div>
         <div class="card-body">
-          <div id="previewList" class="kv-preview" style="font-family: monospace;">
-            <span style="color:var(--muted)">Click "Sync Latest" or refresh preview...</span>
+          <div id="previewList" class="kv-preview">
+            <span style="color:var(--muted)">Loading preview...</span>
           </div>
-          <div style="margin-top: 12px;">
-            <button id="deleteLastPreviewBtn" class="btn btn-outline-accent" style="width:100%;">🗑 Delete PREVIEW entry (last ID)</button>
-          </div>
+          <hr>
+          <button id="deleteLastBtn" class="btn btn-outline-accent" style="width:100%;">🗑 Delete Last Listing</button>
         </div>
       </div>
     </div>
@@ -154,92 +166,164 @@
 <script>
   const API_BASE = 'https://alerts.nagoh.xyz';
   let cachedListings = [];
+  let formUnlocked = false;
+  let simulatedSessionId = null;
 
-  // ---------- UI Helpers ----------
-  const showStatus = (element, message, isError = false) => {
+  // Helper: show status message
+  function showStatus(element, message, isError = false) {
+    if (!element) return;
     element.textContent = message;
     element.style.display = 'block';
     element.classList.remove('status-success', 'status-error');
     element.classList.add(isError ? 'status-error' : 'status-success');
     setTimeout(() => {
-      if (element.style.display === 'block') element.style.opacity = '0.8';
-      setTimeout(() => { element.style.display = 'none'; element.classList.remove('status-success', 'status-error'); }, 2800);
-    }, 2800);
-  };
+      if (element.style.display === 'block') {
+        element.style.display = 'none';
+        element.classList.remove('status-success', 'status-error');
+      }
+    }, 4000);
+  }
 
-  // Health & connection test
-  async function testWorkerHealth() {
+  // Health check
+  async function checkWorkerHealth() {
     const dot = document.getElementById('healthDot');
     try {
       const res = await fetch(`${API_BASE}/health`, { method: 'GET', cache: 'no-store' });
       if (res.ok) {
         dot.style.background = '#52dcb4';
-        dot.title = 'Worker reachable';
+        dot.title = 'Worker online';
         return true;
-      } else throw new Error('status not ok');
-    } catch (e) {
+      } else throw new Error('not ok');
+    } catch(e) {
       dot.style.background = '#f06464';
       dot.title = 'Worker unreachable';
       return false;
     }
   }
 
-  // Fetch all listings for preview
-  async function fetchListingsPreview() {
+  // Fetch listings from KV
+  async function fetchListings() {
     try {
       const res = await fetch(`${API_BASE}/api/listings`, { cache: 'no-store' });
       const data = await res.json();
       cachedListings = data.listings || [];
-      renderPreviewList(cachedListings);
+      renderPreview(cachedListings);
       return cachedListings;
-    } catch (err) {
-      document.getElementById('previewList').innerHTML = `<span style="color:var(--red)">⚠️ Could not fetch: ${err.message}</span>`;
+    } catch(err) {
+      document.getElementById('previewList').innerHTML = `<span style="color:var(--red)">❌ Cannot fetch: ${err.message}</span>`;
       return [];
     }
   }
 
-  function renderPreviewList(listings) {
+  function renderPreview(listings) {
     const container = document.getElementById('previewList');
     if (!listings.length) {
-      container.innerHTML = `<span style="color:var(--muted)">✨ No listings in SALES_STORAGE yet. Create a demo listing!</span>`;
+      container.innerHTML = `<span style="color:var(--muted)">✨ No listings yet. Simulate payment and create one!</span>`;
       return;
     }
-    const latest = [...listings].slice(-5).reverse();
-    container.innerHTML = latest.map(item => `
-      <div style="margin-bottom: 12px; border-bottom: 1px solid #252540; padding-bottom: 8px;">
-        <div><strong style="color:#ffffff;">${escapeHtml(item.title)}</strong>  <span style="color:var(--green);">$${parseFloat(item.priceUsd).toFixed(2)}</span></div>
-        <div style="font-size:0.65rem; color:var(--muted);">${escapeHtml(item.platform)} · ${escapeHtml(item.contactEmail)}</div>
-        <div style="font-size:0.6rem; word-break:break-all;">ID: ${item.id.substring(0,12)}...</div>
+    const recent = [...listings].slice(-6).reverse();
+    container.innerHTML = recent.map(item => `
+      <div style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #252540;">
+        <div><strong style="color:#fff;">${escapeHtml(item.title)}</strong> <span style="color:var(--green);">$${parseFloat(item.priceUsd).toFixed(2)}</span></div>
+        <div style="font-size:0.65rem; color:var(--muted);">${escapeHtml(item.platform)} • ${escapeHtml(item.contactEmail)}</div>
+        <div style="font-size:0.6rem; word-break:break-all;">ID: ${item.id.substring(0,14)}...</div>
       </div>
     `).join('');
   }
 
+  // DELETE listing by ID (requires auth token)
   async function deleteListingById(id) {
-    if (!id) { alert("No valid ID to delete."); return false; }
-    const confirmed = confirm(`Delete listing permanently? (ID: ${id.substring(0,12)}...)`);
-    if (!confirmed) return false;
+    if (!id) { alert("No valid ID"); return false; }
+    const confirmDel = confirm(`Delete listing "${id.substring(0,12)}..." permanently?`);
+    if (!confirmDel) return false;
+    
+    // Get token from localStorage (same as main dashboard)
+    let token = localStorage.getItem('nagoh_auth');
+    if (!token) {
+      token = prompt("Admin password required for deletion:");
+      if (!token) return false;
+      localStorage.setItem('nagoh_auth', token);
+    }
+    
     try {
-      const token = localStorage.getItem('nagoh_auth_demo') || 'demo-bypass-token';
       const res = await fetch(`${API_BASE}/api/listings/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
-        await fetchListingsPreview();
+        await fetchListings();
         return true;
       } else {
-        alert("Delete failed: may require proper auth. (Demo environment expects admin token)");
+        const err = await res.json();
+        alert(`Delete failed: ${err.error || 'auth required'}`);
         return false;
       }
-    } catch(e) { alert("Network error on delete"); return false; }
+    } catch(e) { alert("Network error during delete"); return false; }
   }
 
-  // Demo presets data injection
+  // SUBMIT listing to KV - uses same contract as original create-listing, passing session_id if available
+  async function submitToListings(payload) {
+    const submitBtn = document.getElementById('submitListingBtn');
+    const feedbackDiv = document.getElementById('submitFeedback');
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Publishing...";
+    
+    // If we have simulated session ID from the "payment", attach it like original flow
+    if (simulatedSessionId) {
+      payload.stripeSession = simulatedSessionId;
+    }
+    
+    try {
+      const res = await fetch(`${API_BASE}/api/listings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      const result = await res.json();
+      if (res.ok) {
+        showStatus(feedbackDiv, `✅ SUCCESS! "${payload.title}" saved to KV.`, false);
+        await fetchListings();
+        // Optionally reset form after success? keep for quick multiple adds
+        document.getElementById('demoCreateForm').reset();
+        // refill a default demo hint
+      } else {
+        throw new Error(result.error || `HTTP ${res.status}`);
+      }
+    } catch(err) {
+      showStatus(feedbackDiv, `❌ KV Error: ${err.message}`, true);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "🚀 Publish to SALES KV";
+    }
+  }
+
+  // SIMULATE PAYMENT (bypass Stripe) - creates a fake session_id that the worker will accept
+  function simulatePayment() {
+    // Generate a mock session ID that resembles Stripe format (original worker might check existence)
+    simulatedSessionId = `demo_sim_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
+    
+    // Hide payment section and show form
+    document.getElementById('paySection').style.display = 'none';
+    document.getElementById('formSection').style.display = 'block';
+    formUnlocked = true;
+    
+    const paymentStatusDiv = document.getElementById('paymentStatus');
+    paymentStatusDiv.style.display = 'block';
+    paymentStatusDiv.innerHTML = `✅ Payment simulation successful! Session: ${simulatedSessionId}<br>Form unlocked. You can now submit listings.`;
+    paymentStatusDiv.classList.add('status-success');
+    paymentStatusDiv.classList.remove('status-error');
+    
+    // Also store in session for reference
+    sessionStorage.setItem('demo_session_id', simulatedSessionId);
+  }
+
+  // Demo presets
   const demoPresets = {
-    flash: { title: "FlashMaster DS - Study Cards", price: 149, platform: "iOS", desc: "Spaced repetition flashcards for medical students. Offline sync, iCloud backup, rich media.", repo: "https://github.com/demo/flashmaster", email: "flash@nagoh.xyz" },
-    ai: { title: "Nexus AI Copilot", price: 399, platform: "Cross-Platform", desc: "Real-time code assistant with GPT-4o integration. Works in VSCode and standalone.", repo: "https://github.com/demo/nexusai", email: "ai@nagoh.xyz" },
-    vault: { title: "IronVault Encrypted Manager", price: 79.99, platform: "macOS", desc: "Zero-knowledge password manager + secure notes with hardware key support.", repo: "https://github.com/demo/ironvault", email: "vault@nagoh.xyz" },
-    devops: { title: "KubeMonitor Pro", price: 259, platform: "Web", desc: "Kubernetes cluster analytics, real-time metrics, alerting and cost estimation.", repo: "https://github.com/demo/kubemonitor", email: "ops@nagoh.xyz" }
+    flash: { title: "FlashMaster Pro - Spaced Repetition", price: 149, platform: "iOS", desc: "Smart flashcards with iCloud sync, offline mode, and exam scheduling. Perfect for medical students.", repo: "https://github.com/demo/flashmaster", email: "flash@nagoh.xyz" },
+    ai: { title: "Nexus AI Code Assistant", price: 399, platform: "Cross-Platform", desc: "Real-time code completion, refactoring suggestions, and documentation generation using GPT-4.", repo: "https://github.com/demo/nexusai", email: "ai@nagoh.xyz" },
+    vault: { title: "IronVault Encrypted Manager", price: 79.99, platform: "macOS", desc: "Zero-knowledge password manager + encrypted notes with biometric unlock.", repo: "https://github.com/demo/ironvault", email: "vault@nagoh.xyz" },
+    devops: { title: "KubeWatch Pro", price: 259, platform: "Web", desc: "Real-time Kubernetes monitoring, cost optimization, and alerting dashboard.", repo: "https://github.com/demo/kubewatch", email: "devops@nagoh.xyz" }
   };
 
   function fillDemoPreset(key) {
@@ -253,70 +337,49 @@
     document.getElementById('contactEmail').value = preset.email;
   }
 
-  // SUBMIT to KV (bypass payment) - exactly same POST contract as original create-listing
-  async function submitListing(payload) {
-    const submitBtn = document.getElementById('submitListingBtn');
-    const feedbackDiv = document.getElementById('submitFeedback');
-    submitBtn.disabled = true;
-    submitBtn.textContent = "⏳ Writing to KV...";
-    showStatus(feedbackDiv, "Publishing to SALES_STORAGE ...", false);
-    
-    try {
-      const response = await fetch(`${API_BASE}/api/listings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      
-      const result = await response.json();
-      if (response.ok) {
-        showStatus(feedbackDiv, `✅ SUCCESS! Listing "${payload.title}" stored in KV. ID: ${result.id || 'generated'}`, false);
-        // Clear form optionally, but we can leave for next creation: but we don't reset full if user wants many
-        // but after success we refresh preview
-        await fetchListingsPreview();
-        // optional: give hint
-        document.getElementById('submitFeedback').style.borderLeftColor = "#52dcb4";
-      } else {
-        throw new Error(result.error || `HTTP ${response.status}`);
-      }
-    } catch (err) {
-      showStatus(feedbackDiv, `❌ KV Write Failed: ${err.message}`, true);
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "🚀 Publish to SALES KV (No Payment)";
-    }
-  }
-
-  // Event Listeners + Form Submission bypass payment wall
-  document.getElementById('demoCreateForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    // gather data exactly as required by backend KV endpoint
-    const title = document.getElementById('title').value.trim();
-    const platform = document.getElementById('platform').value;
-    const description = document.getElementById('description').value.trim();
-    const repoUrl = document.getElementById('repoUrl').value.trim();
-    let priceUsd = parseFloat(document.getElementById('priceUsd').value);
-    if (isNaN(priceUsd)) priceUsd = 0;
-    const contactEmail = document.getElementById('contactEmail').value.trim();
-    
-    if (!title || !description || !repoUrl || !contactEmail) {
-      const feedbackDiv = document.getElementById('submitFeedback');
-      showStatus(feedbackDiv, "Please fill all required fields (Title, Description, URL, Email).", true);
+  // Add 3 demo items (bypass payment, auto creates after unlock)
+  async function addDemoPack() {
+    if (!formUnlocked) {
+      alert("Please simulate payment first to unlock form submission.");
       return;
     }
+    const demoItems = [
+      { title: "SmartTask Flow", platform: "Web", description: "Kanban-inspired project manager with real-time collaboration.", repoUrl: "https://github.com/demo/smarttask", priceUsd: 189, contactEmail: "task@nagoh.xyz" },
+      { title: "Crypto Sentinel", platform: "iOS", description: "Portfolio tracker with price alerts and DeFi insights.", repoUrl: "https://github.com/demo/cryptosentinel", priceUsd: 99, contactEmail: "crypto@nagoh.xyz" },
+      { title: "DevMetrics Studio", platform: "Cross-Platform", description: "Engineering analytics for GitHub, GitLab, Jira.", repoUrl: "https://github.com/demo/devmetrics", priceUsd: 349, contactEmail: "metrics@nagoh.xyz" }
+    ];
     
-    const payload = { title, platform, description, repoUrl, priceUsd, contactEmail };
-    await submitListing(payload);
-  });
+    const feedbackDiv = document.getElementById('submitFeedback');
+    showStatus(feedbackDiv, "Adding 3 demo listings...", false);
+    let success = 0;
+    for (const item of demoItems) {
+      const payload = { ...item, stripeSession: simulatedSessionId };
+      try {
+        const res = await fetch(`${API_BASE}/api/listings`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) success++;
+        await new Promise(r => setTimeout(r, 300));
+      } catch(e) { console.warn(e); }
+    }
+    showStatus(feedbackDiv, `Demo pack: ${success}/3 added to KV.`, success < 3);
+    await fetchListings();
+  }
 
-  // preset listeners
+  // Event listeners
+  document.getElementById('simulatePayBtn').addEventListener('click', simulatePayment);
+  document.getElementById('quickDemoPackBtn').addEventListener('click', addDemoPack);
+  
   document.querySelectorAll('.demo-preset').forEach(el => {
     el.addEventListener('click', (e) => {
       const demoType = el.getAttribute('data-demo');
-      if (demoType) fillDemoPreset(demoType);
+      if (demoType && formUnlocked) fillDemoPreset(demoType);
+      else if (!formUnlocked) alert("Please simulate payment first to unlock the form.");
     });
   });
-
+  
   document.getElementById('clearFormBtn').addEventListener('click', () => {
     document.getElementById('title').value = '';
     document.getElementById('platform').value = 'iOS';
@@ -325,77 +388,60 @@
     document.getElementById('priceUsd').value = '';
     document.getElementById('contactEmail').value = '';
   });
-
-  // Add demo pack: automatically creates 3 demo items sequentially to test KV bulk
-  document.getElementById('quickResetDemoBtn').addEventListener('click', async () => {
-    const demoItems = [
-      { title: "AI Content Studio", platform: "Web", description: "Generative AI for marketing teams, supports multiple LLMs", repoUrl: "https://demo.ai/studio", priceUsd: 499, contactEmail: "studio@nagoh.xyz" },
-      { title: "WalletGuard", platform: "iOS", description: "Crypto portfolio tracker with DeFi analytics", repoUrl: "https://github.com/walletguard", priceUsd: 129, contactEmail: "crypto@nagoh.xyz" },
-      { title: "DevMetrics Dashboard", platform: "Cross-Platform", description: "Engineering analytics for GitHub + Jira", repoUrl: "https://github.com/devmetrics", priceUsd: 249, contactEmail: "metrics@nagoh.xyz" }
-    ];
-    const feedbackDiv = document.getElementById('submitFeedback');
-    showStatus(feedbackDiv, "Creating 3 demo listings (Bypass mode active)...", false);
-    let successCount = 0;
-    for (const item of demoItems) {
-      try {
-        const res = await fetch(`${API_BASE}/api/listings`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(item)
-        });
-        if (res.ok) successCount++;
-        await new Promise(r => setTimeout(r, 300));
-      } catch(e) { console.warn(e); }
+  
+  document.getElementById('demoCreateForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!formUnlocked) {
+      alert("Please complete payment simulation first.");
+      return;
     }
-    showStatus(feedbackDiv, `✨ Demo pack result: ${successCount}/3 added to SALES_STORAGE.`, successCount === 3 ? false : true);
-    await fetchListingsPreview();
+    const title = document.getElementById('title').value.trim();
+    const platform = document.getElementById('platform').value;
+    const description = document.getElementById('description').value.trim();
+    const repoUrl = document.getElementById('repoUrl').value.trim();
+    const priceUsd = parseFloat(document.getElementById('priceUsd').value);
+    const contactEmail = document.getElementById('contactEmail').value.trim();
+    
+    if (!title || !description || !repoUrl || !contactEmail || isNaN(priceUsd)) {
+      showStatus(document.getElementById('submitFeedback'), "Please fill all required fields correctly.", true);
+      return;
+    }
+    await submitToListings({ title, platform, description, repoUrl, priceUsd, contactEmail });
   });
-
-  // Delete last preview entry (utility)
-  document.getElementById('deleteLastPreviewBtn').addEventListener('click', async () => {
+  
+  document.getElementById('refreshPreviewBtn').addEventListener('click', fetchListings);
+  document.getElementById('refreshPreviewBtn2').addEventListener('click', fetchListings);
+  document.getElementById('manualHealthCheck').addEventListener('click', async () => {
+    const ok = await checkWorkerHealth();
+    alert(ok ? "✅ Worker is online and reachable." : "❌ Worker unreachable. Check your network or endpoint.");
+  });
+  
+  document.getElementById('deleteLastBtn').addEventListener('click', async () => {
     if (!cachedListings.length) { alert("No listings to delete"); return; }
     const lastId = cachedListings[cachedListings.length - 1]?.id;
     if (lastId) await deleteListingById(lastId);
-    else alert("Unable to retrieve last ID");
-    await fetchListingsPreview();
+    else alert("Could not find last listing ID");
   });
-
-  // Refresh preview buttons
-  const refreshPreview = async () => {
-    await fetchListingsPreview();
-  };
-  document.getElementById('refreshPreviewBtn').addEventListener('click', refreshPreview);
-  document.getElementById('syncPreviewBtn').addEventListener('click', refreshPreview);
-  document.getElementById('manualHealthCheck').addEventListener('click', async () => {
-    await testWorkerHealth();
-    const dot = document.getElementById('healthDot');
-    if (dot.style.background === '#52dcb4') alert("Worker is reachable. KV endpoint ready.");
-    else alert("Worker seems offline or unreachable. Check Cloudflare binding.");
-  });
-
-  // on load: check health & fetch preview
-  (async function init() {
-    await testWorkerHealth();
-    await fetchListingsPreview();
-    // Auto-fill with generic example for better usability
-    if (!document.getElementById('title').value) {
-      fillDemoPreset('flash');
-    }
-    // ensure UI shows unlocked note (we are in demo bypass)
-    const noteDiv = document.createElement('div');
-    // make it subtle
-  })();
-
+  
   function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m) { if(m === '&') return '&amp;'; if(m === '<') return '&lt;'; if(m === '>') return '&gt;'; return m;}); }
   
-  // Additional note: The KV posting uses same contract as original create-listing.html but without payment unlock.
-  // This tool mirrors exactly the same endpoint, no Stripe dependency, and respects the backend validation.
-  // The token is omitted for bypass (public creation is allowed by worker? The backend may require admin token for writes, 
-  // but in demo environment we assume the worker allows writes without token for demo endpoint.
-  // To match your environment: if the worker expects Authorization header, we can set a dummy admin token.
-  // But according to your create-listing.html (no auth header on POST). So safe. We'll use no auth.
-  // For delete, the admin token is needed; but we store demo token variable; however fails gracefully with guidance.
-  console.log("Demo listing studio ready — full KV bypass, identical to create-listing flow.");
+  // Initial load
+  (async function init() {
+    await checkWorkerHealth();
+    await fetchListings();
+    // Restore session if previously unlocked
+    const savedSession = sessionStorage.getItem('demo_session_id');
+    if (savedSession) {
+      simulatedSessionId = savedSession;
+      document.getElementById('paySection').style.display = 'none';
+      document.getElementById('formSection').style.display = 'block';
+      formUnlocked = true;
+      const paymentStatusDiv = document.getElementById('paymentStatus');
+      paymentStatusDiv.style.display = 'block';
+      paymentStatusDiv.innerHTML = `✅ Previously unlocked session active. Form ready.`;
+      paymentStatusDiv.classList.add('status-success');
+    }
+  })();
 </script>
 </body>
 </html>
