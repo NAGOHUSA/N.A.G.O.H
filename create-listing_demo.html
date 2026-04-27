@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>N.A.G.O.H · Demo Listing (Payment Bypass + KV Test)</title>
+  <title>N.A.G.O.H · Demo Listing (Fake Session + KV Bypass)</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -43,9 +43,8 @@
     .info-panel { background: #06060E; border-radius: 24px; padding: 1rem 1.3rem; margin-bottom: 1.2rem; border: 1px solid var(--border); }
     .info-panel .title { font-size: 0.6rem; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; }
     .info-value { font-family: var(--display); font-weight: 700; font-size: 1rem; margin-top: 0.2rem; }
-    .kv-preview { background: #00000030; border-radius: 20px; padding: 0.8rem; font-size: 0.7rem; max-height: 250px; overflow-y: auto; }
-    .locked-overlay { opacity: 0.5; pointer-events: none; position: relative; }
-    .unlock-btn { width: 100%; margin-bottom: 1rem; }
+    .kv-preview { background: #00000030; border-radius: 20px; padding: 0.8rem; font-size: 0.7rem; max-height: 300px; overflow-y: auto; }
+    .fake-session-badge { font-family: monospace; background: #1a1a2e; padding: 4px 8px; border-radius: 8px; font-size: 0.65rem; color: var(--accent); word-break: break-all; }
     hr { margin: 1rem 0; border-color: var(--border); }
   </style>
 </head>
@@ -53,7 +52,7 @@
 
 <div class="container">
   <div class="header">
-    <div class="logo">⚡ N.A.G.O.H · DEMO LISTING STUDIO <span class="badge" style="margin-left: 12px;">TEST MODE</span></div>
+    <div class="logo">⚡ N.A.G.O.H · DEMO LISTING <span class="badge">FAKE SESSION BYPASS</span></div>
     <div>
       <button class="btn" id="refreshPreviewBtn">⟳ Refresh Listings</button>
       <button class="btn btn-primary" id="quickDemoPackBtn">🎲 Add Demo Pack (3 items)</button>
@@ -61,71 +60,65 @@
   </div>
 
   <div class="grid-2col">
-    <!-- MAIN FORM (locked until simulated payment) -->
+    <!-- MAIN FORM -->
     <div class="card">
       <div class="card-header">
-        <h3>📦 Create Listing → SALES_STORAGE</h3>
-        <span style="font-size:0.65rem; background:#00000055; padding:4px 12px; border-radius:40px;">Requires Payment Unlock</span>
+        <h3>📦 Create Demo Listing → SALES_STORAGE</h3>
+        <span style="font-size:0.65rem; background:#00000055; padding:4px 12px; border-radius:40px;">Auto-generates fake session_id</span>
       </div>
       <div class="card-body">
-        <!-- Payment Simulation Section (like original but uses mock session) -->
-        <div id="paySection">
-          <div class="info-panel" style="background: linear-gradient(135deg, #1a1a2e, #0a0a14); margin-bottom: 1.2rem;">
-            <div class="title">💳 LISTING FEE (SIMULATED)</div>
-            <div class="info-value" style="font-size: 1.2rem;">$5.00</div>
-            <div style="font-size:0.7rem; margin-top:8px;">Demo bypass: click "Simulate Payment" to unlock form (mimics Stripe callback with session_id)</div>
-            <button id="simulatePayBtn" class="btn btn-primary" style="margin-top: 1rem; width:100%;">✅ Simulate Payment & Unlock Form</button>
-          </div>
-          <div id="paymentStatus" class="status-bubble" style="display: block; background: rgba(255,255,255,0.03); color: #8F8FAA; text-align: center;">
-            ⚡ Awaiting payment simulation...
-          </div>
+        <!-- Fake Session Generator Info -->
+        <div class="info-panel" style="background: linear-gradient(135deg, #1a1a2e, #0a0a14); margin-bottom: 1.2rem;">
+          <div class="title">🔓 SESSION BYPASS ACTIVE</div>
+          <div class="info-value" style="font-size: 0.9rem;">Fake Stripe Session ID</div>
+          <div style="font-size:0.7rem; margin-top:8px;">The worker requires a session_id parameter. This tool automatically generates a valid-looking fake session ID that will be accepted by the KV endpoint.</div>
+          <div id="fakeSessionDisplay" class="fake-session-badge" style="margin-top: 12px; text-align: center;">⚡ Session will be generated on submit</div>
         </div>
 
-        <!-- Form Section (initially locked) -->
-        <div id="formSection" style="display: none;">
-          <div class="demo-grid">
-            <span class="demo-preset" data-demo="flash">📱 Flashcards App</span>
-            <span class="demo-preset" data-demo="ai">🤖 AI Analytics Tool</span>
-            <span class="demo-preset" data-demo="vault">🔐 Secure Vault Pro</span>
-            <span class="demo-preset" data-demo="devops">⚙️ DevOps Dashboard</span>
+        <!-- Demo Presets -->
+        <div class="demo-grid">
+          <span class="demo-preset" data-demo="flash">📱 Flashcards App</span>
+          <span class="demo-preset" data-demo="ai">🤖 AI Analytics Tool</span>
+          <span class="demo-preset" data-demo="vault">🔐 Secure Vault Pro</span>
+          <span class="demo-preset" data-demo="devops">⚙️ DevOps Dashboard</span>
+          <span class="demo-preset" data-demo="game">🎮 Game Engine</span>
+        </div>
+        
+        <form id="demoCreateForm">
+          <label>Project Title *</label>
+          <input type="text" id="title" name="title" placeholder="e.g. SwiftUI Crypto Tracker" required>
+          
+          <div class="row-2col">
+            <div>
+              <label>Platform *</label>
+              <select id="platform" name="platform">
+                <option value="iOS">iOS</option>
+                <option value="macOS">macOS</option>
+                <option value="Web">Web</option>
+                <option value="Cross-Platform">Cross-Platform</option>
+              </select>
+            </div>
+            <div>
+              <label>Price (USD) *</label>
+              <input type="number" id="priceUsd" name="priceUsd" step="0.01" placeholder="299" required>
+            </div>
           </div>
           
-          <form id="demoCreateForm">
-            <label>Project Title *</label>
-            <input type="text" id="title" name="title" placeholder="e.g. SwiftUI Crypto Tracker" required>
-            
-            <div class="row-2col">
-              <div>
-                <label>Platform *</label>
-                <select id="platform" name="platform">
-                  <option value="iOS">iOS</option>
-                  <option value="macOS">macOS</option>
-                  <option value="Web">Web</option>
-                  <option value="Cross-Platform">Cross-Platform</option>
-                </select>
-              </div>
-              <div>
-                <label>Price (USD) *</label>
-                <input type="number" id="priceUsd" name="priceUsd" step="0.01" placeholder="299" required>
-              </div>
-            </div>
-            
-            <label>Description *</label>
-            <textarea id="description" name="description" rows="3" placeholder="Full feature list, tech stack, unique selling points..." required></textarea>
-            
-            <label>Repository / Demo URL *</label>
-            <input type="url" id="repoUrl" name="repoUrl" placeholder="https://github.com/your-repo" required>
-            
-            <label>Contact Email *</label>
-            <input type="email" id="contactEmail" name="contactEmail" placeholder="seller@nagoh.xyz" required>
-            
-            <div style="display: flex; gap: 1rem; margin-top: 1.8rem;">
-              <button type="button" id="clearFormBtn" class="btn">Clear</button>
-              <button type="submit" id="submitListingBtn" class="btn btn-primary" style="flex: 2">🚀 Publish to SALES KV</button>
-            </div>
-            <div id="submitFeedback" class="status-bubble"></div>
-          </form>
-        </div>
+          <label>Description *</label>
+          <textarea id="description" name="description" rows="3" placeholder="Full feature list, tech stack, unique selling points..." required></textarea>
+          
+          <label>Repository / Demo URL *</label>
+          <input type="url" id="repoUrl" name="repoUrl" placeholder="https://github.com/your-repo" required>
+          
+          <label>Contact Email *</label>
+          <input type="email" id="contactEmail" name="contactEmail" placeholder="seller@nagoh.xyz" required>
+          
+          <div style="display: flex; gap: 1rem; margin-top: 1.8rem;">
+            <button type="button" id="clearFormBtn" class="btn">Clear</button>
+            <button type="submit" id="submitListingBtn" class="btn btn-primary" style="flex: 2">🚀 Publish with Fake Session</button>
+          </div>
+          <div id="submitFeedback" class="status-bubble"></div>
+        </form>
       </div>
     </div>
 
@@ -133,7 +126,7 @@
     <div style="display: flex; flex-direction: column; gap: 1.5rem;">
       <div class="card">
         <div class="card-header">
-          <h3>📡 Connection Status</h3>
+          <h3>📡 KV Connection Status</h3>
           <span id="healthDot" style="width:10px;height:10px;border-radius:50%;background:#f06464;display:inline-block;"></span>
         </div>
         <div class="card-body">
@@ -156,7 +149,10 @@
             <span style="color:var(--muted)">Loading preview...</span>
           </div>
           <hr>
-          <button id="deleteLastBtn" class="btn btn-outline-accent" style="width:100%;">🗑 Delete Last Listing</button>
+          <div style="display: flex; gap: 0.5rem;">
+            <button id="deleteLastBtn" class="btn btn-outline-accent" style="flex:1;">🗑 Delete Last</button>
+            <button id="deleteAllBtn" class="btn btn-outline-accent" style="flex:1; border-color: var(--red); color: var(--red);">⚠️ Delete All</button>
+          </div>
         </div>
       </div>
     </div>
@@ -166,9 +162,15 @@
 <script>
   const API_BASE = 'https://alerts.nagoh.xyz';
   let cachedListings = [];
-  let formUnlocked = false;
-  let simulatedSessionId = null;
-
+  
+  // Generate a realistic fake Stripe session ID that the worker will accept
+  function generateFakeSessionId() {
+    // Stripe session IDs typically look like: cs_test_xxxx
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 15);
+    return `cs_test_fake_${timestamp}_${random}`;
+  }
+  
   // Helper: show status message
   function showStatus(element, message, isError = false) {
     if (!element) return;
@@ -183,7 +185,7 @@
       }
     }, 4000);
   }
-
+  
   // Health check
   async function checkWorkerHealth() {
     const dot = document.getElementById('healthDot');
@@ -200,7 +202,7 @@
       return false;
     }
   }
-
+  
   // Fetch listings from KV
   async function fetchListings() {
     try {
@@ -214,33 +216,32 @@
       return [];
     }
   }
-
+  
   function renderPreview(listings) {
     const container = document.getElementById('previewList');
     if (!listings.length) {
-      container.innerHTML = `<span style="color:var(--muted)">✨ No listings yet. Simulate payment and create one!</span>`;
+      container.innerHTML = `<span style="color:var(--muted)">✨ No listings yet. Create some demo listings!</span>`;
       return;
     }
-    const recent = [...listings].slice(-6).reverse();
+    const recent = [...listings].slice(-8).reverse();
     container.innerHTML = recent.map(item => `
       <div style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #252540;">
         <div><strong style="color:#fff;">${escapeHtml(item.title)}</strong> <span style="color:var(--green);">$${parseFloat(item.priceUsd).toFixed(2)}</span></div>
         <div style="font-size:0.65rem; color:var(--muted);">${escapeHtml(item.platform)} • ${escapeHtml(item.contactEmail)}</div>
-        <div style="font-size:0.6rem; word-break:break-all;">ID: ${item.id.substring(0,14)}...</div>
+        <div style="font-size:0.6rem; color:var(--accent);">ID: ${item.id.substring(0,14)}...</div>
       </div>
     `).join('');
   }
-
-  // DELETE listing by ID (requires auth token)
+  
+  // DELETE listing by ID (requires auth token from dashboard)
   async function deleteListingById(id) {
     if (!id) { alert("No valid ID"); return false; }
-    const confirmDel = confirm(`Delete listing "${id.substring(0,12)}..." permanently?`);
+    const confirmDel = confirm(`Delete listing permanently?`);
     if (!confirmDel) return false;
     
-    // Get token from localStorage (same as main dashboard)
     let token = localStorage.getItem('nagoh_auth');
     if (!token) {
-      token = prompt("Admin password required for deletion:");
+      token = prompt("Enter management password to delete listing:");
       if (!token) return false;
       localStorage.setItem('nagoh_auth', token);
     }
@@ -260,18 +261,23 @@
       }
     } catch(e) { alert("Network error during delete"); return false; }
   }
-
-  // SUBMIT listing to KV - uses same contract as original create-listing, passing session_id if available
+  
+  // SUBMIT listing with fake session_id
   async function submitToListings(payload) {
     const submitBtn = document.getElementById('submitListingBtn');
     const feedbackDiv = document.getElementById('submitFeedback');
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Publishing...";
     
-    // If we have simulated session ID from the "payment", attach it like original flow
-    if (simulatedSessionId) {
-      payload.stripeSession = simulatedSessionId;
-    }
+    // Generate a fresh fake session ID for each submission
+    const fakeSessionId = generateFakeSessionId();
+    payload.stripeSession = fakeSessionId;
+    
+    // Update display to show the fake session being used
+    const sessionDisplay = document.getElementById('fakeSessionDisplay');
+    sessionDisplay.innerHTML = `🔑 Using fake session: ${fakeSessionId.substring(0, 30)}...`;
+    sessionDisplay.style.background = '#2a2a3e';
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Publishing with fake session...";
     
     try {
       const res = await fetch(`${API_BASE}/api/listings`, {
@@ -282,50 +288,32 @@
       
       const result = await res.json();
       if (res.ok) {
-        showStatus(feedbackDiv, `✅ SUCCESS! "${payload.title}" saved to KV.`, false);
+        showStatus(feedbackDiv, `✅ SUCCESS! "${payload.title}" saved to KV with fake session.`, false);
         await fetchListings();
-        // Optionally reset form after success? keep for quick multiple adds
+        // Optional: reset form but keep session display
         document.getElementById('demoCreateForm').reset();
-        // refill a default demo hint
+        sessionDisplay.innerHTML = `⚡ New session will be generated on next submit`;
+        sessionDisplay.style.background = '';
       } else {
-        throw new Error(result.error || `HTTP ${res.status}`);
+        throw new Error(result.error || `HTTP ${res.status} - ${JSON.stringify(result)}`);
       }
     } catch(err) {
       showStatus(feedbackDiv, `❌ KV Error: ${err.message}`, true);
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = "🚀 Publish to SALES KV";
+      submitBtn.textContent = "🚀 Publish with Fake Session";
     }
   }
-
-  // SIMULATE PAYMENT (bypass Stripe) - creates a fake session_id that the worker will accept
-  function simulatePayment() {
-    // Generate a mock session ID that resembles Stripe format (original worker might check existence)
-    simulatedSessionId = `demo_sim_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
-    
-    // Hide payment section and show form
-    document.getElementById('paySection').style.display = 'none';
-    document.getElementById('formSection').style.display = 'block';
-    formUnlocked = true;
-    
-    const paymentStatusDiv = document.getElementById('paymentStatus');
-    paymentStatusDiv.style.display = 'block';
-    paymentStatusDiv.innerHTML = `✅ Payment simulation successful! Session: ${simulatedSessionId}<br>Form unlocked. You can now submit listings.`;
-    paymentStatusDiv.classList.add('status-success');
-    paymentStatusDiv.classList.remove('status-error');
-    
-    // Also store in session for reference
-    sessionStorage.setItem('demo_session_id', simulatedSessionId);
-  }
-
+  
   // Demo presets
   const demoPresets = {
     flash: { title: "FlashMaster Pro - Spaced Repetition", price: 149, platform: "iOS", desc: "Smart flashcards with iCloud sync, offline mode, and exam scheduling. Perfect for medical students.", repo: "https://github.com/demo/flashmaster", email: "flash@nagoh.xyz" },
     ai: { title: "Nexus AI Code Assistant", price: 399, platform: "Cross-Platform", desc: "Real-time code completion, refactoring suggestions, and documentation generation using GPT-4.", repo: "https://github.com/demo/nexusai", email: "ai@nagoh.xyz" },
     vault: { title: "IronVault Encrypted Manager", price: 79.99, platform: "macOS", desc: "Zero-knowledge password manager + encrypted notes with biometric unlock.", repo: "https://github.com/demo/ironvault", email: "vault@nagoh.xyz" },
-    devops: { title: "KubeWatch Pro", price: 259, platform: "Web", desc: "Real-time Kubernetes monitoring, cost optimization, and alerting dashboard.", repo: "https://github.com/demo/kubewatch", email: "devops@nagoh.xyz" }
+    devops: { title: "KubeWatch Pro", price: 259, platform: "Web", desc: "Real-time Kubernetes monitoring, cost optimization, and alerting dashboard.", repo: "https://github.com/demo/kubewatch", email: "devops@nagoh.xyz" },
+    game: { title: "PixelForge Game Studio", price: 599, platform: "Cross-Platform", desc: "2D game engine with visual editor, sprite animation, and physics engine.", repo: "https://github.com/demo/pixelforge", email: "studio@nagoh.xyz" }
   };
-
+  
   function fillDemoPreset(key) {
     const preset = demoPresets[key];
     if (!preset) return;
@@ -336,24 +324,21 @@
     document.getElementById('repoUrl').value = preset.repo;
     document.getElementById('contactEmail').value = preset.email;
   }
-
-  // Add 3 demo items (bypass payment, auto creates after unlock)
+  
+  // Add 3 demo items automatically
   async function addDemoPack() {
-    if (!formUnlocked) {
-      alert("Please simulate payment first to unlock form submission.");
-      return;
-    }
     const demoItems = [
-      { title: "SmartTask Flow", platform: "Web", description: "Kanban-inspired project manager with real-time collaboration.", repoUrl: "https://github.com/demo/smarttask", priceUsd: 189, contactEmail: "task@nagoh.xyz" },
-      { title: "Crypto Sentinel", platform: "iOS", description: "Portfolio tracker with price alerts and DeFi insights.", repoUrl: "https://github.com/demo/cryptosentinel", priceUsd: 99, contactEmail: "crypto@nagoh.xyz" },
-      { title: "DevMetrics Studio", platform: "Cross-Platform", description: "Engineering analytics for GitHub, GitLab, Jira.", repoUrl: "https://github.com/demo/devmetrics", priceUsd: 349, contactEmail: "metrics@nagoh.xyz" }
+      { title: "SmartTask Flow Pro", platform: "Web", description: "Kanban-inspired project manager with real-time collaboration and AI task suggestions.", repoUrl: "https://github.com/demo/smarttask", priceUsd: 189, contactEmail: "task@nagoh.xyz" },
+      { title: "Crypto Sentinel", platform: "iOS", description: "Portfolio tracker with price alerts and DeFi insights, supports 500+ cryptocurrencies.", repoUrl: "https://github.com/demo/cryptosentinel", priceUsd: 99, contactEmail: "crypto@nagoh.xyz" },
+      { title: "DevMetrics Studio", platform: "Cross-Platform", description: "Engineering analytics for GitHub, GitLab, Jira. Track DORA metrics and velocity.", repoUrl: "https://github.com/demo/devmetrics", priceUsd: 349, contactEmail: "metrics@nagoh.xyz" }
     ];
     
     const feedbackDiv = document.getElementById('submitFeedback');
-    showStatus(feedbackDiv, "Adding 3 demo listings...", false);
+    showStatus(feedbackDiv, "Adding 3 demo listings with fake sessions...", false);
     let success = 0;
     for (const item of demoItems) {
-      const payload = { ...item, stripeSession: simulatedSessionId };
+      const fakeSession = generateFakeSessionId();
+      const payload = { ...item, stripeSession: fakeSession };
       try {
         const res = await fetch(`${API_BASE}/api/listings`, {
           method: 'POST',
@@ -367,16 +352,40 @@
     showStatus(feedbackDiv, `Demo pack: ${success}/3 added to KV.`, success < 3);
     await fetchListings();
   }
-
-  // Event listeners
-  document.getElementById('simulatePayBtn').addEventListener('click', simulatePayment);
-  document.getElementById('quickDemoPackBtn').addEventListener('click', addDemoPack);
   
+  // Delete ALL listings (bulk)
+  async function deleteAllListings() {
+    if (!cachedListings.length) { alert("No listings to delete"); return; }
+    const confirmAll = confirm(`⚠️ WARNING: This will delete ALL ${cachedListings.length} listings. Are you absolutely sure?`);
+    if (!confirmAll) return;
+    
+    let token = localStorage.getItem('nagoh_auth');
+    if (!token) {
+      token = prompt("Enter management password to delete ALL listings:");
+      if (!token) return;
+      localStorage.setItem('nagoh_auth', token);
+    }
+    
+    let deleted = 0;
+    for (const item of cachedListings) {
+      try {
+        const res = await fetch(`${API_BASE}/api/listings/${item.id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) deleted++;
+        await new Promise(r => setTimeout(r, 100));
+      } catch(e) { console.warn(e); }
+    }
+    alert(`Deleted ${deleted} of ${cachedListings.length} listings.`);
+    await fetchListings();
+  }
+  
+  // Event listeners
   document.querySelectorAll('.demo-preset').forEach(el => {
     el.addEventListener('click', (e) => {
       const demoType = el.getAttribute('data-demo');
-      if (demoType && formUnlocked) fillDemoPreset(demoType);
-      else if (!formUnlocked) alert("Please simulate payment first to unlock the form.");
+      if (demoType) fillDemoPreset(demoType);
     });
   });
   
@@ -387,14 +396,12 @@
     document.getElementById('repoUrl').value = '';
     document.getElementById('priceUsd').value = '';
     document.getElementById('contactEmail').value = '';
+    document.getElementById('fakeSessionDisplay').innerHTML = '⚡ New session will be generated on submit';
+    document.getElementById('fakeSessionDisplay').style.background = '';
   });
   
   document.getElementById('demoCreateForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!formUnlocked) {
-      alert("Please complete payment simulation first.");
-      return;
-    }
     const title = document.getElementById('title').value.trim();
     const platform = document.getElementById('platform').value;
     const description = document.getElementById('description').value.trim();
@@ -411,17 +418,18 @@
   
   document.getElementById('refreshPreviewBtn').addEventListener('click', fetchListings);
   document.getElementById('refreshPreviewBtn2').addEventListener('click', fetchListings);
+  document.getElementById('quickDemoPackBtn').addEventListener('click', addDemoPack);
   document.getElementById('manualHealthCheck').addEventListener('click', async () => {
     const ok = await checkWorkerHealth();
     alert(ok ? "✅ Worker is online and reachable." : "❌ Worker unreachable. Check your network or endpoint.");
   });
-  
   document.getElementById('deleteLastBtn').addEventListener('click', async () => {
     if (!cachedListings.length) { alert("No listings to delete"); return; }
     const lastId = cachedListings[cachedListings.length - 1]?.id;
     if (lastId) await deleteListingById(lastId);
     else alert("Could not find last listing ID");
   });
+  document.getElementById('deleteAllBtn').addEventListener('click', deleteAllListings);
   
   function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m) { if(m === '&') return '&amp;'; if(m === '<') return '&lt;'; if(m === '>') return '&gt;'; return m;}); }
   
@@ -429,18 +437,9 @@
   (async function init() {
     await checkWorkerHealth();
     await fetchListings();
-    // Restore session if previously unlocked
-    const savedSession = sessionStorage.getItem('demo_session_id');
-    if (savedSession) {
-      simulatedSessionId = savedSession;
-      document.getElementById('paySection').style.display = 'none';
-      document.getElementById('formSection').style.display = 'block';
-      formUnlocked = true;
-      const paymentStatusDiv = document.getElementById('paymentStatus');
-      paymentStatusDiv.style.display = 'block';
-      paymentStatusDiv.innerHTML = `✅ Previously unlocked session active. Form ready.`;
-      paymentStatusDiv.classList.add('status-success');
-    }
+    // Generate a preview fake session to show
+    const previewSession = generateFakeSessionId();
+    document.getElementById('fakeSessionDisplay').innerHTML = `🔑 Ready - will generate session on submit`;
   })();
 </script>
 </body>
