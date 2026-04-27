@@ -2,181 +2,400 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create Listing • N.A.G.O.H (Sales Storage)</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>N.A.G.O.H · Demo Listing Studio (KV Direct)</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #05050A; color: #EAEAFF; font-family: 'DM Mono', monospace; line-height: 1.5; }
+    body { background: #05050F; color: #EAEEFF; font-family: 'DM Mono', monospace; line-height: 1.5; }
     :root {
-      --bg: #05050A; --surface: #0F0F1A; --border: #252540;
-      --text: #EAEAFF; --muted: #8F8FAA;
-      --accent-primary: #8a78ff; --accent-secondary: #52dcb4;
+      --bg: #05050F; --surface: #0C0C1A; --border: #252542;
+      --text: #EAEEFF; --muted: #7B82A1;
+      --accent: #8a78ff; --green: #52dcb4; --red: #f06464;
       --display: 'Syne', sans-serif;
     }
-    .container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
-    .nav { border-bottom: 1px solid var(--border); background: rgba(5,5,10,0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10; }
-    .nav-inner { max-width: 1280px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-    .nav-logo { font-family: var(--display); font-weight: 800; font-size: 1.5rem; background: linear-gradient(135deg, #8a78ff, #52dcb4); -webkit-background-clip: text; background-clip: text; color: transparent; text-decoration: none; }
-    .nav-logo span { color: #52dcb4; -webkit-text-fill-color: #52dcb4; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 1.5rem; padding: 1.5rem; }
-    .page-header { margin: 2rem 0; }
-    h1 { font-family: var(--display); font-size: 2.2rem; font-weight: 700; background: linear-gradient(135deg, #FFFFFF, #b4a9ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 1rem; margin-bottom: 0.4rem; }
-    input, select, textarea { width: 100%; background: #0A0A12; border: 1px solid var(--border); border-radius: 0.75rem; padding: 0.75rem 1rem; color: white; font-family: 'DM Mono', monospace; font-size: 0.85rem; }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 2px rgba(138,120,255,0.2); }
-    .btn { display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border); padding: 0.7rem 1.3rem; border-radius: 2rem; font-family: 'DM Mono', monospace; font-size: 0.8rem; cursor: pointer; transition: 0.2s; text-decoration: none; color: white; }
-    .btn-solid { background: linear-gradient(135deg, #8a78ff, #52dcb4); border: none; color: #05050A; font-weight: 600; }
-    .btn-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(138,120,255,0.3); }
-    .btn-ghost { border-color: var(--border); }
-    .btn-ghost:hover { border-color: var(--accent-primary); background: rgba(138,120,255,0.05); }
-    .status { margin-top: 1rem; padding: 0.75rem; border-radius: 0.75rem; font-size: 0.75rem; font-family: monospace; background: #0e0e18; border-left: 3px solid var(--accent-secondary); white-space: pre-wrap; word-break: break-word; }
-    .status.error { border-left-color: #f06464; color: #ffb8c4; }
-    .status.success { border-left-color: #52dcb4; color: #c0ffea; }
-    .hidden { display: none; }
-    .test-note { background: rgba(138,120,255,0.08); border-radius: 1rem; padding: 0.6rem 1rem; margin-bottom: 1rem; font-size: 0.75rem; border: 1px dashed var(--accent-primary); color: #cdc6ff; }
-    @media (max-width: 780px) { .container { padding: 0 1rem; } }
+    .container { max-width: 1300px; margin: 0 auto; padding: 1.5rem 2rem; }
+    .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1.2rem; margin-bottom: 2rem; }
+    .logo { font-family: var(--display); font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--green)); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -0.02em; }
+    .badge { background: rgba(82,220,180,0.12); border-radius: 60px; padding: 0.2rem 0.8rem; font-size: 0.7rem; color: var(--green); border: 1px solid rgba(82,220,180,0.2); }
+    .grid-2col { display: grid; grid-template-columns: 2fr 1.2fr; gap: 2rem; }
+    @media (max-width: 880px) { .grid-2col { grid-template-columns: 1fr; } .container { padding: 1rem; } }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; overflow: hidden; backdrop-filter: blur(2px); transition: all 0.2s; }
+    .card-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; background: rgba(0,0,0,0.2); }
+    .card-header h3 { font-family: var(--display); font-size: 1.15rem; letter-spacing: -0.2px; }
+    .card-body { padding: 1.5rem; }
+    label { display: block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.4rem; margin-top: 1rem; }
+    label:first-of-type { margin-top: 0; }
+    input, select, textarea { width: 100%; background: #03030C; border: 1px solid var(--border); border-radius: 16px; padding: 0.8rem 1rem; color: white; font-family: 'DM Mono', monospace; font-size: 0.8rem; transition: 0.2s; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(138,120,255,0.25); }
+    .row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .btn { font-family: 'DM Mono', monospace; font-size: 0.75rem; background: transparent; border: 1px solid var(--border); color: var(--text); padding: 0.6rem 1.2rem; border-radius: 40px; cursor: pointer; transition: 0.2s; font-weight: 500; backdrop-filter: blur(4px); }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--green)); border: none; color: #000; font-weight: 700; box-shadow: 0 2px 8px rgba(138,120,255,0.2); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-outline-accent { border-color: var(--accent); color: var(--accent); }
+    .btn-outline-accent:hover { background: rgba(138,120,255,0.1); }
+    .demo-grid { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+    .demo-preset { background: rgba(138,120,255,0.1); border-radius: 32px; padding: 0.4rem 1rem; font-size: 0.7rem; cursor: pointer; border: 1px solid rgba(138,120,255,0.3); transition: 0.1s; }
+    .demo-preset:hover { background: rgba(138,120,255,0.3); border-color: var(--accent); }
+    .status-bubble { margin-top: 1rem; padding: 0.8rem 1rem; border-radius: 20px; font-size: 0.7rem; font-family: monospace; background: #080812; border-left: 4px solid var(--green); display: none; }
+    .status-error { border-left-color: var(--red); color: #ffbfbf; }
+    .status-success { border-left-color: var(--green); color: #c0ffdc; }
+    .info-panel { background: #06060E; border-radius: 24px; padding: 1rem 1.3rem; margin-bottom: 1.2rem; border: 1px solid var(--border); }
+    .info-panel .title { font-size: 0.6rem; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; }
+    .info-value { font-family: var(--display); font-weight: 700; font-size: 1rem; margin-top: 0.2rem; }
+    .kv-preview { background: #00000030; border-radius: 20px; padding: 0.8rem; font-size: 0.7rem; max-height: 200px; overflow-y: auto; }
+    hr { border-color: var(--border); margin: 1rem 0; }
   </style>
 </head>
 <body>
 
-<nav class="nav">
-  <div class="nav-inner">
-    <a href="#" class="nav-logo">N.A.G.O.H<span>.</span></a>
-  </div>
-</nav>
-
-<main class="container">
-  <div class="page-header">
-    <h1>List Your Project <span style="background:#1e2a2a; color:#52dcb4; font-size:0.7rem; padding:4px 12px; border-radius:20px; vertical-align:middle; margin-left:10px;">SALES STORAGE</span></h1>
-    <p style="color:var(--muted); margin-top:0.5rem;">Direct submission to Cloudflare KV. Payment bypass active for testing.</p>
+<div class="container">
+  <div class="header">
+    <div class="logo">⚡ N.A.G.O.H · KV STUDIO <span class="badge" style="margin-left: 12px;">DEMO MODE · BYPASS PAYMENT</span></div>
+    <div>
+      <button class="btn" id="syncPreviewBtn">⟳ Sync Latest Listings</button>
+      <button class="btn btn-primary" id="quickResetDemoBtn">🧪 Add Demo Pack</button>
+    </div>
   </div>
 
-  <div style="display:grid; gap:1.5rem; grid-template-columns: 1fr 320px;">
-    <div style="display:flex; flex-direction:column; gap:1.5rem">
+  <div class="grid-2col">
+    <!-- CREATE / DEMO LISTING FORM ( fully functional, no payment wall ) -->
+    <div class="card">
+      <div class="card-header">
+        <h3>📦 Create Demo Listing → SALES_STORAGE</h3>
+        <span style="font-size:0.65rem; background:#00000055; padding:4px 12px; border-radius:40px;">Direct KV Injection</span>
+      </div>
+      <div class="card-body">
+        <div class="demo-grid">
+          <span class="demo-preset" data-demo="flash">📱 Flashcards App</span>
+          <span class="demo-preset" data-demo="ai">🤖 AI Analytics Tool</span>
+          <span class="demo-preset" data-demo="vault">🔐 Secure Vault Pro</span>
+          <span class="demo-preset" data-demo="devops">⚙️ DevOps Dashboard</span>
+        </div>
+        
+        <form id="demoCreateForm">
+          <label>Project Title *</label>
+          <input type="text" id="title" name="title" placeholder="e.g. SwiftUI Crypto Tracker" required>
+          
+          <div class="row-2col">
+            <div>
+              <label>Platform *</label>
+              <select id="platform" name="platform">
+                <option value="iOS">iOS</option>
+                <option value="macOS">macOS</option>
+                <option value="Web">Web</option>
+                <option value="Cross-Platform">Cross-Platform</option>
+              </select>
+            </div>
+            <div>
+              <label>Price (USD) *</label>
+              <input type="number" id="priceUsd" name="priceUsd" step="0.01" placeholder="299" required>
+            </div>
+          </div>
+          
+          <label>Description *</label>
+          <textarea id="description" name="description" rows="3" placeholder="Full feature list, tech stack, unique selling points..." required></textarea>
+          
+          <label>Repository / Demo URL *</label>
+          <input type="url" id="repoUrl" name="repoUrl" placeholder="https://github.com/your-repo" required>
+          
+          <label>Contact Email *</label>
+          <input type="email" id="contactEmail" name="contactEmail" placeholder="seller@nagoh.xyz" required>
+          
+          <div style="display: flex; gap: 1rem; margin-top: 1.8rem;">
+            <button type="button" id="clearFormBtn" class="btn">Clear</button>
+            <button type="submit" id="submitListingBtn" class="btn btn-primary" style="flex: 2">🚀 Publish to SALES KV (No Payment)</button>
+          </div>
+          <div id="submitFeedback" class="status-bubble"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Info + Recent preview + direct KV debug -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <div class="card">
+        <div class="card-header">
+          <h3>📡 KV Connection & Bypass Mode</h3>
+          <span id="healthDot" style="width:10px;height:10px;border-radius:50%;background:#f06464;display:inline-block;"></span>
+        </div>
+        <div class="card-body">
+          <div class="info-panel">
+            <div class="title">⚡ PAYMENT BYPASS</div>
+            <div class="info-value" style="color:var(--green);">ACTIVE · DEMO MODE</div>
+            <div style="font-size:0.7rem; margin-top:6px;">All submissions go directly to <strong>env.SALES (KV namespace)</strong>. No Stripe verification required for testing.</div>
+          </div>
+          <div class="info-panel">
+            <div class="title">🎯 TARGET NAMESPACE</div>
+            <div class="info-value">SALES_STORAGE · /api/listings</div>
+            <div style="font-size:0.7rem; margin-top:4px;">Endpoint: alerts.nagoh.xyz/api/listings [POST]</div>
+          </div>
+          <button id="manualHealthCheck" class="btn" style="width:100%; margin-top:0.5rem;">🔄 Verify Worker Health</button>
+        </div>
+      </div>
       
       <div class="card">
-        <h3 style="font-size:1rem; margin-bottom:1rem">01. Simulation Control</h3>
-        <button id="mockPayButton" class="btn btn-solid">✅ Simulate Payment & Unlock Form</button>
-        <div id="paymentStatus" class="status hidden"></div>
-      </div>
-
-      <div class="card" id="formCard" style="opacity:0.5; pointer-events:none">
-        <h3 style="font-size:1rem; margin-bottom:1rem">02. Project Details</h3>
-        <form id="createForm">
-          <label>Project Name *<input required name="title" placeholder="e.g. Ghost Kanban"></label>
-          <label>Platform *
-            <select name="platform">
-              <option value="iOS">iOS</option>
-              <option value="macOS">macOS</option>
-              <option value="Web">Web</option>
-            </select>
-          </label>
-          <label>Description *<textarea required name="description" placeholder="Describe the project..."></textarea></label>
-          <label>Repository/URL *<input required name="repoUrl" type="url" placeholder="https://github.com/..."></label>
-          <label>Price (USD) *<input required name="priceUsd" type="number" placeholder="499"></label>
-          <label>Contact Email *<input required name="contactEmail" type="email" placeholder="you@example.com"></label>
-          
-          <div style="display:flex; gap:0.75rem; margin-top:1.5rem">
-            <button type="button" id="demoFillBtn" class="btn btn-ghost" style="flex:1; justify-content:center">⚡ Demo Data</button>
-            <button type="submit" class="btn btn-solid" style="flex:1; justify-content:center">Push to Sales KV →</button>
+        <div class="card-header">
+          <h3>📋 Recent Listings Preview</h3>
+          <button id="refreshPreviewBtn" class="btn" style="padding: 0.2rem 0.8rem;">↻ Refresh</button>
+        </div>
+        <div class="card-body">
+          <div id="previewList" class="kv-preview" style="font-family: monospace;">
+            <span style="color:var(--muted)">Click "Sync Latest" or refresh preview...</span>
           </div>
-        </form>
-        <div id="submitStatus" class="status hidden"></div>
+          <div style="margin-top: 12px;">
+            <button id="deleteLastPreviewBtn" class="btn btn-outline-accent" style="width:100%;">🗑 Delete PREVIEW entry (last ID)</button>
+          </div>
+        </div>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="test-note">
-        <strong>Storage Target: SALES</strong><br>
-        • Writes to SALES_STORAGE<br>
-        • Binding: env.SALES<br>
-        • Endpoint: alerts.nagoh.xyz
-      </div>
-      <div id="apiStatus" style="font-size:0.7rem; color:var(--muted)">Checking connection...</div>
     </div>
   </div>
-</main>
+</div>
 
 <script>
-  (function() {
-    const API_BASE = 'https://alerts.nagoh.xyz';
-    let unlocked = false;
+  const API_BASE = 'https://alerts.nagoh.xyz';
+  let cachedListings = [];
 
-    const mockPayBtn = document.getElementById('mockPayButton');
-    const formCard = document.getElementById('formCard');
-    const paymentStatus = document.getElementById('paymentStatus');
-    const submitStatus = document.getElementById('submitStatus');
-    const apiStatus = document.getElementById('apiStatus');
-    const form = document.getElementById('createForm');
+  // ---------- UI Helpers ----------
+  const showStatus = (element, message, isError = false) => {
+    element.textContent = message;
+    element.style.display = 'block';
+    element.classList.remove('status-success', 'status-error');
+    element.classList.add(isError ? 'status-error' : 'status-success');
+    setTimeout(() => {
+      if (element.style.display === 'block') element.style.opacity = '0.8';
+      setTimeout(() => { element.style.display = 'none'; element.classList.remove('status-success', 'status-error'); }, 2800);
+    }, 2800);
+  };
 
-    // Health Check
-    async function checkStatus() {
-      try {
-        const res = await fetch(`${API_BASE}/health`);
-        if(res.ok) {
-          apiStatus.textContent = '● Worker Online (SALES STORAGE)';
-          apiStatus.style.color = '#52dcb4';
-        }
-      } catch(e) {
-        apiStatus.textContent = '○ Worker Offline';
-        apiStatus.style.color = '#f06464';
-      }
+  // Health & connection test
+  async function testWorkerHealth() {
+    const dot = document.getElementById('healthDot');
+    try {
+      const res = await fetch(`${API_BASE}/health`, { method: 'GET', cache: 'no-store' });
+      if (res.ok) {
+        dot.style.background = '#52dcb4';
+        dot.title = 'Worker reachable';
+        return true;
+      } else throw new Error('status not ok');
+    } catch (e) {
+      dot.style.background = '#f06464';
+      dot.title = 'Worker unreachable';
+      return false;
     }
-    checkStatus();
+  }
 
-    // Unlock logic
-    mockPayBtn.addEventListener('click', () => {
-      unlocked = true;
-      formCard.style.opacity = '1';
-      formCard.style.pointerEvents = 'auto';
-      mockPayBtn.textContent = '✓ Payment Bypassed';
-      mockPayBtn.disabled = true;
-      paymentStatus.textContent = 'Form unlocked. Ready for Sales KV write.';
-      paymentStatus.classList.remove('hidden');
-      paymentStatus.className = 'status success';
-    });
+  // Fetch all listings for preview
+  async function fetchListingsPreview() {
+    try {
+      const res = await fetch(`${API_BASE}/api/listings`, { cache: 'no-store' });
+      const data = await res.json();
+      cachedListings = data.listings || [];
+      renderPreviewList(cachedListings);
+      return cachedListings;
+    } catch (err) {
+      document.getElementById('previewList').innerHTML = `<span style="color:var(--red)">⚠️ Could not fetch: ${err.message}</span>`;
+      return [];
+    }
+  }
 
-    // Demo Data
-    document.getElementById('demoFillBtn').addEventListener('click', () => {
-      form.title.value = "SEC_CORE Flashcards";
-      form.description.value = "Educational app for Security+ SY0-701 certification studying.";
-      form.repoUrl.value = "https://nagoh.xyz/sec-core";
-      form.priceUsd.value = "199";
-      form.contactEmail.value = "dev@nagoh.xyz";
-    });
+  function renderPreviewList(listings) {
+    const container = document.getElementById('previewList');
+    if (!listings.length) {
+      container.innerHTML = `<span style="color:var(--muted)">✨ No listings in SALES_STORAGE yet. Create a demo listing!</span>`;
+      return;
+    }
+    const latest = [...listings].slice(-5).reverse();
+    container.innerHTML = latest.map(item => `
+      <div style="margin-bottom: 12px; border-bottom: 1px solid #252540; padding-bottom: 8px;">
+        <div><strong style="color:#ffffff;">${escapeHtml(item.title)}</strong>  <span style="color:var(--green);">$${parseFloat(item.priceUsd).toFixed(2)}</span></div>
+        <div style="font-size:0.65rem; color:var(--muted);">${escapeHtml(item.platform)} · ${escapeHtml(item.contactEmail)}</div>
+        <div style="font-size:0.6rem; word-break:break-all;">ID: ${item.id.substring(0,12)}...</div>
+      </div>
+    `).join('');
+  }
 
-    // Form Submission
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      submitStatus.textContent = 'Sending to env.SALES...';
-      submitStatus.classList.remove('hidden', 'error', 'success');
+  async function deleteListingById(id) {
+    if (!id) { alert("No valid ID to delete."); return false; }
+    const confirmed = confirm(`Delete listing permanently? (ID: ${id.substring(0,12)}...)`);
+    if (!confirmed) return false;
+    try {
+      const token = localStorage.getItem('nagoh_auth_demo') || 'demo-bypass-token';
+      const res = await fetch(`${API_BASE}/api/listings/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        await fetchListingsPreview();
+        return true;
+      } else {
+        alert("Delete failed: may require proper auth. (Demo environment expects admin token)");
+        return false;
+      }
+    } catch(e) { alert("Network error on delete"); return false; }
+  }
+
+  // Demo presets data injection
+  const demoPresets = {
+    flash: { title: "FlashMaster DS - Study Cards", price: 149, platform: "iOS", desc: "Spaced repetition flashcards for medical students. Offline sync, iCloud backup, rich media.", repo: "https://github.com/demo/flashmaster", email: "flash@nagoh.xyz" },
+    ai: { title: "Nexus AI Copilot", price: 399, platform: "Cross-Platform", desc: "Real-time code assistant with GPT-4o integration. Works in VSCode and standalone.", repo: "https://github.com/demo/nexusai", email: "ai@nagoh.xyz" },
+    vault: { title: "IronVault Encrypted Manager", price: 79.99, platform: "macOS", desc: "Zero-knowledge password manager + secure notes with hardware key support.", repo: "https://github.com/demo/ironvault", email: "vault@nagoh.xyz" },
+    devops: { title: "KubeMonitor Pro", price: 259, platform: "Web", desc: "Kubernetes cluster analytics, real-time metrics, alerting and cost estimation.", repo: "https://github.com/demo/kubemonitor", email: "ops@nagoh.xyz" }
+  };
+
+  function fillDemoPreset(key) {
+    const preset = demoPresets[key];
+    if (!preset) return;
+    document.getElementById('title').value = preset.title;
+    document.getElementById('priceUsd').value = preset.price;
+    document.getElementById('platform').value = preset.platform;
+    document.getElementById('description').value = preset.desc;
+    document.getElementById('repoUrl').value = preset.repo;
+    document.getElementById('contactEmail').value = preset.email;
+  }
+
+  // SUBMIT to KV (bypass payment) - exactly same POST contract as original create-listing
+  async function submitListing(payload) {
+    const submitBtn = document.getElementById('submitListingBtn');
+    const feedbackDiv = document.getElementById('submitFeedback');
+    submitBtn.disabled = true;
+    submitBtn.textContent = "⏳ Writing to KV...";
+    showStatus(feedbackDiv, "Publishing to SALES_STORAGE ...", false);
+    
+    try {
+      const response = await fetch(`${API_BASE}/api/listings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
       
-      const data = Object.fromEntries(new FormData(form).entries());
+      const result = await response.json();
+      if (response.ok) {
+        showStatus(feedbackDiv, `✅ SUCCESS! Listing "${payload.title}" stored in KV. ID: ${result.id || 'generated'}`, false);
+        // Clear form optionally, but we can leave for next creation: but we don't reset full if user wants many
+        // but after success we refresh preview
+        await fetchListingsPreview();
+        // optional: give hint
+        document.getElementById('submitFeedback').style.borderLeftColor = "#52dcb4";
+      } else {
+        throw new Error(result.error || `HTTP ${response.status}`);
+      }
+    } catch (err) {
+      showStatus(feedbackDiv, `❌ KV Write Failed: ${err.message}`, true);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "🚀 Publish to SALES KV (No Payment)";
+    }
+  }
 
+  // Event Listeners + Form Submission bypass payment wall
+  document.getElementById('demoCreateForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    // gather data exactly as required by backend KV endpoint
+    const title = document.getElementById('title').value.trim();
+    const platform = document.getElementById('platform').value;
+    const description = document.getElementById('description').value.trim();
+    const repoUrl = document.getElementById('repoUrl').value.trim();
+    let priceUsd = parseFloat(document.getElementById('priceUsd').value);
+    if (isNaN(priceUsd)) priceUsd = 0;
+    const contactEmail = document.getElementById('contactEmail').value.trim();
+    
+    if (!title || !description || !repoUrl || !contactEmail) {
+      const feedbackDiv = document.getElementById('submitFeedback');
+      showStatus(feedbackDiv, "Please fill all required fields (Title, Description, URL, Email).", true);
+      return;
+    }
+    
+    const payload = { title, platform, description, repoUrl, priceUsd, contactEmail };
+    await submitListing(payload);
+  });
+
+  // preset listeners
+  document.querySelectorAll('.demo-preset').forEach(el => {
+    el.addEventListener('click', (e) => {
+      const demoType = el.getAttribute('data-demo');
+      if (demoType) fillDemoPreset(demoType);
+    });
+  });
+
+  document.getElementById('clearFormBtn').addEventListener('click', () => {
+    document.getElementById('title').value = '';
+    document.getElementById('platform').value = 'iOS';
+    document.getElementById('description').value = '';
+    document.getElementById('repoUrl').value = '';
+    document.getElementById('priceUsd').value = '';
+    document.getElementById('contactEmail').value = '';
+  });
+
+  // Add demo pack: automatically creates 3 demo items sequentially to test KV bulk
+  document.getElementById('quickResetDemoBtn').addEventListener('click', async () => {
+    const demoItems = [
+      { title: "AI Content Studio", platform: "Web", description: "Generative AI for marketing teams, supports multiple LLMs", repoUrl: "https://demo.ai/studio", priceUsd: 499, contactEmail: "studio@nagoh.xyz" },
+      { title: "WalletGuard", platform: "iOS", description: "Crypto portfolio tracker with DeFi analytics", repoUrl: "https://github.com/walletguard", priceUsd: 129, contactEmail: "crypto@nagoh.xyz" },
+      { title: "DevMetrics Dashboard", platform: "Cross-Platform", description: "Engineering analytics for GitHub + Jira", repoUrl: "https://github.com/devmetrics", priceUsd: 249, contactEmail: "metrics@nagoh.xyz" }
+    ];
+    const feedbackDiv = document.getElementById('submitFeedback');
+    showStatus(feedbackDiv, "Creating 3 demo listings (Bypass mode active)...", false);
+    let successCount = 0;
+    for (const item of demoItems) {
       try {
         const res = await fetch(`${API_BASE}/api/listings`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
+          body: JSON.stringify(item)
         });
-        
-        const result = await res.json();
-        if(res.ok) {
-          submitStatus.textContent = `🎉 Success! Listing saved to Sales KV.\nID: ${result.id}`;
-          submitStatus.className = 'status success';
-          form.reset();
-        } else {
-          throw new Error(result.error || 'Failed to save');
-        }
-      } catch(err) {
-        submitStatus.textContent = `Error: ${err.message}`;
-        submitStatus.className = 'status error';
-      }
-    });
+        if (res.ok) successCount++;
+        await new Promise(r => setTimeout(r, 300));
+      } catch(e) { console.warn(e); }
+    }
+    showStatus(feedbackDiv, `✨ Demo pack result: ${successCount}/3 added to SALES_STORAGE.`, successCount === 3 ? false : true);
+    await fetchListingsPreview();
+  });
+
+  // Delete last preview entry (utility)
+  document.getElementById('deleteLastPreviewBtn').addEventListener('click', async () => {
+    if (!cachedListings.length) { alert("No listings to delete"); return; }
+    const lastId = cachedListings[cachedListings.length - 1]?.id;
+    if (lastId) await deleteListingById(lastId);
+    else alert("Unable to retrieve last ID");
+    await fetchListingsPreview();
+  });
+
+  // Refresh preview buttons
+  const refreshPreview = async () => {
+    await fetchListingsPreview();
+  };
+  document.getElementById('refreshPreviewBtn').addEventListener('click', refreshPreview);
+  document.getElementById('syncPreviewBtn').addEventListener('click', refreshPreview);
+  document.getElementById('manualHealthCheck').addEventListener('click', async () => {
+    await testWorkerHealth();
+    const dot = document.getElementById('healthDot');
+    if (dot.style.background === '#52dcb4') alert("Worker is reachable. KV endpoint ready.");
+    else alert("Worker seems offline or unreachable. Check Cloudflare binding.");
+  });
+
+  // on load: check health & fetch preview
+  (async function init() {
+    await testWorkerHealth();
+    await fetchListingsPreview();
+    // Auto-fill with generic example for better usability
+    if (!document.getElementById('title').value) {
+      fillDemoPreset('flash');
+    }
+    // ensure UI shows unlocked note (we are in demo bypass)
+    const noteDiv = document.createElement('div');
+    // make it subtle
   })();
+
+  function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m) { if(m === '&') return '&amp;'; if(m === '<') return '&lt;'; if(m === '>') return '&gt;'; return m;}); }
+  
+  // Additional note: The KV posting uses same contract as original create-listing.html but without payment unlock.
+  // This tool mirrors exactly the same endpoint, no Stripe dependency, and respects the backend validation.
+  // The token is omitted for bypass (public creation is allowed by worker? The backend may require admin token for writes, 
+  // but in demo environment we assume the worker allows writes without token for demo endpoint.
+  // To match your environment: if the worker expects Authorization header, we can set a dummy admin token.
+  // But according to your create-listing.html (no auth header on POST). So safe. We'll use no auth.
+  // For delete, the admin token is needed; but we store demo token variable; however fails gracefully with guidance.
+  console.log("Demo listing studio ready — full KV bypass, identical to create-listing flow.");
 </script>
 </body>
 </html>
